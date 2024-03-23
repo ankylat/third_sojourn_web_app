@@ -2,23 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Wallet, ethers } from "ethers";
 import axios from "axios";
-import {
-  fetchUserEulogias,
-  fetchUserTemplates,
-  fetchUserNotebooks,
-  fetchUserJournals,
-  fetchUserDementors,
-} from "../lib/notebooks";
 import { getThisUserWritings } from "../lib/irys";
-import AccountSetupModal from "../components/AccountSetupModal";
 import { setUserData, getUserData } from "../lib/idbHelper";
-import airdropABI from "../lib/airdropABI.json";
-import {
-  sendTestEth,
-  airdropCall,
-  callTba,
-  airdropFirstJournal,
-} from "../lib/helpers";
+import ankyMentorsABI from "../lib/ankyMentorsABI";
 
 const UserContext = createContext();
 
@@ -28,23 +14,25 @@ export const UserProvider = ({ children }) => {
   const [userAppInformation, setUserAppInformation] = useState({});
   const [userDatabaseInformation, setUserDatabaseInformation] = useState({});
   const [appLoading, setAppLoading] = useState(true);
-  const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [userIsReadyNow, setUserIsReadyNow] = useState(false);
-  const [farcasterUser, setFarcasterUser] = useState({});
   const [allUserWritings, setAllUserWritings] = useState([]);
   const [usersAnkyImage, setUsersAnkyImage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [usersAnkyUri, setUsersAnkyUri] = useState("");
-  const [userOwnsAnky, setUserOwnsAnky] = useState("");
+  const [userOwnsAnky, setUserOwnsAnky] = useState(false);
   const [loadingUserStoredData, setLoadingUserStoredData] = useState(true);
   const [mainAppLoading, setMainAppLoading] = useState(true);
   const [finalSetup, setFinalSetup] = useState(false);
   const [settingThingsUp, setSettingThingsUp] = useState(false);
   const [showProgressModal, setShowProgressModal] = useState(false);
-  const [libraryLoading, setLibraryLoading] = useState(true);
   const [usersAnky, setUsersAnky] = useState({
     ankyIndex: undefined,
     ankyUri: undefined,
+  });
+  const [usersAnkyMentors, setUsersAnkyMentors] = useState([]);
+  const [chosenUserAnkyMentor, setChosenUserAnkyMentor] = useState({
+    ankyUri: "",
+    image: "",
+    metadata: {},
   });
   const [setupIsReady, setSetupIsReady] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -62,24 +50,13 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadStoredUserData() {
+      console.log("load the user darta");
       if (ready && isEmpty(userAppInformation)) {
-        const userJournals = await getUserData("userJournals");
-        const userTemplates = await getUserData("userTemplates");
-        const userNotebooks = await getUserData("userNotebooks");
-        const userEulogias = await getUserData("userEulogias");
-        const userDementors = await getUserData("userDementors");
         const ankyIndex = await getUserData("ankyIndex");
-        const ankyTbaAddress = await getUserData("ankyTbaAddress");
         const userWalletAddress = await getUserData("userWalletAddress");
 
         setUserAppInformation({
-          userJournals,
-          userTemplates,
-          userNotebooks,
-          userEulogias,
-          userDementors,
           ankyIndex,
-          ankyTbaAddress,
           userWalletAddress,
         });
         setLoadingUserStoredData(false);
@@ -98,25 +75,37 @@ export const UserProvider = ({ children }) => {
     async function getAllUserWritings() {
       if (!wallet) return;
       if (!authenticated) return;
-      console.log("IN HEREEEE, THE WALLET IS.", wallet);
+      console.log("the wallet issss:", wallet);
       const writings = await getThisUserWritings(wallet.address);
       const sortedWritings = writings.sort(sortWritings);
-      console.log(
-        "all the sorted writings are inside the user contextr:",
-        sortedWritings
-      );
+
       setAllUserWritings(sortedWritings);
     }
 
     getAllUserWritings();
   }, [wallet]);
 
+  async function getUsersEthBalance(provider, address) {
+    try {
+      const balance = await provider.getBalance(address);
+      const balanceInEth = ethers.utils.formatEther(balance);
+      return balanceInEth; // Returns the balance in Ether (ETH)
+    } catch (error) {
+      console.log(
+        "there was an error fetching the user's base ETH balance",
+        error
+      );
+      return null;
+    }
+  }
+
   // Check initialization and setup status
   useEffect(() => {
+    console.log("on this useEffect");
     async function handleInitialization() {
+      console.log("IN HERE");
       if (loading && !ready) return;
       if (ready && !wallet && !authenticated) {
-        console.log("INEIS");
         setMainAppLoading(false);
         setAppLoading(false);
         return;
@@ -141,30 +130,21 @@ export const UserProvider = ({ children }) => {
       setMainAppLoading(false);
       if (loadingUserStoredData) return;
 
-      if (wallet && !wallet.chainId.includes("8453")) await changeChain();
-      setLibraryLoading(false);
       setAppLoading(false);
     }
 
     handleInitialization();
-  }, [wallet, ready]);
+  }, [wallet, authenticated, ready]);
 
   // Load the user's library when setup is ready
   useEffect(() => {
     if (userIsReadyNow) {
-      loadUserLibrary();
     }
   }, [userIsReadyNow]);
 
   useEffect(() => {
     if (finalSetup) {
-      setUserData("userJournals", userAppInformation.userJournals);
-      setUserData("userTemplates", userAppInformation.userTemplates);
-      setUserData("userNotebooks", userAppInformation.userNotebooks);
-      setUserData("userEulogias", userAppInformation.userEulogias);
-      setUserData("userDementors", userAppInformation.userDementors);
       setUserData("ankyIndex", userAppInformation.ankyIndex);
-      setUserData("ankyTbaAddress", userAppInformation.tbaAddress);
       setUserData("userWalletAddress", userAppInformation.userWalletAddress);
     }
   }, [finalSetup]);
@@ -172,16 +152,15 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const loadUserDatabaseInformation = async () => {
       try {
+        console.log("inside the load user database information function");
         if (!authenticated) return;
         const authToken = await getAccessToken();
         const thisUserPrivyId = user.id.replace("did:privy:", "");
-        const thisFarcasterAccount = farcasterUser || null;
-        if (!thisFarcasterAccount?.fid) thisFarcasterAccount.fid = null;
 
         if (!authToken) return;
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
-          { thisFarcasterAccount },
+          {},
           {
             headers: {
               "Content-Type": "application/json",
@@ -189,14 +168,19 @@ export const UserProvider = ({ children }) => {
             },
           }
         );
+        const provider = await wallet.getEthersProvider();
+        // get the users ether and degen balance
+        console.log("before getting the eth balance");
+        const baseEthBalance = await getUsersEthBalance(
+          provider,
+          wallet.address
+        );
 
         setUserDatabaseInformation({
           streak: response.data.user.streak || 0,
           manaBalance: response.data.user.manaBalance || 0,
+          baseEthBalance: baseEthBalance,
         });
-        if (response.data.farcasterAccount) {
-          setFarcasterUser(response.data.farcasterAccount);
-        }
       } catch (error) {
         console.log("there was an errror here0, ", error);
       }
@@ -204,258 +188,53 @@ export const UserProvider = ({ children }) => {
     loadUserDatabaseInformation();
   }, [user, authenticated]);
 
-  const loadUserLibrary = async (fromOutside = false) => {
-    try {
-      if (
-        (setupIsReady || fromOutside) &&
-        authenticated &&
-        wallet &&
-        wallet.address &&
-        wallet.address.length > 0
-      ) {
-        setLoadingLibrary(true);
-        const { tba } = await callTba(wallet.address, setUserAppInformation);
-        let provider = await wallet?.getEthersProvider();
-        const signer = await provider.getSigner();
-        let userTba = userAppInformation?.tbaAddress || tba;
-
-        if (!userAppInformation || !userAppInformation.wallet)
-          setUserAppInformation((x) => {
-            return { ...x, wallet };
-          });
-
-        const promises = [];
-
-        if (fromOutside || reloadData || !userAppInformation.userJournals) {
-          promises.push(
-            fetchUserJournals(signer, wallet).then((userJournals) => {
-              setUserAppInformation((x) => {
-                return { ...x, userJournals: userJournals };
-              });
-            })
-          );
-        }
-
-        if (fromOutside || reloadData || !userAppInformation.userNotebooks) {
-          promises.push(
-            fetchUserNotebooks(signer, userTba, wallet).then(
-              (userNotebooks) => {
-                setUserAppInformation((x) => {
-                  return { ...x, userNotebooks: userNotebooks };
-                });
-              }
-            )
-          );
-        }
-
-        if (fromOutside || reloadData || !userAppInformation.userEulogias) {
-          promises.push(
-            fetchUserEulogias(signer, wallet).then((userEulogias) => {
-              setUserAppInformation((x) => {
-                return { ...x, userEulogias: userEulogias };
-              });
-            })
-          );
-        }
-
-        if (fromOutside || reloadData || !userAppInformation.userDementors) {
-          promises.push(
-            fetchUserDementors(signer, wallet).then((userDementors) => {
-              setUserAppInformation((x) => {
-                return { ...x, userDementors: userDementors };
-              });
-            })
-          );
-        }
-
-        await Promise.all(promises);
-
-        setLoadingLibrary(false);
-        setLibraryLoading(false);
-        setFinalSetup(true);
-      } else {
-        setAppLoading(false);
-      }
-    } catch (error) {
-      setAppLoading(false);
-      setLoadingLibrary(false);
-      alert("There was an error retrieving your library :(");
-      console.log("there was an error retrieving the users library.", error);
-    }
-  };
-
   async function fetchUsersAnky() {
     if (!wallet || !wallet.address) return;
     try {
       let provider = await wallet.getEthersProvider();
       let signer = await provider.getSigner();
       if (!provider) return;
-      const ankyAirdropContract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_ANKY_AIRDROP_SMART_CONTRACT,
-        airdropABI,
+      const ankyMentorsContract = new ethers.Contract(
+        "0x6d622549842bc73a8f2be146a27f026b646bf6a1",
+        ankyMentorsABI,
         signer
       );
-      const usersBalance = await ankyAirdropContract.balanceOf(wallet.address);
-      let usersAnkyUri = "";
+      console.log("before calling the contract123", wallet);
+      const usersBalance = await ankyMentorsContract.balanceOf(wallet.address);
+      console.log("the users balance of ankys is: ", usersBalance);
       const usersAnkys = ethers.utils.formatUnits(usersBalance, 0);
+      console.log("the users ankys", usersAnkys);
+
       if (usersAnkys > 0) {
-        const usersAnkyId = await ankyAirdropContract.tokenOfOwnerByIndex(
-          wallet.address,
-          0
-        );
-        usersAnkyUri = await ankyAirdropContract.tokenURI(usersAnkyId);
-        const transformUri = (broken) => {
-          return `https://ipfs.io/ipfs/${broken.split("ipfs://")[1]}`;
-        };
-        const fetchableUri = transformUri(usersAnkyUri);
-        const metadata = await fetch(fetchableUri);
-        const jsonMetadata = await metadata.json();
-        let imageUrl = transformUri(jsonMetadata.image);
-        setUsersAnky({
-          ankyIndex: usersAnkys,
-          ankyUri: usersAnkyUri,
-          imageUrl: imageUrl,
-        });
-        return { usersAnkys, usersAnkyUri, imageUrl };
+        setUserOwnsAnky(true);
+        // for (let i = 0; i < usersAnkys; i++) {
+        //   const usersAnkyId = await ankyMentorsContract.tokenOfOwnerByIndex(
+        //     wallet.address,
+        //     0
+        //   );
+        //   const highlightUri =
+        //     "https://highlight-creator-assets.highlight.xyz/main/base-dir/278b5bb6-5920-40cf-ab4b-f733184a871c/onChainDir/";
+
+        //   const fetchableUri = transformUri(usersAnkyUri);
+        //   const metadata = await fetch(fetchableUri);
+        //   const jsonMetadata = await metadata.json();
+        //   let imageUrl = transformUri(jsonMetadata.image);
+        //   setUsersAnky({
+        //     ankyIndex: usersAnkys,
+        //     ankyUri: usersAnkyUri,
+        //     imageUrl: imageUrl,
+        //   });
+        // }
+
+        // return { usersAnkys, usersAnkyUri, imageUrl };
       } else {
-        setUsersAnky({ ankyIndex: undefined, ankyUri: undefined });
-        return { usersAnkys: 0, usersAnkyUri: "", imageUrl: "" };
+        // setUsersAnky({ ankyIndex: undefined, ankyUri: undefined });
+        // return { usersAnkys: 0, usersAnkyUri: "", imageUrl: "" };
       }
     } catch (error) {
       console.log("there was an error", error);
     }
   }
-
-  async function getTestEthAndAidropAnky(wallet, provider, authToken) {
-    const testEthResponse = await sendTestEth(wallet, provider, authToken);
-    if (!testEthResponse.success) {
-      setErrorMessage("There was an error sending you the test eth");
-      throw new Error("There was an error sending the test eth.");
-    }
-    const airdropCallResponse = await airdropCall(
-      wallet,
-      setUserAppInformation,
-      authToken
-    );
-    setUserAppInformation((x) => {
-      return {
-        ...x,
-        tokenUri: airdropCallResponse.tokenUri,
-        ankyIndex: airdropCallResponse.ankyIndex,
-        userWalletAddress: wallet.address,
-      };
-    });
-    if (!airdropCallResponse.success) {
-      setErrorMessage("There was an error gifting you your anky.");
-      throw new Error("There was an error with the airdrop call.");
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 8000));
-  }
-  async function getTbaInformation(wallet, setUserAppInformation) {
-    const callTbaResponse = await callTba(
-      wallet.address,
-      setUserAppInformation
-    );
-    setUserAppInformation((x) => {
-      return {
-        ...x,
-        tbaAddress: callTbaResponse.tba,
-      };
-    });
-    if (!callTbaResponse.success) {
-      setErrorMessage("There was an error retrieving your tba.");
-      throw new Error("There was an error with the tba call.");
-      return;
-    }
-  }
-  async function airdropUsersFirstJournal(address, authToken, provider) {
-    const response = await airdropFirstJournal(address, authToken);
-
-    if (response && response.success) {
-      const txHash = response.txHash;
-      // Assuming you have a provider instance to query the Ethereum network
-      const txReceipt = await provider.getTransactionReceipt(txHash);
-
-      const eventTopic = ethers.utils.id(
-        "JournalAirdropped(tokenId, usersAnkyAddress)"
-      );
-
-      for (const log of txReceipt.logs) {
-        if (log.topics[0] === eventTopic) {
-          const decodedLog = journalsContract.interface.parseLog(log);
-          const { tokenId } = decodedLog.args;
-          const newJournalElement = {
-            journalId: tokenId,
-            entries: [],
-            journalType: 0,
-            metadataCID: "",
-          };
-
-          setUserAppInformation((x) => {
-            return {
-              ...x,
-              userJournals: [newJournalElement],
-            };
-          });
-          setUserData("userJournals", [newJournalElement]);
-          break;
-        }
-      }
-    } else {
-      setErrorMessage("There was an error with your journal.");
-    }
-  }
-
-  const initializeUser = async () => {
-    try {
-      if (setupIsReady) return;
-      if (loading) return;
-      if (!wallet && !wallet?.address) return;
-
-      setShowProgressModal(true);
-      setSettingThingsUp(true);
-      const authToken = await getAccessToken();
-      await changeChain();
-      setCurrentStep(1);
-
-      let provider = await wallet.getEthersProvider();
-      if (checkIfUserIsTheSame || !userAppInformation.ankyIndex) {
-        await getTestEthAndAidropAnky(wallet, provider, authToken);
-      }
-      setCurrentStep(2);
-      setCurrentStep(3);
-
-      if (checkIfUserIsTheSame || (!userAppInformation.tbaAddress && wallet)) {
-        await getTbaInformation(wallet, setUserAppInformation);
-      }
-      setCurrentStep(4);
-
-      if (
-        checkIfUserIsTheSame ||
-        !userAppInformation.userJournals ||
-        (userAppInformation.userJournals.length === 0 && wallet)
-      ) {
-        try {
-          const airdropJournalResponse = await airdropUsersFirstJournal(
-            wallet.address,
-            authToken,
-            provider
-          );
-        } catch (error) {
-          console.log("there was an error airdropping her ");
-        }
-      }
-      setCurrentStep(5);
-
-      localStorage.setItem("firstTimeUser189", "done");
-      setUserIsReadyNow(true);
-      setShowProgressModal(false);
-      return setSetupIsReady(true);
-    } catch (error) {
-      console.log("Error initializing user", error);
-    }
-  };
 
   const changeChain = async () => {
     if (authenticated && wallet) {
@@ -472,9 +251,6 @@ export const UserProvider = ({ children }) => {
         userAppInformation,
         setUserAppInformation,
         appLoading,
-        loadingLibrary,
-        libraryLoading,
-        loadUserLibrary,
         userDatabaseInformation,
         setUserDatabaseInformation,
         userOwnsAnky,
@@ -483,8 +259,6 @@ export const UserProvider = ({ children }) => {
         setMainAppLoading,
         usersAnky,
         usersAnkyImage,
-        farcasterUser,
-        setFarcasterUser,
         allUserWritings,
         setAllUserWritings,
       }}

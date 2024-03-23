@@ -5,14 +5,16 @@ import { useEffect, useState } from "react";
 import { Inter, Righteous } from "next/font/google";
 import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
+import { MdMenuOpen } from "react-icons/md";
+import Link from "next/link";
+import { FaPencilAlt } from "react-icons/fa";
 import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { base } from "@wagmi/chains";
 import { configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import Head from "next/head";
-import { UserProvider } from "../context/UserContext";
-import { FarcasterProvider } from "../context/FarcasterContext";
 import { SettingsProvider } from "../context/SettingsContext";
+import { UserProvider } from "../context/UserContext";
 import { useRouter } from "next/router";
 import { initializeDB } from "../lib/idbHelper";
 
@@ -29,62 +31,14 @@ const alchemy = new Alchemy(settings);
 
 const righteous = Righteous({ subsets: ["latin"], weight: ["400"] });
 const inter = Inter({ subsets: ["cyrillic"], weight: ["400"] });
-const GlobalApp = dynamic(() => import("../components/GlobalApp"));
 
 function MyApp({ Component, pageProps }) {
-  const [isDesktop, setIsDesktop] = useState(false);
   const [loginResponse, setLoginResponse] = useState(null);
+  const [displayWritingGameLanding, setDisplayWritingGameLanding] =
+    useState(false);
+  const [lifeBarLength, setLifeBarLength] = useState(100);
+  const [newenBarLength, setNewenBarLength] = useState(0);
   const router = useRouter();
-
-  useEffect(() => {
-    // const isStandalone = window.matchMedia(
-    //   '(display-mode: standalone)'
-    // ).matches;
-    // if (isStandalone) {
-    //   alert('the user has the pwa installed');
-    // } else {
-    //   alert('the user doesnt have the pwa installed');
-    // }
-    if (typeof window !== "undefined") {
-      initializeDB().then((db) => {});
-    }
-    if (window.innerWidth > 768) {
-      setIsDesktop(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if ("serviceWorker" in navigator && navigator.serviceWorker) {
-      const handleServiceWorkerMessage = (event) => {
-        if (event.data && event.data.type === "ANKY_LOADING") {
-          console.log("listening to the anky loading event");
-          setIsAnkyLoading(true);
-        }
-        if (event.data && event.data.type === "ANKY_READY") {
-          console.log("listening to the anky ready event");
-          setIsAnkyReady(true);
-          setIsAnkyLoading(false);
-        }
-        if (event.data && event.data.type === "ANKY_IMAGES_READY") {
-          console.log(
-            "listening to the anky images event on the app",
-            event.data.images
-          );
-          setAnkyImages(event.data.images);
-        }
-      };
-      navigator.serviceWorker.addEventListener(
-        "message",
-        handleServiceWorkerMessage
-      );
-      return () => {
-        navigator.serviceWorker.removeEventListener(
-          "message",
-          handleServiceWorkerMessage
-        );
-      };
-    }
-  }, []);
 
   const handleLogin = async (user) => {
     try {
@@ -95,7 +49,6 @@ function MyApp({ Component, pageProps }) {
           privyId: user.id.split("did:privy:")[1],
         }
       );
-      console.log("the response after the logging in", response);
       setLoginResponse(response.data);
     } catch (error) {
       console.log("the error is: ", error);
@@ -211,11 +164,63 @@ function MyApp({ Component, pageProps }) {
       >
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
           <UserProvider>
-            <FarcasterProvider>
-              <SettingsProvider>
-                <GlobalApp alchemy={alchemy} loginResponse={loginResponse} />
-              </SettingsProvider>
-            </FarcasterProvider>
+            <SettingsProvider>
+              <div className="fixed overflow-y-scroll text-center w-screen text-white flex flex-col h-screen">
+                <div className="standalone:mt-8 flex-none text-gray-400 w-full h-16 justify-between md:flex items-center flex-col">
+                  {newenBarLength == 0 && (
+                    <div className="h-12 items-center flex-row w-full bg-black px-2  cursor-pointer justify-between flex ">
+                      <div className="active:text-yellow-600 translate-y-2 md:translate-y-0 h-full md:mt-2  hover:text-purple-600">
+                        <MdMenuOpen size={40} />
+                      </div>
+                      <Link
+                        href="/"
+                        onClick={() => {
+                          setDisplayWritingGameLanding(false);
+                        }}
+                        className={`${righteous.className} hover:text-purple-600 text-3xl`}
+                      >
+                        anky
+                      </Link>
+                      <div
+                        className="active:text-purple-600 md:mb-1 mt-1 hover:text-purple-600"
+                        onClick={() => {
+                          console.log("ifefe", lifeBarLength);
+                        }}
+                      >
+                        <FaPencilAlt size={30} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="h-8 w-full">
+                    <div
+                      className="h-full opacity-80"
+                      style={{
+                        width: `${lifeBarLength}%`,
+                        backgroundColor: lifeBarLength > 30 ? "green" : "red",
+                      }}
+                    ></div>
+                  </div>
+                  <div className="h-8 w-full">
+                    <div
+                      className="h-full opacity-80"
+                      style={{
+                        width: `${newenBarLength}%`,
+                        backgroundColor: newenBarLength < 40 ? "red" : "purple",
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <Component
+                  {...pageProps}
+                  displayWritingGameLanding={displayWritingGameLanding}
+                  setDisplayWritingGameLanding={setDisplayWritingGameLanding}
+                  setLifeBarLength={setLifeBarLength}
+                  lifeBarLength={lifeBarLength}
+                  newenBarLength={newenBarLength}
+                  setNewenBarLength={setNewenBarLength}
+                />
+              </div>
+            </SettingsProvider>
           </UserProvider>
         </PrivyWagmiConnector>
       </PrivyProvider>
