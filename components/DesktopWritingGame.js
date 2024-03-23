@@ -504,7 +504,6 @@ const DesktopWritingGame = ({
     return (
       <div>
         <p>loading...</p>
-        <Spinner />
       </div>
     );
 
