@@ -1,0 +1,149 @@
+import React, { useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import Button from "../components/Button";
+import Link from "next/link";
+
+const TermsAndConditions = () => {
+  const [hasUserSigned, setHasUserSigned] = useState(false);
+  const { authenticated, login } = usePrivy();
+  return (
+    <section className="px-2 h-full">
+      {hasUserSigned ? (
+        <p>you already signed</p>
+      ) : (
+        <div>
+          {!authenticated ? (
+            <p>
+              to sign this document, please first{" "}
+              <span
+                className="cursor-pointer text-blue-600 hover:text-yellow-600"
+                onClick={login}
+              >
+                login
+              </span>
+            </p>
+          ) : (
+            <p></p>
+          )}
+        </div>
+      )}
+      <h2 class="text-xl font-bold mb-4">
+        anky third sojourn · terms & conditions
+      </h2>
+      <p class="mb-4">
+        “Anky Is You SpA” is a company that is located in Chile, and that deals
+        with law through the entity with RUT number “77.796.373-2”. Throughout
+        this document, that company will be referred to as “us”, “we”, “our”,
+        etc.
+      </p>
+      <p class="mb-4">
+        For simplicity, and for the whole rest of this document, the reader of
+        it, and person that is invited to this process is referred to as “you”,
+        “your”, etc.
+      </p>
+      <p class="mb-4">
+        That same “you” is the one that will be subject to inquiry through this
+        whole adventure, but that part is for the future.
+      </p>
+      <p class="mb-4">
+        If you sign this document, you imply that you acknowledge these 12
+        points.
+      </p>
+      <ul class="list-decimal pl-5 space-y-2">
+        <li>
+          You acknowledge that this process starts on the 31st of March, on this
+          exact timestamp: 1711861200, and that will last for 96 days. A day is
+          a 24-hour period, counted exactly in relationship to that timestamp.
+        </li>
+        <li>
+          You acknowledge that it is your personal responsibility to remember to
+          write every day. Our mission is to create a system and network that
+          actually helps you remember, but we will understand through trial and
+          error how does that system look like. We will then iterate with your
+          feedback and doing our best to understand your needs as a user. But
+          that takes time, and patience, and needs to be a two-sided
+          relationship.
+        </li>
+        <li>
+          You acknowledge that every 8-minute piece of writing that you create
+          through Anky is a public good, and that if you want to be anonymous
+          you just have to create a new wallet with no attachments to your
+          identity and find a way to get a mentor in there.
+        </li>
+        <li>
+          You acknowledge that all of the pieces of writing of a given day will
+          be used to write the chapter that corresponds to that specific and
+          unique day on the story of the Ankyverse.
+        </li>
+        <li>
+          You acknowledge that if you want to collaborate on writing the lore
+          that will be used as the context for the AI model you need to do it in
+          this Adim room.
+        </li>
+        <li>
+          You acknowledge that for writing you will earn a cryptocurrency called
+          Newen. This is a representation (and honoring) of the harnessing of
+          life force that happened on an 8-minute writing session.
+        </li>
+        <li>
+          You acknowledge that each 8-minute writing session will reward you
+          with 7023 $Newen, and that:
+          <ul>
+            <li>
+              No one knows how much will be the market value of this token in
+              the future.
+            </li>
+            <li>
+              The focus is not on that. The focus is on the value that we bring
+              to the world.
+            </li>
+          </ul>
+        </li>
+        <li>
+          You acknowledge that a book will be written between these potential
+          192 writers and this custom trained AI model.
+        </li>
+        <li>
+          You acknowledge that you will own part of that book, and that every
+          future day on which you write will reward you with an ongoing slice of
+          that pie. And that when we print that book and distribute it to the
+          world as “the first book that has ever been written by more than 100
+          humans in the history of humanity and it is a story that speaks about
+          depression, technology, and the impact of addiction on the human
+          experience” you will earn a percentage of each one of those sales
+          (when done legally).
+        </li>
+        <li>
+          You acknowledge that we are doing the best that we can in order to
+          move from a centralized world (jp being the one that is writing this
+          document) into a decentralized world (where we find a way to agree on
+          what this should say, and actually drive this ship in community), but
+          that it is important to start with strong direction in the beginning.
+        </li>
+        <li>
+          You acknowledge that there could be errors, and that everything could
+          go wrong with a bad click. But the fundamentals are intact, and they
+          are what is being encoded with every step we take.
+        </li>
+        <li>
+          You acknowledge that by signing this document you will receive a
+          journal, which will be the place where each one of your 8-minute
+          pieces of writing will be stored for a long, long time using a network
+          called Arweave.
+        </li>
+      </ul>
+      <div className="my-8 mx-8">
+        {authenticated && (
+          <Button
+            buttonAction={() => alert("sign")}
+            buttonText="firmar"
+            buttonColor="bg-purple-600 mb-8"
+          />
+        )}
+        <Link href="/">go back</Link>
+      </div>
+    </section>
+  );
+};
+
+export default TermsAndConditions;

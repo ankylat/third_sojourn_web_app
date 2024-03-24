@@ -37,12 +37,11 @@ function MyApp({ Component, pageProps }) {
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
   const [lifeBarLength, setLifeBarLength] = useState(100);
-  const [newenBarLength, setNewenBarLength] = useState(0);
+  const [newenBarLength, setNewenBarLength] = useState(100);
   const router = useRouter();
 
   const handleLogin = async (user) => {
     try {
-      console.log("inside the handle login");
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_ROUTE}/user/login`,
         {
@@ -61,7 +60,7 @@ function MyApp({ Component, pageProps }) {
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <Head>
-        <title>Anky</title>
+        <title>anky</title>
         <meta
           name="description"
           content="Transform writing into a meditation practice like no other."
@@ -148,26 +147,20 @@ function MyApp({ Component, pageProps }) {
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
         onSuccess={handleLogin}
         config={{
-          embeddedWallets: {
-            noPromptOnSignature: true,
-          },
-          loginMethods: ["email", "wallet"],
+          loginMethods: ["wallet"],
           appearance: {
             theme: "dark",
             accentColor: "#364CAC",
             logo: "",
-          },
-          embeddedWallets: {
-            createOnLogin: "users-without-wallets",
           },
         }}
       >
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
           <UserProvider>
             <SettingsProvider>
-              <div className="fixed overflow-y-scroll text-center w-screen text-white flex flex-col h-screen">
-                <div className="standalone:mt-8 flex-none text-gray-400 w-full h-16 justify-between md:flex items-center flex-col">
-                  {newenBarLength == 0 && (
+              <div className="w-96 mx-auto bg-black overflow-y-scroll text-center text-white flex flex-col h-screen">
+                <div className=" text-gray-400 w-full h-fit items-center flex-col">
+                  {/* {newenBarLength == 0 && (
                     <div className="h-12 items-center flex-row w-full bg-black px-2  cursor-pointer justify-between flex ">
                       <div className="active:text-yellow-600 translate-y-2 md:translate-y-0 h-full md:mt-2  hover:text-purple-600">
                         <MdMenuOpen size={40} />
@@ -190,8 +183,8 @@ function MyApp({ Component, pageProps }) {
                         <FaPencilAlt size={30} />
                       </div>
                     </div>
-                  )}
-                  <div className="h-8 w-full">
+                  )} */}
+                  <div className="h-4 w-full">
                     <div
                       className="h-full opacity-80"
                       style={{
@@ -200,7 +193,7 @@ function MyApp({ Component, pageProps }) {
                       }}
                     ></div>
                   </div>
-                  <div className="h-8 w-full">
+                  <div className="h-4 w-full">
                     <div
                       className="h-full opacity-80"
                       style={{

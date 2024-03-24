@@ -15,7 +15,7 @@
     "@irys/query": "^0.0.2",
     "@irys/sdk": "^0.0.4",
     "@mui/icons-material": "^5.15.2",
-    "@privy-io/react-auth": "^1.52.4",
+    "@privy-io/react-auth": "^1.59.5",
     "@privy-io/wagmi-connector": "^0.1.12",
     "@wagmi/chains": "^1.8.0",
     "alchemy-sdk": "^2.10.1",
