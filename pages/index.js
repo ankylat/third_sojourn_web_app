@@ -77,7 +77,7 @@ const LandingPage = ({
         <p>our toolkit:</p>
         <p>
           {" "}
-          <Link className="text-red-200 hover:text-red-600" href="#community">
+          <Link className="text-red-200 hover:text-red-600" href="# community">
             community.
           </Link>
         </p>
@@ -110,10 +110,10 @@ const LandingPage = ({
       >
         <h2 className="text-4xl">community</h2>
         <p>
-          the mission that we have with our communications is simple and sharp,
-          and you have different degrees of involvement.
+          the mission that we have is simple and sharp, and you have different
+          degrees of involvement.
         </p>
-        <p>the simplest one: write every day for 8 minutes.</p>
+        <p>the main one: write every day for 8 minutes.</p>
         <p>
           after that, you can spend 8 minutes reading the chapter of the book
           that was written by anky as a consequence of what people wrote the day
@@ -129,13 +129,13 @@ const LandingPage = ({
         </p>
         <p>
           you can also join our
-          <a href="https://www.tg.me/ankytheape">telegram group.</a>
+          <a href="https://t.me/ankytheape" target="_blank">
+            telegram group.
+          </a>
         </p>
         <p>
           and participate as you wish on the
-          <a href="https://www.warpcast.com/channels/anky">
-            farcaster channel.
-          </a>
+          <a href="https://warpcast.com/~/channel/anky">farcaster channel.</a>
         </p>
         <p>
           you decide how much you do, but the eternal rule applies to all of
@@ -143,7 +143,7 @@ const LandingPage = ({
         </p>
         <p>the more you give the more you receive.</p>
         <p>
-          life is a circle. and this is the invitation to navigate it together.
+          life is a spiral. and this is the invitation to navigate it together.
         </p>
       </section>
       <section
@@ -204,8 +204,8 @@ const LandingPage = ({
       >
         <h2 className="text-4xl">ethos</h2>
         <p>
-          anky is built after a strong recongnition that it is time to do show
-          up, and do the work.
+          anky is built after a strong recongnition that it is time to show up,
+          and do the work.
         </p>
         <p>no one will be accountable for yourself.</p>
         <p>it is up to you to show up.</p>
@@ -234,11 +234,20 @@ const LandingPage = ({
           here on{" "}
           <a
             target="_blank"
-            href="https://www.opensea.io/collection/anky-mentors"
+            href="https://opensea.io/collection/anky-mentors"
             className="text-blue-600 hover:text-yellow-600"
           >
             opensea
+          </a>{" "}
+          or{" "}
+          <a
+            target="_blank"
+            href="https://highlight.xyz/mint/65ecc65e9ab450e98aed98bb/marketplace"
+            className="text-blue-600 hover:text-yellow-600"
+          >
+            highlight
           </a>
+          .
         </p>
       </section>
       <section
