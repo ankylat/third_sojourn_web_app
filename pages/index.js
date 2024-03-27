@@ -1,10 +1,13 @@
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import DesktopWritingGame from "../components/DesktopWritingGame";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
+import { WebIrys } from "@irys/sdk";
 import Link from "next/link";
 import Image from "next/image";
+import Button from "../components/Button";
+import axios from "axios";
 
 const LandingPage = ({
   displayWritingGameLanding,
@@ -15,59 +18,204 @@ const LandingPage = ({
   newenBarLength,
 }) => {
   const [text, setText] = useState("");
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [isTextareaClicked, setIsTextareaClicked] = useState(false);
+  const { wallets } = useWallets();
+  const { sendTransaction, login, authenticated, getAccessToken, user } =
+    usePrivy();
+  const w = wallets.at(0);
+
   const ankyverseToday = getAnkyverseDay(new Date());
   const ankyverseQuestion = getAnkyverseQuestion(ankyverseToday.wink);
 
-  const { authenticated, login } = usePrivy();
   const { userOwnsAnky, setUserAppInformation, userAppInformation } = useUser();
 
-  if (displayWritingGameLanding) {
-    return (
-      <div
-        className="h-full"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/primordia.png')",
-          backgroundColor: "black",
-          backgroundPosition: "center center",
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <DesktopWritingGame
-          ankyverseDate={`sojourn ${ankyverseToday.currentSojourn} - wink ${
-            ankyverseToday.wink
-          } - ${ankyverseToday.currentKingdom.toLowerCase()}`}
-          userPrompt={ankyverseQuestion}
-          setUserAppInformation={setUserAppInformation}
-          userAppInformation={userAppInformation}
-          setLifeBarLength={setLifeBarLength}
-          text={text}
-          setText={setText}
-          lifeBarLength={lifeBarLength}
-          displayWritingGameLanding={displayWritingGameLanding}
-          setDisplayWritingGameLanding={setDisplayWritingGameLanding}
-          countdownTarget={480}
-          newenBarLength={newenBarLength}
-          setNewenBarLength={setNewenBarLength}
-        />
-      </div>
-    );
+  const handleClick = () => {
+    setIsTextareaClicked(true);
+    const now = Date.now();
+    setStartTime(now);
+    console.log("starting the session now");
+    pingServerToStartWritingSession();
+    // Start the timer here if needed
+  };
+
+  const getWebIrys = async () => {
+    const url = "https://node2.irys.xyz";
+    const token = "ethereum";
+
+    const provider = await w?.getEthersProvider();
+    if (!provider) throw new Error(`Cannot find privy wallet`);
+    const irysWallet =
+      w?.walletClientType === "privy"
+        ? { name: "privy-embedded", provider, sendTransaction }
+        : { name: "privy", provider };
+
+    const webIrys = new WebIrys({
+      url: url,
+      token: token,
+      wallet: irysWallet,
+    });
+
+    await webIrys.ready();
+    return webIrys;
+  };
+
+  async function sendTextToIrys() {
+    try {
+      /************* EDIT THESE VALUES DYNAMICALLY */
+      const ankyMentorIndex = "12";
+      const ankyverseDay = "1";
+      const previousPage = "2";
+      /************* EDIT THESE VALUES DYNAMICALLY */
+
+      const tags = [
+        { name: "Content-Type", value: "text/plain" },
+        { name: "application-id", value: "Anky Third Sojourn - v0" },
+        { name: "mentor-index", value: ankyMentorIndex },
+        { name: "sojourn", value: "3" },
+        { name: "day", value: ankyverseDay },
+        {
+          name: "previous-page",
+          value: previousPage,
+        },
+      ];
+      const webIrys = await getWebIrys();
+      try {
+        const receipt = await webIrys.upload(text, { tags });
+        console.log("the receipt is: ', ", receipt);
+        console.log(`Data uploaded ==> https://gateway.irys.xyz/${receipt.id}`);
+        return receipt.id;
+      } catch (e) {
+        console.log("Error uploading data ", e);
+      }
+    } catch (error) {
+      console.log("there was a problem uploading to irys");
+    }
   }
+
+  async function pingServerToStartWritingSession() {
+    try {
+      console.log("starting the writing session");
+      let now = new Date();
+      let response;
+      if (authenticated) {
+        const authToken = await getAccessToken();
+        response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
+          {
+            timestamp: now,
+            userPrivyId: user.id.replace("did:privy:", ""),
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        console.log(
+          "the repsonse from the pinging of the server is: ",
+          response.data
+        );
+      }
+    } catch (error) {
+      console.log("there was an error requesting to ping the serve", error);
+    }
+  }
+
+  async function pingServerToEndWritingSession(frontendWrittenTime) {
+    try {
+      let response;
+      if (authenticated) {
+        const authToken = await getAccessToken();
+        const now = new Date();
+        response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_ROUTE}/end-session`,
+          {
+            timestamp: now,
+            user: user.id.replace("did:privy:", ""),
+            frontendWrittenTime,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+      }
+      console.log("the response from pinging the server is: ", response);
+      return {
+        ...x,
+        manaBalance: response.data.data.manaBalance,
+        streak: response.data.data.activeStreak,
+      };
+    } catch (error) {
+      console.log("there was an error pinging the server here.", error);
+    }
+  }
+
+  const finishSession = async () => {
+    try {
+      const finishTimestamp = Date.now();
+      const frontendWrittenTime = Math.floor(
+        (finishTimestamp - startTime) / 1000
+      );
+      if (authenticated) {
+        pingServerToEndWritingSession(finishTimestamp, frontendWrittenTime);
+      }
+    } catch (error) {
+      console.log("there was an error", error);
+    }
+  };
 
   return (
     <div className="w-full h-fit flex flex-col items-center">
-      <section className="w-full hero-section p-2">
-        <h2 className="text-5xl">STOP READING</h2>
-        <h3 className="text-3xl">just write</h3>
+      <div className="h-6 w-full">
+        <div
+          className="h-full opacity-80"
+          style={{
+            width: `${newenBarLength}%`,
+            backgroundColor: newenBarLength < 40 ? "red" : "purple",
+          }}
+        ></div>
+      </div>
+      <div className="w-full h-screen p-2">
+        <h2 className="text-5xl">just write</h2>
         <p>(for 8 minutes)</p>
-        <div className="w-full mt-4 aspect-square">
-          <textarea className="h-full w-full bg-red-200" />
+        <div className="w-full mt-4">
+          <textarea
+            onClick={handleClick}
+            onChange={(e) => {
+              setText(e.target.value);
+            }}
+            className={`${
+              isTextareaClicked ? "h-96 w-full" : "h-48 w-3/4"
+            } bg-black border border-white p-2 cursor-pointer`}
+            placeholder="write here..."
+          />
+        </div>
+        {!authenticated && (
+          <Button
+            buttonAction={login}
+            buttonText="login"
+            buttonColor="bg-green-600 w-48 mt-8"
+          />
+        )}
+        <div>
+          {text.length > 0 && (
+            <Button
+              buttonAction={finishSession}
+              buttonText="finish session"
+              buttonColor="bg-green-600 w-48 mt-8"
+            />
+          )}
         </div>
         <div className="mt-8 hover:text-yellow-600">
           <Link href="/terms-and-conditions">terms & conditions</Link>
         </div>
-      </section>
+      </div>
       <section className="w-full h-screen bg-gray-400 px-2 py-8 text-black">
         <p>anky is a game for writers</p>
         <p>

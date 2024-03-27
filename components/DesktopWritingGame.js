@@ -4,7 +4,9 @@ import Image from "next/image";
 import { WebIrys } from "@irys/sdk";
 import { useWallets } from "@privy-io/react-auth";
 import { saveTextAnon } from "../lib/backend";
-import { ethers } from "ethers";
+import Link from "next/link";
+import { VscDebugRestart } from "react-icons/vsc";
+import { FaHome } from "react-icons/fa";
 import { setUserData } from "../lib/idbHelper";
 import { v4 as uuidv4 } from "uuid";
 import Button from "./Button";
@@ -52,7 +54,6 @@ const DesktopWritingGame = ({
   const { userSettings } = useSettings();
   const [textareaHeight, setTextareaHeight] = useState("20vh"); // default height
   const { setUserDatabaseInformation, setAllUserWritings } = useUser();
-  const audioRef = useRef();
   const [amountOfManaAdded, setAmountOfManaAdded] = useState(0);
   const [whatIsThis, setWhatIsThis] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -204,7 +205,6 @@ const DesktopWritingGame = ({
 
   const startNewRun = () => {
     try {
-      audioRef.current.pause();
       setTime(0);
       setLifeBarLength(100);
       setText("");
@@ -221,7 +221,6 @@ const DesktopWritingGame = ({
 
   const startNewCountdownRun = () => {
     try {
-      audioRef.current.pause();
       setCopyText("Copy my writing");
       setTime(countdownTarget);
       setLifeBarLength(100);
@@ -461,15 +460,28 @@ const DesktopWritingGame = ({
       <div
         className={`${
           text && "fade-in"
-        } flex flex-col justify-center items-center absolute w-screen top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-opacity-20 mb-4`}
+        } flex flex-col justify-center w-96 items-center absolute w-screen top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-opacity-20 mb-4`}
       >
-        <div className="border-white border-2 mx-16 md:mx-auto w-5/6 md:w-2/3 xl:w-2/5 rounded-xl bg-black p-2 text-white">
-          <p className="text-lg md:text-3xl">your writing session is over</p>
-          <Button
-            buttonAction={copyTextAndStartAgain}
-            buttonText={copyText}
-            buttonColor="bg-red-600"
-          />
+        <div className="border-white border-2 mx-16 md:mx-auto w-64 h-64 flex flex-col grow rounded-xl bg-black p-2 text-white">
+          <h2 className="text-3xl mt-3">just write</h2>
+          <p className="mb-4">(for 8 minutes)</p>
+          <div className="grow bg-red-200 mt-auto flex justify-around pb-4 items-end">
+            <button
+              className="w-12 h-12 flex items-center justify-center rounded-xl p-2 bg-red-600 hover:bg-red-400"
+              onClick={startNewRun}
+            >
+              <VscDebugRestart />
+            </button>
+
+            <button
+              className="w-12 h-12 flex items-center justify-center rounded-xl p-2 bg-red-600 hover:bg-red-400"
+              onClick={startNewRun}
+            >
+              <Link href="/#community">
+                <FaHome />
+              </Link>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -517,32 +529,18 @@ const DesktopWritingGame = ({
 
   return (
     <div className="h-full">
-      <audio ref={audioRef}>
-        <source src="/sounds/bell.mp3" />
-      </audio>
-      <div className="md:block text-white relative w-full h-full mx-auto">
+      <div className="text-white relative w-full h-full mx-auto">
         <div className="flex h-full flex-col">
           <div
-            className={`${righteous.className} w-full grow-0 bg-black/50 py-2 justify-center items-center flex h-fit items-center px-2 flex `}
+            className={`${righteous.className} w-full grow-0 bg-black/50 justify-center items-center flex h-fit items-center px-2 flex `}
           >
             {text.length == 0 && (
               <div
-                className={`text-left h-fit w-10/12 text-purple-600 md:mt-0 text-xl md:text-3xl overflow-y-scroll  drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]`}
+                className={`text-left h-fit w-full px-2 text-purple-600 md:mt-0 text-xl md:text-2xl overflow-y-scroll  drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]`}
               >
                 {userPrompt}
               </div>
             )}
-            {/* <div className="w-2/12 text-4xl md:text-6xl text-yellow-600 h-full flex relative items-center justify-center ">
-              {time}
-              {time === 0 && (
-                <span
-                  onClick={() => setDisplaySettingsModal(true)}
-                  className="text-sm absolute bottom-0 right-0 text-red-600 hover:text-red-400 cursor-pointer"
-                >
-                  <IoSettings size={22} />
-                </span>
-              )}
-            </div> */}
           </div>
 
           <div className="w-full grow relative">
@@ -558,8 +556,8 @@ const DesktopWritingGame = ({
                 right: text ? "0" : "",
               }}
               className={`${
-                text ? "w-full h-full text-left" : "mt-8 w-4/5 md:w-3/5 h-64"
-              } p-2 text-white opacity-80 placeholder-white text-xl border placeholder:text-gray-300 border-white rounded-md bg-opacity-10 bg-black`}
+                text ? "w-full h-full text-left" : "w-4/5 md:w-3/5 h-64"
+              } p-2 text-white opacity-80 placeholder-white text-md border placeholder:text-gray-300 border-white rounded-md bg-opacity-10 bg-black`}
               placeholder="write here..."
               value={text}
               onPaste={(e) => e.preventDefault()}

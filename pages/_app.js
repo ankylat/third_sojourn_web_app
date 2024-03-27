@@ -37,13 +37,13 @@ function MyApp({ Component, pageProps }) {
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
   const [lifeBarLength, setLifeBarLength] = useState(100);
-  const [newenBarLength, setNewenBarLength] = useState(100);
+  const [newenBarLength, setNewenBarLength] = useState(0);
   const router = useRouter();
 
   const handleLogin = async (user) => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_ROUTE}/user/login`,
+        `${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`,
         {
           privyId: user.id.split("did:privy:")[1],
         }
@@ -159,50 +159,6 @@ function MyApp({ Component, pageProps }) {
           <UserProvider>
             <SettingsProvider>
               <div className="w-96 mx-auto bg-black overflow-y-scroll text-center text-white flex flex-col h-screen">
-                <div className=" text-gray-400 w-full h-fit items-center flex-col">
-                  {/* {newenBarLength == 0 && (
-                    <div className="h-12 items-center flex-row w-full bg-black px-2  cursor-pointer justify-between flex ">
-                      <div className="active:text-yellow-600 translate-y-2 md:translate-y-0 h-full md:mt-2  hover:text-purple-600">
-                        <MdMenuOpen size={40} />
-                      </div>
-                      <Link
-                        href="/"
-                        onClick={() => {
-                          setDisplayWritingGameLanding(false);
-                        }}
-                        className={`${righteous.className} hover:text-purple-600 text-3xl`}
-                      >
-                        anky
-                      </Link>
-                      <div
-                        className="active:text-purple-600 md:mb-1 mt-1 hover:text-purple-600"
-                        onClick={() => {
-                          console.log("ifefe", lifeBarLength);
-                        }}
-                      >
-                        <FaPencilAlt size={30} />
-                      </div>
-                    </div>
-                  )} */}
-                  <div className="h-4 w-full">
-                    <div
-                      className="h-full opacity-80"
-                      style={{
-                        width: `${lifeBarLength}%`,
-                        backgroundColor: lifeBarLength > 30 ? "green" : "red",
-                      }}
-                    ></div>
-                  </div>
-                  <div className="h-4 w-full">
-                    <div
-                      className="h-full opacity-80"
-                      style={{
-                        width: `${newenBarLength}%`,
-                        backgroundColor: newenBarLength < 40 ? "red" : "purple",
-                      }}
-                    ></div>
-                  </div>
-                </div>
                 <Component
                   {...pageProps}
                   displayWritingGameLanding={displayWritingGameLanding}
