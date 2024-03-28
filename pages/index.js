@@ -15,7 +15,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
 
 const secondsOfLife = 8;
-const totalSessionDuration = 12; // seconds
+const totalSessionDuration = 480; // seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
