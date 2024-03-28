@@ -194,8 +194,12 @@ const LandingPage = ({
 
   return (
     <div className="w-full h-fit flex flex-col items-center">
-      <nav className="h-44 py-6 sm:py-0 sm:h-24 bg-white w-full px-24 flex flex-col  sm:flex-row justify-between items-center shadow-md">
-        <div className="flex w-fit ">
+      <nav
+        className={`transition-all duration-500 ease-in-out ${
+          isTextareaClicked ? "h-0 opacity-0" : "h-44 sm:h-24 py-6 opacity-100"
+        } sm:py-0  bg-white w-full px-24 flex flex-col sm:flex-row justify-between items-center shadow-md`}
+      >
+        <div className="flex w-fit">
           <div className="w-32 h-16 relative ">
             <Image src="/images/anky-logo.png" fill />
           </div>
@@ -264,7 +268,7 @@ const LandingPage = ({
 
           <div
             className={`${
-              isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-1/2 lg:w-3/5 "
+              isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
             } mx-auto mt-4`}
           >
             <textarea
