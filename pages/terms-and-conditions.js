@@ -151,13 +151,6 @@ const TermsAndConditions = () => {
         <li>You acknowledge that your uniqueness is a gift.</li>
       </ul>
       <div className="my-8 mx-8">
-        {authenticated && (
-          <Button
-            buttonAction={() => alert("sign")}
-            buttonText="firmar"
-            buttonColor="bg-purple-600 mb-8"
-          />
-        )}
         <div className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2">
           <Link href="/">go back</Link>
         </div>

@@ -2,6 +2,7 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import DesktopWritingGame from "../components/DesktopWritingGame";
+import { setUserData, getUserData } from "../lib/idbHelper";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
@@ -41,6 +42,7 @@ const LandingPage = ({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [startTime, setStartTime] = useState(null);
+  const [userStreak, setUserStreak] = useState(1);
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
@@ -107,7 +109,13 @@ const LandingPage = ({
 
   const handleClick = () => {
     setIsTextareaClicked(true);
-    pingServerToStartWritingSession();
+    if (authenticated) {
+      pingServerToStartWritingSession();
+    }
+    let now = new Date();
+    setLastKeystroke(now);
+    setStartTime(now);
+    setSessionStarted(true);
   };
 
   const getWebIrys = async () => {
@@ -168,12 +176,10 @@ const LandingPage = ({
     try {
       if (sessionRandomUUID) return;
       let now = new Date();
-      setLastKeystroke(now);
-      setStartTime(now);
       let response;
+      const newRandomUUID = uuidv4();
+      setSessionRandomUUID(newRandomUUID);
       if (authenticated) {
-        const newRandomUUID = uuidv4();
-        setSessionRandomUUID(newRandomUUID);
         const authToken = await getAccessToken();
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
@@ -229,8 +235,8 @@ const LandingPage = ({
       console.log("the response after finishing the session is: ", response);
       setFinishedSession(true);
       return {
-        manaBalance: response.data.data.manaBalance,
-        streak: response.data.data.activeStreak,
+        manaBalance: response?.data?.data?.manaBalance || 0,
+        streak: response?.data?.data?.activeStreak || userStreak,
       };
     } catch (error) {
       console.log("there was an error pinging the server here.", error);
@@ -254,27 +260,39 @@ const LandingPage = ({
   const handleSaveSession = async () => {
     try {
       setSavingSession(true);
-      const receipt = await sendTextToIrys();
-      const authToken = await getAccessToken();
-      let response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
-        {
-          cid: receipt,
-          sessionId: sessionId,
-          user: user.id.replace("did:privy:", ""),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+      if (authenticated) {
+        const receipt = await sendTextToIrys();
+        const authToken = await getAccessToken();
+        let response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
+          {
+            cid: receipt,
+            sessionId: sessionId,
+            user: user.id.replace("did:privy:", ""),
           },
-        }
-      );
-      console.log("the response from saving the cid is: ", response);
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        console.log("the response from saving the cid is: ", response);
+      } else {
+        localStorage.setItem(
+          `session - ${sessionRandomUUID}`,
+          JSON.stringify({
+            timestamp: new Date().getTime(),
+            text: text,
+          })
+        );
+      }
 
       setSavingSession(false);
       setSessionSaved(true);
-    } catch (error) {}
+    } catch (error) {
+      console.log("there is an error here", error);
+    }
   };
 
   const handleTextChange = (e) => {
@@ -330,7 +348,7 @@ const LandingPage = ({
               {sessionSaved ? (
                 <div className="text-left bg-white finish-button w-96 rounded-xl h-96  mx-auto flex flex-col justify-between  items-center">
                   <div className="flex flex-col  justify-center">
-                    <span className="text-6xl">3</span>
+                    <span className="text-6xl">{userStreak}</span>
                     <span className="text-xl"> your streak</span>
                   </div>
                   <div className="flex flex-col p-3 rounded-xl bg-gray-100 border border-black">
@@ -384,11 +402,11 @@ const LandingPage = ({
                       <span>words</span>
                     </div>
                     <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
-                      <span>7025</span>
+                      <span>{authenticated ? "+7025" : "0"}</span>
                       <span>$newen</span>
                     </div>
                     <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
-                      <span>3</span>
+                      <span>1</span>
                       <span>streak</span>
                     </div>
                   </div>
