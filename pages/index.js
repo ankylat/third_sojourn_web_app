@@ -295,7 +295,7 @@ const LandingPage = ({
           )}
         </div>
       )}
-      <section className="w-full h-screen bg-gray-400 px-2 py-8 text-black">
+      {/* <section className="w-full h-screen bg-gray-400 px-2 py-8 text-black">
         <p>anky is a game for writers</p>
         <p>
           designed to stare into the eyes of the most brutal adversary we have:
@@ -496,7 +496,7 @@ const LandingPage = ({
         <p>bruno</p>
         <p>jp</p>
         <p>thank you for your trust</p>
-      </section>
+      </section> */}
     </div>
   );
 };
