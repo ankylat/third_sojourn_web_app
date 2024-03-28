@@ -42,6 +42,7 @@ const LandingPage = ({
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [savingSession, setSavingSession] = useState(false);
+  const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
   const [lastKeystroke, setLastKeystroke] = useState();
   const [userLost, setUserLost] = useState(false);
@@ -192,6 +193,7 @@ const LandingPage = ({
           "the repsonse from the pinging of the server is: ",
           response.data
         );
+        setSessionId(response.data.id);
         setSessionStarted(true);
       }
     } catch (error) {
@@ -253,7 +255,23 @@ const LandingPage = ({
     try {
       setSavingSession(true);
       const receipt = await sendTextToIrys();
-      console.log("in heeeere, the receipt is", receipt);
+      const authToken = await getAccessToken();
+      let response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
+        {
+          cid: receipt,
+          sessionId: sessionId,
+          user: user.id.replace("did:privy:", ""),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      console.log("the response from saving the cid is: ", response);
+
       setSavingSession(false);
       setSessionSaved(true);
     } catch (error) {}
