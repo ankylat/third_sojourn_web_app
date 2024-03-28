@@ -28,11 +28,12 @@ const LandingPage = ({
   lifeBarLength,
   setNewenBarLength,
   newenBarLength,
+  isTextareaClicked,
+  setIsTextareaClicked,
 }) => {
   const [text, setText] = useState("");
   const [sessionStarted, setSessionStarted] = useState(false);
   const [startTime, setStartTime] = useState(null);
-  const [isTextareaClicked, setIsTextareaClicked] = useState(false);
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
   const {
@@ -193,37 +194,7 @@ const LandingPage = ({
   };
 
   return (
-    <div className="w-full h-fit flex flex-col items-center">
-      <nav
-        style={{
-          transitionProperty: "height, opacity",
-          transitionDuration: "500ms, 250ms", // First value for height, second for opacity
-        }}
-        className={`transition-all duration-500 ease-in-out ${
-          isTextareaClicked ? "h-0 opacity-0" : "h-24 py-6 opacity-100"
-        } sm:py-0  bg-white w-full md:px-24 px-12 flex flex-row justify-between items-center shadow-md`}
-      >
-        <div className="flex w-fit">
-          <div className="w-32 h-16 relative ">
-            <Image src="/images/anky-logo.png" fill />
-          </div>
-        </div>
-        {authenticated ? (
-          <button
-            className={`${montserratAlternates.className} login-btn shadow-xl border-black border rounded`}
-            onClick={logout}
-          >
-            LOGOUT
-          </button>
-        ) : (
-          <button
-            className={`${montserratAlternates.className} login-btn hover:bg-gray-100 shadow-xl border-black border rounded`}
-            onClick={login}
-          >
-            LOG IN
-          </button>
-        )}
-      </nav>
+    <div className="w-full h-screen flex flex-col  items-center">
       <div className="h-6 w-full pr-12">
         <div
           className="h-full opacity-80 newen-bar"
@@ -233,14 +204,18 @@ const LandingPage = ({
         ></div>
       </div>
       {finishedSession ? (
-        <div className="w-full h-screen p-2 flex flex-col">
-          <div className="text-left finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
+        <div
+          className={`${
+            isTextareaClicked ? "" : ""
+          } w-full grow p-2 flex flex-col`}
+        >
+          <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
             <span className="mr-8">
               <PiWarningCircle size={33} />{" "}
             </span>
             <span className="text-left">
               {" "}
-              You stopped writing for more than 8 seconds
+              You stopped writing for more than 8 seconds.
             </span>
           </div>
           <div
@@ -255,7 +230,7 @@ const LandingPage = ({
           </div>
         </div>
       ) : (
-        <div className="w-full h-screen p-2">
+        <div className="w-full grow p-2">
           {isTextareaClicked ? (
             <div
               className={`${ibmPlexSans.className} ${
@@ -284,7 +259,11 @@ const LandingPage = ({
               onChange={(e) => {
                 setText(e.target.value);
               }}
-              className={`${montserratAlternates.className}  w-full md:h-96 h-48 bg-white shadow-md mx-auto placeholder:italic italic text-gray-400 italic border border-white p-2 cursor-pointer`}
+              className={`${
+                montserratAlternates.className
+              }  w-full md:h-96 h-48 bg-white shadow-md ${
+                !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
+              } mx-auto placeholder:italic italic text-gray-400 italic border border-white p-2 cursor-pointer`}
               placeholder="start typing..."
             />
           </div>

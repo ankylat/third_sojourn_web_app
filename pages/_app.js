@@ -17,8 +17,8 @@ import { SettingsProvider } from "../context/SettingsContext";
 import { UserProvider } from "../context/UserContext";
 import { useRouter } from "next/router";
 import { initializeDB } from "../lib/idbHelper";
-
 import { Network, Alchemy } from "alchemy-sdk";
+import Navbar from "../components/Navbar";
 
 const configureChainsConfig = configureChains([base], [publicProvider()]);
 
@@ -37,6 +37,7 @@ function MyApp({ Component, pageProps }) {
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
   const [lifeBarLength, setLifeBarLength] = useState(100);
+  const [isTextareaClicked, setIsTextareaClicked] = useState(false);
   const [newenBarLength, setNewenBarLength] = useState(0);
   const router = useRouter();
 
@@ -56,7 +57,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <main
-      className={`${inter.className}`}
+      className={`${inter.className} h-screen flex flex-col`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <Head>
@@ -164,6 +165,10 @@ function MyApp({ Component, pageProps }) {
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
           <UserProvider>
             <SettingsProvider>
+              <Navbar
+                isTextareaClicked={isTextareaClicked}
+                setIsTextareaClicked={setIsTextareaClicked}
+              />
               <Component
                 {...pageProps}
                 displayWritingGameLanding={displayWritingGameLanding}
@@ -172,6 +177,8 @@ function MyApp({ Component, pageProps }) {
                 lifeBarLength={lifeBarLength}
                 newenBarLength={newenBarLength}
                 setNewenBarLength={setNewenBarLength}
+                isTextareaClicked={isTextareaClicked}
+                setIsTextareaClicked={setIsTextareaClicked}
               />
             </SettingsProvider>
           </UserProvider>

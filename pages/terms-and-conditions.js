@@ -7,8 +7,8 @@ const TermsAndConditions = () => {
   const [hasUserSigned, setHasUserSigned] = useState(false);
   const { authenticated, login } = usePrivy();
   return (
-    <section className="px-2 h-full">
-      {hasUserSigned ? (
+    <section className="w-full md:w-1/2 mx-auto py-8 px-4 grow overflow-y-scroll">
+      {/* {hasUserSigned ? (
         <p>you already signed</p>
       ) : (
         <div>
@@ -26,7 +26,7 @@ const TermsAndConditions = () => {
             <p></p>
           )}
         </div>
-      )}
+      )} */}
       <h2 class="text-xl font-bold mb-4">
         anky third sojourn · terms & conditions
       </h2>
@@ -46,8 +46,8 @@ const TermsAndConditions = () => {
         whole adventure, but that part is for the future.
       </p>
       <p class="mb-4">
-        If you sign this document, you imply that you acknowledge these 12
-        points.
+        If you decide to write through anky every day, you imply that you
+        acknowledge these 12 points.
       </p>
       <ul class="list-decimal pl-5 space-y-2">
         <li>
@@ -62,13 +62,30 @@ const TermsAndConditions = () => {
           error how does that system look like. We will then iterate with your
           feedback and doing our best to understand your needs as a user. But
           that takes time, and patience, and needs to be a two-sided
-          relationship.
+          relationship. In the meantime, this{" "}
+          <a
+            href="https://calendar.google.com/calendar/u/0?cid=YTkwMjkyNzYzYmIxODQzNDkzZjNkMzI3YTAzZTBiNDI2MjFiNTA4M2U5Mzg4NTBhMWJiNmRmY2U0ZjEwYzUzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+            target="_blank"
+            className="text-blue-600 hover:text-yellow-600"
+          >
+            google calendar
+          </a>{" "}
+          may help.
         </li>
         <li>
           You acknowledge that every 8-minute piece of writing that you create
-          through Anky is a public good, and that if you want to be anonymous
-          you just have to create a new wallet with no attachments to your
-          identity and find a way to get a mentor in there.
+          through Anky is public (at least on the initial phase), and that if
+          you want to be anonymous you just have to create a new wallet with no
+          attachments to your identity and find a way to get a mentor in there.
+          You can get one on secondary, or ask us for one on the{" "}
+          <a
+            href="https://t.me/ankytheape"
+            target="_blank"
+            className="text-blue-600 hover:text-yellow-600"
+          >
+            telegram group
+          </a>
+          .
         </li>
         <li>
           You acknowledge that all of the pieces of writing of a given day will
@@ -78,7 +95,14 @@ const TermsAndConditions = () => {
         <li>
           You acknowledge that if you want to collaborate on writing the lore
           that will be used as the context for the AI model you need to do it in
-          this Adim room.
+          <a
+            href="https://adimverse.com/rooms/2dPsG1fXWh33ztRQ9NWhWQwd9vf"
+            target="_blank"
+            className="text-blue-600 hover:text-yellow-600"
+          >
+            this
+          </a>
+          Adim room.
         </li>
         <li>
           You acknowledge that for writing you will earn a cryptocurrency called
@@ -89,13 +113,13 @@ const TermsAndConditions = () => {
           You acknowledge that each 8-minute writing session will reward you
           with 7023 $Newen, and that:
           <ul>
-            <li>
+            <li className="mt-2">
               No one knows how much will be the market value of this token in
               the future.
             </li>
-            <li>
-              The focus is not on that. The focus is on the value that we bring
-              to the world.
+            <li className="mt-2">
+              The focus is not on that, but on the value that we bring to the
+              world.
             </li>
           </ul>
         </li>
@@ -110,8 +134,7 @@ const TermsAndConditions = () => {
           world as “the first book that has ever been written by more than 100
           humans in the history of humanity and it is a story that speaks about
           depression, technology, and the impact of addiction on the human
-          experience” you will earn a percentage of each one of those sales
-          (when done legally).
+          experience” you will earn a percentage of each one of those sales.
         </li>
         <li>
           You acknowledge that we are doing the best that we can in order to
@@ -121,16 +144,11 @@ const TermsAndConditions = () => {
           that it is important to start with strong direction in the beginning.
         </li>
         <li>
-          You acknowledge that there could be errors, and that everything could
-          go wrong with a bad click. But the fundamentals are intact, and they
-          are what is being encoded with every step we take.
+          You acknowledge that there could be errors on this whole system, but
+          the fundamentals are intact, and they are what is being encoded with
+          every step we take.
         </li>
-        <li>
-          You acknowledge that by signing this document you will receive a
-          journal, which will be the place where each one of your 8-minute
-          pieces of writing will be stored for a long, long time using a network
-          called Arweave.
-        </li>
+        <li>You acknowledge that your uniqueness is a gift.</li>
       </ul>
       <div className="my-8 mx-8">
         {authenticated && (
@@ -140,7 +158,9 @@ const TermsAndConditions = () => {
             buttonColor="bg-purple-600 mb-8"
           />
         )}
-        <Link href="/">go back</Link>
+        <div className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2">
+          <Link href="/">go back</Link>
+        </div>
       </div>
     </section>
   );

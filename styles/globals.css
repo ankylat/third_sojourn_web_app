@@ -12,6 +12,11 @@ body {
   max-height: 100vh;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  background-image: url("/images/anky.svg");
+  background-position: top -30px right -200px;
+  background-size: 120vh;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 a {
@@ -87,4 +92,12 @@ textarea {
   margin-top: 160px;
   border-radius: 3px;
   font-size: 20px;
+}
+
+.big-logo {
+  height: 200vh;
+  width: 50vw;
+  right: 0;
+  position: absolute;
+  top: -200px;
 }
