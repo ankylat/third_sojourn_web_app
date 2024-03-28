@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { Montserrat_Alternates } from "next/font/google";
+import Link from "next/link";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -22,19 +23,21 @@ const Navbar = ({ isTextareaClicked }) => {
     >
       <div className="flex w-fit">
         <div className="w-32 h-16 relative ">
-          <Image src="/images/anky-logo.png" fill />
+          <Link passHref href="/">
+            <Image src="/images/anky-logo.png" fill />
+          </Link>
         </div>
       </div>
       {authenticated ? (
         <button
-          className={`${montserratAlternates.className} login-btn shadow-xl border-black border rounded`}
+          className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100  shadow-xl border-black border rounded`}
           onClick={logout}
         >
           LOGOUT
         </button>
       ) : (
         <button
-          className={`${montserratAlternates.className} login-btn hover:bg-gray-100 shadow-xl border-black border rounded`}
+          className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100 shadow-xl border-black border rounded`}
           onClick={login}
         >
           LOG IN

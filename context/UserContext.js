@@ -15,6 +15,8 @@ export const UserProvider = ({ children }) => {
   const [userDatabaseInformation, setUserDatabaseInformation] = useState({});
   const [appLoading, setAppLoading] = useState(true);
   const [userIsReadyNow, setUserIsReadyNow] = useState(false);
+  const [loadingUserDatabaseInformation, setLoadingUserDatabaseInformation] =
+    useState(false);
   const [allUserWritings, setAllUserWritings] = useState([]);
   const [usersAnkyImage, setUsersAnkyImage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -134,7 +136,7 @@ export const UserProvider = ({ children }) => {
     }
 
     handleInitialization();
-  }, [wallet, authenticated, ready]);
+  }, [authenticated]);
 
   // Load the user's library when setup is ready
   useEffect(() => {
@@ -152,8 +154,8 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const loadUserDatabaseInformation = async () => {
       try {
-        console.log("inside the load user database information function");
         if (!authenticated) return;
+        console.log("inside the load user database information function");
         const authToken = await getAccessToken();
         const thisUserPrivyId = user.id.replace("did:privy:", "");
 
@@ -168,25 +170,18 @@ export const UserProvider = ({ children }) => {
             },
           }
         );
-        const provider = await wallet.getEthersProvider();
-        // get the users ether and degen balance
-        console.log("before getting the eth balance");
-        const baseEthBalance = await getUsersEthBalance(
-          provider,
-          wallet.address
-        );
+        console.log("theeeee response is: ", response.data);
 
         setUserDatabaseInformation({
           streak: response.data.user.streak || 0,
           manaBalance: response.data.user.manaBalance || 0,
-          baseEthBalance: baseEthBalance,
         });
       } catch (error) {
         console.log("there was an errror here0, ", error);
       }
     };
     loadUserDatabaseInformation();
-  }, [user, authenticated]);
+  }, [authenticated]);
 
   async function fetchUsersAnky() {
     if (!wallet || !wallet.address) return;

@@ -77,7 +77,7 @@ const TermsAndConditions = () => {
           through Anky is public (at least on the initial phase), and that if
           you want to be anonymous you just have to create a new wallet with no
           attachments to your identity and find a way to get a mentor in there.
-          You can get one on secondary, or ask us for one on the{" "}
+          You can get one on secondary, or ask us for one on the
           <a
             href="https://t.me/ankytheape"
             target="_blank"

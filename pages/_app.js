@@ -43,6 +43,7 @@ function MyApp({ Component, pageProps }) {
 
   const handleLogin = async (user) => {
     try {
+      console.log("handle login");
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`,
         {

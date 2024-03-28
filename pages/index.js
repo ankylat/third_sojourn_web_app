@@ -1,7 +1,8 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import DesktopWritingGame from "../components/DesktopWritingGame";
+import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
 import { WebIrys } from "@irys/sdk";
@@ -9,7 +10,11 @@ import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../components/Button";
+import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
+
+const secondsOfLife = 8;
+const totalSessionDuration = 12; // seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -32,8 +37,14 @@ const LandingPage = ({
   setIsTextareaClicked,
 }) => {
   const [text, setText] = useState("");
+  const [time, setTime] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [startTime, setStartTime] = useState(null);
+  const [savingSession, setSavingSession] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
+  const [lastKeystroke, setLastKeystroke] = useState();
+  const [userLost, setUserLost] = useState(false);
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
   const {
@@ -46,21 +57,56 @@ const LandingPage = ({
   } = usePrivy();
   const w = wallets.at(0);
 
+  const textareaRef = useRef(null);
+  const intervalRef = useRef(null);
+  const keystrokeIntervalRef = useRef(null);
+
+  useEffect(() => {
+    if (sessionStarted && !finishedSession) {
+      intervalRef.current = setInterval(() => {
+        setTime((time) => {
+          const newTime = time + 1;
+          const newenLength = ((newTime / totalSessionDuration) * 100).toFixed(
+            2
+          );
+          setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
+
+          return newTime;
+        });
+        if (time > totalSessionDuration) {
+          setFinishedSession(true);
+          pingServerToEndWritingSession();
+          clearInterval(intervalRef.current);
+          clearInterval(keystrokeIntervalRef.current);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [sessionStarted, time]);
+
+  useEffect(() => {
+    if (sessionStarted && !finishedSession) {
+      keystrokeIntervalRef.current = setInterval(() => {
+        const elapsedTime = Date.now() - lastKeystroke;
+        if (elapsedTime > secondsOfLife * 1000) {
+          alert("you lost");
+        } else {
+          // const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
+          // setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
+        }
+      }, 88);
+    }
+    return () => clearInterval(keystrokeIntervalRef.current);
+  }, [sessionStarted, lastKeystroke]);
+
   const ankyverseToday = getAnkyverseDay(new Date());
   const ankyverseQuestion = getAnkyverseQuestion(ankyverseToday.wink);
 
   const { userOwnsAnky, setUserAppInformation, userAppInformation } = useUser();
 
   const handleClick = () => {
-    setNewenBarLength(100);
     setIsTextareaClicked(true);
-    const now = Date.now();
-    setStartTime(now);
-    console.log("starting the session now");
     pingServerToStartWritingSession();
-    setTimeout(() => {
-      setFinishedSession(true);
-    }, 4444);
   };
 
   const getWebIrys = async () => {
@@ -119,14 +165,19 @@ const LandingPage = ({
 
   async function pingServerToStartWritingSession() {
     try {
-      console.log("starting the writing session");
+      if (sessionRandomUUID) return;
       let now = new Date();
+      setLastKeystroke(now);
+      setStartTime(now);
       let response;
       if (authenticated) {
+        const newRandomUUID = uuidv4();
+        setSessionRandomUUID(newRandomUUID);
         const authToken = await getAccessToken();
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
           {
+            randomUUID: newRandomUUID,
             timestamp: now,
             userPrivyId: user.id.replace("did:privy:", ""),
           },
@@ -141,18 +192,23 @@ const LandingPage = ({
           "the repsonse from the pinging of the server is: ",
           response.data
         );
+        setSessionStarted(true);
       }
     } catch (error) {
       console.log("there was an error requesting to ping the serve", error);
     }
   }
 
-  async function pingServerToEndWritingSession(frontendWrittenTime) {
+  async function pingServerToEndWritingSession() {
     try {
       let response;
       if (authenticated) {
         const authToken = await getAccessToken();
-        const now = new Date();
+        const now = new Date().getTime();
+        const frontendWrittenTime = Math.floor(
+          Math.abs(startTime - now) / 1000
+        );
+        console.log("the frontend written time is: ", frontendWrittenTime);
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/end-session`,
           {
@@ -168,9 +224,9 @@ const LandingPage = ({
           }
         );
       }
-      console.log("the response from pinging the server is: ", response);
+      console.log("the response after finishing the session is: ", response);
+      setFinishedSession(true);
       return {
-        ...x,
         manaBalance: response.data.data.manaBalance,
         streak: response.data.data.activeStreak,
       };
@@ -193,8 +249,28 @@ const LandingPage = ({
     }
   };
 
+  const handleSaveSession = async () => {
+    try {
+      setSavingSession(true);
+      const receipt = await sendTextToIrys();
+      console.log("in heeeere, the receipt is", receipt);
+      setSavingSession(false);
+      setSessionSaved(true);
+    } catch (error) {}
+  };
+
+  const handleTextChange = (e) => {
+    try {
+      setText(e.target.value);
+      const now = Date.now();
+      setLastKeystroke(now);
+    } catch (error) {
+      console.log("there was an error in the handle text change function");
+    }
+  };
+
   return (
-    <div className="w-full h-screen flex flex-col  items-center">
+    <div className="w-full h-screen flex flex-col items-center">
       <div className="h-6 w-full pr-12">
         <div
           className="h-full opacity-80 newen-bar"
@@ -209,25 +285,105 @@ const LandingPage = ({
             isTextareaClicked ? "" : ""
           } w-full grow p-2 flex flex-col`}
         >
-          <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
-            <span className="mr-8">
-              <PiWarningCircle size={33} />{" "}
-            </span>
-            <span className="text-left">
+          {userLost ? (
+            <div>
               {" "}
-              You stopped writing for more than 8 seconds.
-            </span>
-          </div>
-          <div
-            onClick={() => {
-              setIsTextareaClicked(false);
-              setFinishedSession(false);
-              setNewenBarLength(0);
-            }}
-            className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2"
-          >
-            RETRY
-          </div>
+              <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
+                <span className="mr-8">
+                  <PiWarningCircle size={33} />{" "}
+                </span>
+                <span className="text-left">
+                  You stopped writing for more than 8 seconds.
+                </span>
+              </div>
+              <div
+                onClick={() => {
+                  setIsTextareaClicked(false);
+                  setFinishedSession(false);
+                  setNewenBarLength(0);
+                }}
+                className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2"
+              >
+                RETRY
+              </div>
+            </div>
+          ) : (
+            <div>
+              {sessionSaved ? (
+                <div className="text-left bg-white finish-button w-96 rounded-xl h-96  mx-auto flex flex-col justify-between  items-center">
+                  <div className="flex flex-col  justify-center">
+                    <span className="text-6xl">3</span>
+                    <span className="text-xl"> your streak</span>
+                  </div>
+                  <div className="flex flex-col p-3 rounded-xl bg-gray-100 border border-black">
+                    {" "}
+                    <div className="flex w-full mx-auto justify-center mb-2">
+                      {["mo", "tue", "wed", "thu", "fri", "sat", "sun"].map(
+                        (x, i) => {
+                          return (
+                            <div className="flex flex-col justify-center">
+                              <div className="w-6 h-6 mx-2 rounded-full bg-red-200 border border-black"></div>
+                              <span className="text-xs">{x}</span>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                    <hr />
+                    <div>
+                      <p className="wrap mt-2 text-md">
+                        "the scariest moment of writing is always before you
+                        start"
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between w-full">
+                    <span
+                      onClick={() => alert("share on socials")}
+                      className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
+                    >
+                      share
+                    </span>
+                    <span
+                      onClick={() => setIsTextareaClicked(false)}
+                      className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
+                    >
+                      <Link href="/book">read book of anky</Link>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-left bg-white finish-button w-fit rounded-xl h-96  mx-auto flex flex-col justify-between  items-center">
+                  <span className="">
+                    <FaCheckCircle size={126} color="green" />
+                  </span>
+                  <div className="flex justify-between space-x-2 mt-8">
+                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
+                      <span>{text.split(" ").length}</span>
+                      <span>words</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
+                      <span>7025</span>
+                      <span>$newen</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
+                      <span>3</span>
+                      <span>streak</span>
+                    </div>
+                  </div>
+                  <div>
+                    <button
+                      className={`${montserratAlternates.className} login-btn px-4 hover:bg-gray-100 shadow-xl border-black border rounded`}
+                      onClick={handleSaveSession}
+                    >
+                      {savingSession ? "saving..." : "save session"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <div></div>
         </div>
       ) : (
         <div className="w-full grow p-2">
@@ -254,16 +410,18 @@ const LandingPage = ({
             } mx-auto mt-4`}
           >
             <textarea
-              onClick={handleClick}
-              style={{ fontStyle: "italic" }}
-              onChange={(e) => {
-                setText(e.target.value);
+              onClick={() => {
+                if (!sessionStarted) {
+                  handleClick();
+                }
               }}
+              style={{ fontStyle: "italic" }}
+              onChange={handleTextChange}
               className={`${
                 montserratAlternates.className
               }  w-full md:h-96 h-48 bg-white shadow-md ${
                 !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
-              } mx-auto placeholder:italic italic text-gray-400 italic border border-white p-2 cursor-pointer`}
+              } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-2 cursor-pointer`}
               placeholder="start typing..."
             />
           </div>
