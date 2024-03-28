@@ -3,11 +3,23 @@ import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import DesktopWritingGame from "../components/DesktopWritingGame";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
+import { PiWarningCircle } from "react-icons/pi";
 import { WebIrys } from "@irys/sdk";
+import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../components/Button";
 import axios from "axios";
+
+const montserratAlternates = Montserrat_Alternates({
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
 
 const LandingPage = ({
   displayWritingGameLanding,
@@ -21,9 +33,16 @@ const LandingPage = ({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [startTime, setStartTime] = useState(null);
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
+  const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
-  const { sendTransaction, login, authenticated, getAccessToken, user } =
-    usePrivy();
+  const {
+    sendTransaction,
+    login,
+    authenticated,
+    logout,
+    getAccessToken,
+    user,
+  } = usePrivy();
   const w = wallets.at(0);
 
   const ankyverseToday = getAnkyverseDay(new Date());
@@ -32,11 +51,15 @@ const LandingPage = ({
   const { userOwnsAnky, setUserAppInformation, userAppInformation } = useUser();
 
   const handleClick = () => {
+    setNewenBarLength(100);
     setIsTextareaClicked(true);
     const now = Date.now();
     setStartTime(now);
     console.log("starting the session now");
     pingServerToStartWritingSession();
+    setTimeout(() => {
+      setFinishedSession(true);
+    }, 3000);
     // Start the timer here if needed
   };
 
@@ -172,50 +195,99 @@ const LandingPage = ({
 
   return (
     <div className="w-full h-fit flex flex-col items-center">
-      <div className="h-6 w-full">
+      <nav className="h-44 py-6 sm:py-0 sm:h-24 bg-white w-full px-24 flex flex-col  sm:flex-row justify-between items-center shadow-md">
+        <div className="flex w-fit ">
+          <div className="w-32 h-16 relative ">
+            <Image src="/images/anky-logo.png" fill />
+          </div>
+        </div>
+        {authenticated ? (
+          <button
+            className={`${montserratAlternates.className} login-btn shadow-xl border-black border rounded`}
+            onClick={logout}
+          >
+            LOGOUT
+          </button>
+        ) : (
+          <button
+            className={`${montserratAlternates.className} login-btn hover:bg-gray-100 shadow-xl border-black border rounded`}
+            onClick={login}
+          >
+            LOG IN
+          </button>
+        )}
+      </nav>
+      <div className="h-6 w-full pr-12">
         <div
-          className="h-full opacity-80"
+          className="h-full opacity-80 newen-bar"
           style={{
             width: `${newenBarLength}%`,
             backgroundColor: newenBarLength < 40 ? "red" : "purple",
           }}
         ></div>
       </div>
-      <div className="w-full h-screen p-2">
-        <h2 className="text-5xl">just write</h2>
-        <p>(for 8 minutes)</p>
-        <div className="w-full mt-4">
-          <textarea
-            onClick={handleClick}
-            onChange={(e) => {
-              setText(e.target.value);
+      {finishedSession ? (
+        <div className="w-full h-screen p-2 flex flex-col">
+          <div className="text-left finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
+            <span className="mr-8">
+              <PiWarningCircle size={22} />{" "}
+            </span>
+            You stopped writing for more than 8 seconds
+          </div>
+          <div
+            onClick={() => {
+              setIsTextareaClicked(false);
+              setFinishedSession(false);
             }}
-            className={`${
-              isTextareaClicked ? "h-96 w-full" : "h-48 w-3/4"
-            } bg-black border border-white p-2 cursor-pointer`}
-            placeholder="write here..."
-          />
+            className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2"
+          >
+            RETRY
+          </div>
         </div>
-        {!authenticated && (
-          <Button
-            buttonAction={login}
-            buttonText="login"
-            buttonColor="bg-green-600 w-48 mt-8"
-          />
-        )}
-        <div>
-          {text.length > 0 && (
-            <Button
-              buttonAction={finishSession}
-              buttonText="finish session"
-              buttonColor="bg-green-600 w-48 mt-8"
+      ) : (
+        <div className="w-full h-screen p-2">
+          {isTextareaClicked ? (
+            <div
+              className={`${ibmPlexSans.className} ${
+                isTextareaClicked ? " w-7/8 xl:w-w-8/12 " : "w-3/4 xl:w-1/2 "
+              } mx-auto h-16 mt-8 text-xl flex justify-center items-center px-8 prompt border-black`}
+            >
+              What happens when we dream?
+            </div>
+          ) : (
+            <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
+              <h2 className="text-xl write-text mt-4">Write for 8 minutes.</h2>
+              <p className={`${montserratAlternates.className} cta `}>
+                Click directly on the box & write about the day theme.
+              </p>
+            </div>
+          )}
+
+          <div
+            className={`${
+              isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-1/2 lg:w-3/5 "
+            } mx-auto mt-4`}
+          >
+            <textarea
+              onClick={handleClick}
+              style={{ fontStyle: "italic" }}
+              onChange={(e) => {
+                setText(e.target.value);
+              }}
+              className={`${montserratAlternates.className}  w-full md:h-96 h-48 bg-white shadow-md mx-auto placeholder:italic italic text-gray-400 italic border border-white p-2 cursor-pointer`}
+              placeholder="start typing..."
             />
+          </div>
+
+          {!isTextareaClicked && (
+            <div
+              className={`${montserratAlternates.className} w-48 mx-auto text-gray-400 mt-8 hover:text-gray-500`}
+            >
+              <Link href="/terms-and-conditions">terms & conditions</Link>
+            </div>
           )}
         </div>
-        <div className="mt-8 hover:text-yellow-600">
-          <Link href="/terms-and-conditions">terms & conditions</Link>
-        </div>
-      </div>
+      )}
       <section className="w-full h-screen bg-gray-400 px-2 py-8 text-black">
         <p>anky is a game for writers</p>
         <p>

@@ -115,6 +115,12 @@ function MyApp({ Component, pageProps }) {
           sizes="16x16"
           href="images/touch/homescreen48.png"
         />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap"
+          rel="stylesheet"
+        />
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
@@ -158,17 +164,15 @@ function MyApp({ Component, pageProps }) {
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
           <UserProvider>
             <SettingsProvider>
-              <div className="w-96 mx-auto bg-black overflow-y-scroll text-center text-white flex flex-col h-screen">
-                <Component
-                  {...pageProps}
-                  displayWritingGameLanding={displayWritingGameLanding}
-                  setDisplayWritingGameLanding={setDisplayWritingGameLanding}
-                  setLifeBarLength={setLifeBarLength}
-                  lifeBarLength={lifeBarLength}
-                  newenBarLength={newenBarLength}
-                  setNewenBarLength={setNewenBarLength}
-                />
-              </div>
+              <Component
+                {...pageProps}
+                displayWritingGameLanding={displayWritingGameLanding}
+                setDisplayWritingGameLanding={setDisplayWritingGameLanding}
+                setLifeBarLength={setLifeBarLength}
+                lifeBarLength={lifeBarLength}
+                newenBarLength={newenBarLength}
+                setNewenBarLength={setNewenBarLength}
+              />
             </SettingsProvider>
           </UserProvider>
         </PrivyWagmiConnector>
