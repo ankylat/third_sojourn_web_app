@@ -321,7 +321,10 @@ const LandingPage = ({
                       {["mo", "tue", "wed", "thu", "fri", "sat", "sun"].map(
                         (x, i) => {
                           return (
-                            <div className="flex flex-col justify-center">
+                            <div
+                              key={i}
+                              className="flex flex-col justify-center"
+                            >
                               <div className="w-6 h-6 mx-2 rounded-full bg-red-200 border border-black"></div>
                               <span className="text-xs">{x}</span>
                             </div>
