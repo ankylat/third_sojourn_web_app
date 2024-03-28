@@ -60,7 +60,6 @@ const LandingPage = ({
     setTimeout(() => {
       setFinishedSession(true);
     }, 3000);
-    // Start the timer here if needed
   };
 
   const getWebIrys = async () => {
@@ -222,7 +221,6 @@ const LandingPage = ({
           className="h-full opacity-80 newen-bar"
           style={{
             width: `${newenBarLength}%`,
-            backgroundColor: newenBarLength < 40 ? "red" : "purple",
           }}
         ></div>
       </div>
@@ -238,6 +236,7 @@ const LandingPage = ({
             onClick={() => {
               setIsTextareaClicked(false);
               setFinishedSession(false);
+              setNewenBarLength(0);
             }}
             className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2"
           >
