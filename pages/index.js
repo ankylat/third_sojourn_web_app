@@ -59,7 +59,7 @@ const LandingPage = ({
     pingServerToStartWritingSession();
     setTimeout(() => {
       setFinishedSession(true);
-    }, 3000);
+    }, 4444);
   };
 
   const getWebIrys = async () => {
@@ -195,6 +195,10 @@ const LandingPage = ({
   return (
     <div className="w-full h-fit flex flex-col items-center">
       <nav
+        style={{
+          transitionProperty: "height, opacity",
+          transitionDuration: "500ms, 250ms", // First value for height, second for opacity
+        }}
         className={`transition-all duration-500 ease-in-out ${
           isTextareaClicked ? "h-0 opacity-0" : "h-44 sm:h-24 py-6 opacity-100"
         } sm:py-0  bg-white w-full px-24 flex flex-col sm:flex-row justify-between items-center shadow-md`}
