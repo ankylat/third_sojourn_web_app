@@ -200,8 +200,8 @@ const LandingPage = ({
           transitionDuration: "500ms, 250ms", // First value for height, second for opacity
         }}
         className={`transition-all duration-500 ease-in-out ${
-          isTextareaClicked ? "h-0 opacity-0" : "h-44 sm:h-24 py-6 opacity-100"
-        } sm:py-0  bg-white w-full px-24 flex flex-col sm:flex-row justify-between items-center shadow-md`}
+          isTextareaClicked ? "h-0 opacity-0" : "h-24 py-6 opacity-100"
+        } sm:py-0  bg-white w-full md:px-24 px-12 flex flex-row justify-between items-center shadow-md`}
       >
         <div className="flex w-fit">
           <div className="w-32 h-16 relative ">
@@ -236,9 +236,12 @@ const LandingPage = ({
         <div className="w-full h-screen p-2 flex flex-col">
           <div className="text-left finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
             <span className="mr-8">
-              <PiWarningCircle size={22} />{" "}
+              <PiWarningCircle size={33} />{" "}
             </span>
-            You stopped writing for more than 8 seconds
+            <span className="text-left">
+              {" "}
+              You stopped writing for more than 8 seconds
+            </span>
           </div>
           <div
             onClick={() => {
