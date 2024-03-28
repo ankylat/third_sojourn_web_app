@@ -288,7 +288,7 @@ const LandingPage = ({
 
           {!isTextareaClicked && (
             <div
-              className={`${montserratAlternates.className} w-48 mx-auto text-gray-400 mt-8 hover:text-gray-500`}
+              className={`${montserratAlternates.className} w-48 mx-auto text-gray-400 text-center mt-8 hover:text-gray-500`}
             >
               <Link href="/terms-and-conditions">terms & conditions</Link>
             </div>
