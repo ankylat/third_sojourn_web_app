@@ -332,8 +332,8 @@ const LandingPage = ({
                     <hr />
                     <div>
                       <p className="wrap mt-2 text-md">
-                        "the scariest moment of writing is always before you
-                        start"
+                        &quot;the scariest moment of writing is always before
+                        you start&quot;
                       </p>
                     </div>
                   </div>
