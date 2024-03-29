@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 20; // seconds
+const totalSessionDuration = 300; // seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
