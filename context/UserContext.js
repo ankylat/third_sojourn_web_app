@@ -175,6 +175,7 @@ export const UserProvider = ({ children }) => {
         setUserDatabaseInformation({
           streak: response.data.user.streak || 0,
           manaBalance: response.data.user.manaBalance || 0,
+          wroteToday: response?.data?.user?.wroteToday || false,
         });
       } catch (error) {
         console.log("there was an errror here0, ", error);

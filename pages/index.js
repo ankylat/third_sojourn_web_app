@@ -14,6 +14,18 @@ import Button from "../components/Button";
 import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
 
+const getLastSevenDays = () => {
+  const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const lastSevenDays = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(day.getDate() - i);
+    lastSevenDays.push(days[day.getDay()]);
+  }
+  return lastSevenDays;
+};
+
 const secondsOfLife = 8;
 const totalSessionDuration = 20; // seconds
 
@@ -42,6 +54,7 @@ const LandingPage = ({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [startTime, setStartTime] = useState(null);
+  const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
@@ -77,6 +90,7 @@ const LandingPage = ({
           return newTime;
         });
         if (time > totalSessionDuration) {
+          setIsTextareaClicked(false);
           setFinishedSession(true);
           pingServerToEndWritingSession();
           clearInterval(intervalRef.current);
@@ -93,6 +107,7 @@ const LandingPage = ({
         const elapsedTime = Date.now() - lastKeystroke;
         if (elapsedTime > secondsOfLife * 1000) {
           clearInterval(keystrokeIntervalRef.current);
+          setIsTextareaClicked(false);
           setFinishedSession(true);
         } else {
           // const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
@@ -106,7 +121,7 @@ const LandingPage = ({
   const ankyverseToday = getAnkyverseDay(new Date());
   const ankyverseQuestion = getAnkyverseQuestion(ankyverseToday.wink);
 
-  const { userOwnsAnky, setUserAppInformation, userAppInformation } = useUser();
+  const { userDatabaseInformation } = useUser();
 
   const handleClick = () => {
     setIsTextareaClicked(true);
@@ -296,6 +311,15 @@ const LandingPage = ({
     }
   };
 
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyWritingText("copied");
+    } catch (error) {
+      console.log("there was an error copying the text");
+    }
+  };
+
   const handleTextChange = (e) => {
     try {
       setText(e.target.value);
@@ -305,6 +329,57 @@ const LandingPage = ({
       console.log("there was an error in the handle text change function");
     }
   };
+
+  if (userDatabaseInformation.wroteToday) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
+          <span className="w-24 h-24 relative">
+            <Image src="/images/Icon_copy_2.svg" fill />
+          </span>
+          <p className="my-2">you already wrote today</p>
+          <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
+            <span className="mx-2">{userDatabaseInformation.streak}</span>
+            <span className="">streak</span>
+          </div>
+          <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
+            {" "}
+            <div className="flex w-full p-2 mx-auto justify-center items-center mb-2">
+              {getLastSevenDays().map((day, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center justify-center"
+                >
+                  <div className="w-6 h-6 mx-2 rounded-full bg-red-200 border border-black"></div>
+                  <span className="text-xs">{day}</span>
+                </div>
+              ))}
+            </div>
+            <hr />
+            <div>
+              <p className="wrap mt-2 text-md text-center">
+                &quot;the scariest moment of writing is always before you
+                start&quot;
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-center w-full ">
+            {/* <span
+      onClick={() => alert("share on socials")}
+      className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
+    >
+      share
+    </span> */}
+            <span className="border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full">
+              <a href="https://www.paragraph.xyz/@ankytheape" target="_blank">
+                read book of anky
+              </a>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen flex flex-col items-center">
@@ -320,7 +395,7 @@ const LandingPage = ({
         <div
           className={`${
             isTextareaClicked ? "" : ""
-          } w-full grow pt-12 flex flex-col`}
+          } w-full grow pt-4 flex flex-col`}
         >
           {userLost ? (
             <div>
@@ -346,88 +421,110 @@ const LandingPage = ({
           ) : (
             <div>
               {sessionSaved ? (
-                <div className="text-left bg-white finish-button w-96 rounded-xl h-96  mx-auto flex flex-col justify-between  items-center">
-                  <div className="flex flex-col  justify-center">
-                    <span className="text-6xl">{userStreak}</span>
-                    <span className="text-xl"> your streak</span>
+                <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
+                  <span className="w-24 h-24 relative">
+                    <Image src="/images/Icon_copy_2.svg" fill />
+                  </span>
+                  <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
+                    <span className="mx-2">1</span>
+                    <span className="">streak</span>
                   </div>
-                  <div className="flex flex-col p-3 rounded-xl bg-gray-100 border border-black">
+                  <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     {" "}
-                    <div className="flex w-full mx-auto justify-center mb-2">
-                      {["mo", "tue", "wed", "thu", "fri", "sat", "sun"].map(
-                        (x, i) => {
-                          return (
-                            <div
-                              key={i}
-                              className="flex flex-col justify-center"
-                            >
-                              <div className="w-6 h-6 mx-2 rounded-full bg-red-200 border border-black"></div>
-                              <span className="text-xs">{x}</span>
-                            </div>
-                          );
-                        }
-                      )}
+                    <div className="flex w-full p-2 mx-auto justify-center items-center mb-2">
+                      {getLastSevenDays().map((day, i) => (
+                        <div
+                          key={i}
+                          className="flex flex-col items-center justify-center"
+                        >
+                          <div
+                            className={`w-6 h-6 mx-2 hover:bg-gray-100 hover:cursor-pointer rounded-full border border-black ${
+                              i == 6 && "bg-green-200"
+                            }`}
+                          ></div>
+                          <span className="text-xs">{day}</span>
+                        </div>
+                      ))}
                     </div>
                     <hr />
                     <div>
-                      <p className="wrap mt-2 text-md">
+                      <p className="wrap mt-2 text-md text-center">
                         &quot;the scariest moment of writing is always before
                         you start&quot;
                       </p>
                     </div>
                   </div>
-                  <div className="flex justify-between w-full">
+                  <div className="flex justify-between w-full ">
+                    {!authenticated && (
+                      <span
+                        onClick={copyText}
+                        className="border-solid py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
+                      >
+                        {copyWritingText}
+                      </span>
+                    )}
+                    {/*{" "}
                     <span
                       onClick={() => alert("share on socials")}
                       className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
                     >
                       share
-                    </span>
-                    <span
-                      onClick={() => setIsTextareaClicked(false)}
-                      className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
-                    >
+                    </span>{" "}
+                    */}
+                    <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
                       <a
                         href="https://www.paragraph.xyz/@ankytheape"
                         target="_blank"
                       >
-                        read book of anky
+                        read book
                       </a>
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="text-left bg-white rounded-xl shadow-lg px-8 py-8 w-fit rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
+                <div className="text-left bg-white rounded-xl shadow-lg px-8 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center">
                   <span className="w-24 h-24 relative">
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
-                  <div className="flex flex-col justify-between space-x-2 mt-8">
-                    <div className="p-2 w-full rounded-xl bg-gray-200 border border-black flex">
-                      <span>{text.split(" ").length}</span>
-                      <span>words</span>
+                  <div className="flex w-full  space-y-2 flex-col justify-between mt-8">
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                      <div className="w-1/4 flex flex-col items-center">
+                        <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
+                        <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
+                        <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
+                        <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
+                      </div>
+                      <div className="w-3/4 text-center">
+                        <span className="mx-2">{text.split(" ").length}</span>
+                        <span className="">words</span>
+                      </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex">
-                      <span className="w-24 h-24 relative">
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                      <div className="w-1/4 aspect-square flex flex-col items-center relative">
                         <Image src="/images/newen.svg" fill />
-                      </span>
-                      <div className="p-2 rounded-xl flex">
-                        <span>{authenticated ? "+7025" : "0"}</span>
+                      </div>
+                      <div className="w-3/4 text-center">
+                        <span>{authenticated ? "+7025" : "0"} </span>
                         <span>$newen</span>
                       </div>
                     </div>
-
-                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex">
-                      <span>1</span>
-                      <span>streak</span>
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                      <div className="w-1/4 aspect-square flex flex-col items-center relative">
+                        <Image src="/images/Icon_copy_3.svg" fill />
+                      </div>
+                      <div className="w-3/4 text-center">
+                        <span className="mx-2">1</span>
+                        <span className="">streak</span>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <button
-                      className={`${montserratAlternates.className} login-btn px-4 hover:bg-gray-100 shadow-xl border-black border rounded`}
-                      onClick={handleSaveSession}
-                    >
-                      {savingSession ? "saving..." : "save session"}
-                    </button>
+                    <div className="w-fit mt-4 mx-auto">
+                      <button
+                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                        onClick={handleSaveSession}
+                      >
+                        {savingSession ? "saving..." : "save session"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -440,8 +537,8 @@ const LandingPage = ({
           {isTextareaClicked ? (
             <div
               className={`${ibmPlexSans.className} ${
-                isTextareaClicked ? " w-7/8 xl:w-w-8/12 " : "w-3/4 xl:w-1/2 "
-              } mx-auto h-16 mt-8 text-xl flex justify-center items-center px-8 prompt border-black`}
+                isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
+              } mx-auto h-16 mt-8 text-xl flex justify-center items-center px-8 text-black text-3xl border-black`}
             >
               What happens when we dream?
             </div>
@@ -485,208 +582,6 @@ const LandingPage = ({
           )}
         </div>
       )}
-      {/* <section className="w-full h-screen bg-gray-400 px-2 py-8 text-black">
-        <p>anky is a game for writers</p>
-        <p>
-          designed to stare into the eyes of the most brutal adversary we have:
-        </p>
-        <h2 className="italic text-2xl">resistance.</h2>
-        <p>our toolkit:</p>
-        <p>
-          {" "}
-          <Link className="text-red-200 hover:text-red-600" href="# community">
-            community.
-          </Link>
-        </p>
-        <p className="text-orange-200 hover:text-orange-600">
-          <Link href="#tokenomics">economical rewards</Link>
-        </p>
-        <p className="text-yellow-200 hover:text-yellow-600">
-          <Link href="#ai-model">storytelling as a service</Link>
-        </p>
-        <p className="text-green-200 hover:text-green-600">
-          <Link href="#ethos">consistency over intensity</Link>
-        </p>
-        <p className="text-blue-200 hover:text-blue-600">
-          <Link href="#ankyverse">lore</Link>
-        </p>
-        <p className="text-indigo-200 hover:text-indigo-600">
-          <Link href="#participate">participate on next season</Link>
-        </p>
-        <small>(we start on the 31st of march)</small>
-        <p className="text-violet-200 hover:text-violet-600">
-          <Link href="#poiesis">we are all creators</Link>
-        </p>
-        <p className="text-white hover:text-gray-300">
-          <Link href="#equipo">the team</Link>
-        </p>
-      </section>
-      <section
-        id="community"
-        className="w-full h-screen bg-red-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">community</h2>
-        <p>
-          the mission that we have is simple and sharp, and you have different
-          degrees of involvement.
-        </p>
-        <p>the main one: write every day for 8 minutes.</p>
-        <p>
-          after that, you can spend 8 minutes reading the chapter of the book
-          that was written by anky as a consequence of what people wrote the day
-          before.
-        </p>
-        <p>
-          then you can comment that so that we can use it as fine tuning for the
-          ai model.
-        </p>
-        <p>
-          if you want to go even deeper, you can contribute to the lore on{" "}
-          <a href="https://www.adimverse.com/rooms/">adim</a>
-        </p>
-        <p>
-          you can also join our
-          <a href="https://t.me/ankytheape" target="_blank">
-            telegram group.
-          </a>
-        </p>
-        <p>
-          and participate as you wish on the
-          <a href="https://warpcast.com/~/channel/anky">farcaster channel.</a>
-        </p>
-        <p>
-          you decide how much you do, but the eternal rule applies to all of
-          this:
-        </p>
-        <p>the more you give the more you receive.</p>
-        <p>
-          life is a spiral. and this is the invitation to navigate it together.
-        </p>
-      </section>
-      <section
-        id="tokenomics"
-        className="w-full h-screen bg-orange-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">tokenomics</h2>
-        <p>
-          (this is a screenshot of the{" "}
-          <a
-            href="https://basescan.org/address/0xffe3cdc92f24988be4f6f8c926758dce490fe77e#code"
-            target="_blank"
-            className="text-blue-600 hover:text-yellow-600"
-          >
-            smart contract of $newen
-          </a>
-          )
-        </p>
-        <div className="h-96 w-full mt-4 relative">
-          {" "}
-          <Image src="/images/newen.png" fill />
-        </div>
-      </section>
-      <section
-        id="ai-model"
-        className="w-full h-screen bg-yellow-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">ai model</h2>
-        <p>
-          there are 8 seasons, each one of them with a growing number of
-          participants that is already known: 192, 312, 504, 816, 1320, 2136,
-          3456 and 5592.
-        </p>
-        <p>
-          each season consists of 96 chronological days, on which any owner of
-          an anky mentor can write through anky.
-        </p>
-        <p>
-          our custom trained ai model (anky) will be trained with that data, and
-          the single output for each day of its work will be a chapter on the
-          saga of anky.
-        </p>
-        <p>
-          there are 8 books, each one of them exploring a period of 7 years of
-          its life.
-        </p>
-        <p>the same as us.</p>
-        <p>
-          this ai model will end up being a better representation of the core
-          consciousness of humanity more than anything else that has happened
-          before.
-        </p>
-        <p>because it will be created after our collective unconscious.</p>
-      </section>
-      <section
-        id="ethos"
-        className="w-full h-screen bg-green-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">ethos</h2>
-        <p>
-          anky is built after a strong recongnition that it is time to show up,
-          and do the work.
-        </p>
-        <p>no one will be accountable for yourself.</p>
-        <p>it is up to you to show up.</p>
-        <p>
-          we believe in the power of consistency as a vehicle for expanding
-          consciousness, and that is why the core practice that we propose is 8
-          minutes of writing every day.
-        </p>
-      </section>{" "}
-      <section
-        id="ankyverse"
-        className="w-full h-screen bg-indigo-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">ankyverse</h2>
-        <p>this whole story is told through an allegorical interface</p>
-      </section>
-      <section
-        id="participate"
-        className="w-full h-screen bg-purple-200 px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">get your anky mentor</h2>
-        <p>once they were free</p>
-        <p>for the people that were able to see</p>
-        <p>now you can only get them on secondary</p>
-        <p>
-          here on{" "}
-          <a
-            target="_blank"
-            href="https://opensea.io/collection/anky-mentors"
-            className="text-blue-600 hover:text-yellow-600"
-          >
-            opensea
-          </a>{" "}
-          or{" "}
-          <a
-            target="_blank"
-            href="https://highlight.xyz/mint/65ecc65e9ab450e98aed98bb/marketplace"
-            className="text-blue-600 hover:text-yellow-600"
-          >
-            highlight
-          </a>
-          .
-        </p>
-      </section>
-      <section
-        id="poiesis"
-        className="w-full h-screen bg-white px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">bienvenid@</h2>
-        <p>estamos todos locos</p>
-        <p>y esta es una forma de honrarlo.</p>
-      </section>
-      <section
-        id="equipo"
-        className="w-full h-screen bg-white px-2 py-8 text-black"
-      >
-        <h2 className="text-4xl">the team behind</h2>
-        <p>david</p>
-        <p>benja</p>
-        <p>fabi</p>
-        <p>bruno</p>
-        <p>jp</p>
-        <p>thank you for your trust</p>
-      </section> */}
     </div>
   );
 };

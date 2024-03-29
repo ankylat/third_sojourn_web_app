@@ -43,17 +43,18 @@ const TermsAndConditions = () => {
       </p>
       <p class="mb-4">
         That same “you” is the one that will be subject to inquiry through this
-        whole adventure, but that part is for the future.
+        whole adventure that we are embarking on together.
       </p>
       <p class="mb-4">
-        If you decide to write through anky every day, you imply that you
-        acknowledge these 12 points.
+        If you decide to write through anky every day for 8 minutes, you imply
+        that you acknowledge these 12 points.
       </p>
       <ul class="list-decimal pl-5 space-y-2">
         <li>
           You acknowledge that this process starts on the 31st of March, on this
-          exact timestamp: 1711861200, and that will last for 96 days. A day is
-          a 24-hour period, counted exactly in relationship to that timestamp.
+          exact timestamp: 1711861200, and that this third sojourn will last for
+          96 days. A day is a 24-hour period, counted exactly in relationship to
+          that timestamp.
         </li>
         <li>
           You acknowledge that it is your personal responsibility to remember to
@@ -70,14 +71,15 @@ const TermsAndConditions = () => {
           >
             google calendar
           </a>{" "}
-          may help.
+          may help. You can always reach out to us on telegram to offer any
+          feedback.
         </li>
         <li>
           You acknowledge that every 8-minute piece of writing that you create
           through Anky is public (at least on the initial phase), and that if
           you want to be anonymous you just have to create a new wallet with no
           attachments to your identity and find a way to get a mentor in there.
-          You can get one on secondary, or ask us for one on the
+          You can get one on secondary, or ask us for one on our{" "}
           <a
             href="https://t.me/ankytheape"
             target="_blank"
@@ -89,29 +91,31 @@ const TermsAndConditions = () => {
         </li>
         <li>
           You acknowledge that all of the pieces of writing of a given day will
-          be used to write the chapter that corresponds to that specific and
-          unique day on the story of the Ankyverse.
+          be used as input for our custom trained ai model for it to write the
+          chapter that corresponds to that specific and unique day on the story
+          of the Ankyverse.
         </li>
         <li>
           You acknowledge that if you want to collaborate on writing the lore
-          that will be used as the context for the AI model you need to do it in
+          that will be used as the context for the AI model you need to do it on
+          this{" "}
           <a
             href="https://adimverse.com/rooms/2dPsG1fXWh33ztRQ9NWhWQwd9vf"
             target="_blank"
             className="text-blue-600 hover:text-yellow-600"
           >
-            this
+            Adim room
           </a>
-          Adim room.
+          .
         </li>
         <li>
           You acknowledge that for writing you will earn a cryptocurrency called
-          Newen. This is a representation (and honoring) of the harnessing of
+          $newen. This is a representation (and honoring) of the harnessing of
           life force that happened on an 8-minute writing session.
         </li>
         <li>
-          You acknowledge that each 8-minute writing session will reward you
-          with 7023 $Newen, and that:
+          You acknowledge that for this third sojourn each 8-minute writing
+          session will reward you with 7023 $newen, and that:
           <ul>
             <li className="mt-2">
               No one knows how much will be the market value of this token in
@@ -129,10 +133,10 @@ const TermsAndConditions = () => {
         </li>
         <li>
           You acknowledge that you will own part of that book, and that every
-          future day on which you write will reward you with an ongoing slice of
-          that pie. And that when we print that book and distribute it to the
-          world as “the first book that has ever been written by more than 100
-          humans in the history of humanity and it is a story that speaks about
+          future day on which you write will reward you with a slice of that
+          pie. And that when we print that book and distribute it to the world
+          as “the first book that has ever been written by more than 100 humans
+          in the history of humanity and it is a story that speaks about
           depression, technology, and the impact of addiction on the human
           experience” you will earn a percentage of each one of those sales.
         </li>

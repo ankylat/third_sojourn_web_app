@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/globals.css";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Inter, Righteous } from "next/font/google";
+import { Inter, Montserrat_Alternates } from "next/font/google";
 import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { MdMenuOpen } from "react-icons/md";
@@ -20,6 +20,11 @@ import { initializeDB } from "../lib/idbHelper";
 import { Network, Alchemy } from "alchemy-sdk";
 import Navbar from "../components/Navbar";
 
+const montserratAlternates = Montserrat_Alternates({
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 const configureChainsConfig = configureChains([base], [publicProvider()]);
 
 const settings = {
@@ -29,7 +34,6 @@ const settings = {
 
 const alchemy = new Alchemy(settings);
 
-const righteous = Righteous({ subsets: ["latin"], weight: ["400"] });
 const inter = Inter({ subsets: ["cyrillic"], weight: ["400"] });
 
 function MyApp({ Component, pageProps }) {
@@ -58,7 +62,7 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <main
-      className={`${inter.className} h-screen flex flex-col`}
+      className={`${montserratAlternates.className} h-screen flex flex-col`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <Head>
