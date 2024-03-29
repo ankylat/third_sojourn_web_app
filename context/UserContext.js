@@ -170,6 +170,7 @@ export const UserProvider = ({ children }) => {
             },
           }
         );
+        console.log("the response here is: ", response);
 
         setUserDatabaseInformation({
           streak: response.data.user.streak || 0,

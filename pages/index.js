@@ -15,7 +15,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
 
 const secondsOfLife = 8;
-const totalSessionDuration = 480; // seconds
+const totalSessionDuration = 20; // seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -92,7 +92,8 @@ const LandingPage = ({
       keystrokeIntervalRef.current = setInterval(() => {
         const elapsedTime = Date.now() - lastKeystroke;
         if (elapsedTime > secondsOfLife * 1000) {
-          alert("you lost");
+          clearInterval(keystrokeIntervalRef.current);
+          setFinishedSession(true);
         } else {
           // const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
           // setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
@@ -319,11 +320,10 @@ const LandingPage = ({
         <div
           className={`${
             isTextareaClicked ? "" : ""
-          } w-full grow p-2 flex flex-col`}
+          } w-full grow pt-12 flex flex-col`}
         >
           {userLost ? (
             <div>
-              {" "}
               <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
                 <span className="mr-8">
                   <PiWarningCircle size={33} />{" "}
@@ -387,25 +387,36 @@ const LandingPage = ({
                       onClick={() => setIsTextareaClicked(false)}
                       className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
                     >
-                      <Link href="/book">read book of anky</Link>
+                      <a
+                        href="https://www.paragraph.xyz/@ankytheape"
+                        target="_blank"
+                      >
+                        read book of anky
+                      </a>
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="text-left bg-white finish-button w-fit rounded-xl h-96  mx-auto flex flex-col justify-between  items-center">
-                  <span className="">
-                    <FaCheckCircle size={126} color="green" />
+                <div className="text-left bg-white rounded-xl shadow-lg px-8 py-8 w-fit rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
+                  <span className="w-24 h-24 relative">
+                    <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
-                  <div className="flex justify-between space-x-2 mt-8">
-                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
+                  <div className="flex flex-col justify-between space-x-2 mt-8">
+                    <div className="p-2 w-full rounded-xl bg-gray-200 border border-black flex">
                       <span>{text.split(" ").length}</span>
                       <span>words</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
-                      <span>{authenticated ? "+7025" : "0"}</span>
-                      <span>$newen</span>
+                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex">
+                      <span className="w-24 h-24 relative">
+                        <Image src="/images/newen.svg" fill />
+                      </span>
+                      <div className="p-2 rounded-xl flex">
+                        <span>{authenticated ? "+7025" : "0"}</span>
+                        <span>$newen</span>
+                      </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex flex-col">
+
+                    <div className="p-2 rounded-xl bg-gray-200 border border-black flex">
                       <span>1</span>
                       <span>streak</span>
                     </div>
@@ -467,7 +478,7 @@ const LandingPage = ({
 
           {!isTextareaClicked && (
             <div
-              className={`${montserratAlternates.className} w-48 mx-auto text-gray-400 text-center mt-8 hover:text-gray-500`}
+              className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-gray-400 text-center flex mt-8 hover:text-gray-500`}
             >
               <Link href="/terms-and-conditions">terms & conditions</Link>
             </div>
