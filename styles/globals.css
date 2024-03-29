@@ -74,6 +74,8 @@ section p {
 
 textarea {
   color: #131316;
+  line-height: 2rem;
+  font-size: 1.3rem;
 }
 
 .finish-button {
@@ -83,7 +85,7 @@ textarea {
   padding: 16px;
   border: 2px;
   border-style: solid;
-  border-radius: 3px;
+  border-radius: 8px;
   font-size: 20px;
 }
 

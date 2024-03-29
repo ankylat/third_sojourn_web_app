@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 300; // seconds
+const totalSessionDuration = 60; // seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ const LandingPage = ({
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
   const [lastKeystroke, setLastKeystroke] = useState();
-  const [userLost, setUserLost] = useState(false);
+  const [userLost, setUserLost] = useState(true);
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
   const {
@@ -91,6 +91,7 @@ const LandingPage = ({
         });
         if (time > totalSessionDuration) {
           setIsTextareaClicked(false);
+          setUserLost(false);
           setFinishedSession(true);
           pingServerToEndWritingSession();
           clearInterval(intervalRef.current);
@@ -107,7 +108,6 @@ const LandingPage = ({
         const elapsedTime = Date.now() - lastKeystroke;
         if (elapsedTime > secondsOfLife * 1000) {
           clearInterval(keystrokeIntervalRef.current);
-          setIsTextareaClicked(false);
           setFinishedSession(true);
         } else {
           // const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
@@ -343,7 +343,6 @@ const LandingPage = ({
             <span className="">streak</span>
           </div>
           <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
-            {" "}
             <div className="flex w-full p-2 mx-auto justify-center items-center mb-2">
               {getLastSevenDays().map((day, i) => (
                 <div
@@ -398,24 +397,25 @@ const LandingPage = ({
           } w-full grow pt-4 flex flex-col`}
         >
           {userLost ? (
-            <div>
-              <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mt-42 mx-auto flex items-center">
+            <div className="">
+              <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mx-auto flex items-center">
                 <span className="mr-8">
                   <PiWarningCircle size={33} />{" "}
                 </span>
-                <span className="text-left">
+                <span className="text-left text-black">
                   You stopped writing for more than 8 seconds.
                 </span>
               </div>
               <div
                 onClick={() => {
-                  setIsTextareaClicked(false);
                   setFinishedSession(false);
                   setNewenBarLength(0);
+                  setSessionStarted(false);
+                  setTime(0);
                 }}
-                className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2"
+                className="w-36 mx-auto mt-4 border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
               >
-                RETRY
+                retry
               </div>
             </div>
           ) : (
@@ -538,7 +538,7 @@ const LandingPage = ({
             <div
               className={`${ibmPlexSans.className} ${
                 isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
-              } mx-auto h-16 mt-8 text-xl flex justify-center items-center px-8 text-black text-3xl border-black`}
+              } mx-auto h-16 mt-8 flex justify-center items-center px-8 text-gray-500 text-3xl shadow-lg`}
             >
               What happens when we dream?
             </div>
