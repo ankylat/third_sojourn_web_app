@@ -209,6 +209,7 @@ const LandingPage = ({
             randomUUID: newRandomUUID,
             timestamp: now,
             userPrivyId: user.id.replace("did:privy:", ""),
+            wallet: user.wallet.address,
           },
           {
             headers: {
@@ -245,6 +246,7 @@ const LandingPage = ({
             timestamp: now,
             user: user.id.replace("did:privy:", ""),
             frontendWrittenTime,
+            userWallet: user.wallet.address,
           },
           {
             headers: {
@@ -443,16 +445,7 @@ const LandingPage = ({
                       </p>
                     </div>
                   </div>
-                  <div className="flex justify-between w-full ">
-                    {!authenticated && (
-                      <span
-                        onClick={copyText}
-                        className="border-solid py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
-                      >
-                        {copyWritingText}
-                      </span>
-                    )}
-
+                  <div className="flex justify-center w-full ">
                     <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
                       <a
                         href="https://www.paragraph.xyz/@ankytheape"
