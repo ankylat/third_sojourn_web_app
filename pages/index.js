@@ -322,7 +322,7 @@ const LandingPage = ({
       await navigator.clipboard.writeText(text);
       setCopyWritingText("copied");
       setTimeout(() => {
-        setCopyWritingText("");
+        setCopyWritingText("copy text");
       }, 2222);
     } catch (error) {
       console.log("there was an error copying the text");
@@ -334,7 +334,7 @@ const LandingPage = ({
       await navigator.clipboard.writeText(userDatabaseInformation.todayWriting);
       setCopyWritingText("copied");
       setTimeout(() => {
-        setCopyWritingText("");
+        setCopyWritingText("copy text");
       }, 2222);
     } catch (error) {}
   };
@@ -352,7 +352,7 @@ const LandingPage = ({
   if (userDatabaseInformation.wroteToday) {
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
-        <div className="w-full h-full md:w-1/2">
+        <div className="w-full h-full md:w-1/2 p-2">
           <h2 className="text-xl md:text-3xl">
             sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
           </h2>
