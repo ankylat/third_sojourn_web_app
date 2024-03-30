@@ -128,7 +128,7 @@ const LandingPage = ({
     return () => clearInterval(keystrokeIntervalRef.current);
   }, [sessionStarted, lastKeystroke]);
 
-  const { userDatabaseInformation } = useUser();
+  const { userDatabaseInformation, appLoading } = useUser();
 
   const handleClick = () => {
     setIsTextareaClicked(true);
@@ -544,7 +544,7 @@ const LandingPage = ({
               }  w-full md:h-96 h-48 bg-white shadow-md ${
                 !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
               } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-              placeholder="start typing..."
+              placeholder={`${appLoading ? "loading..." : "start writing..."}`}
             />
           </div>
 

@@ -8,25 +8,6 @@ const TermsAndConditions = () => {
   const { authenticated, login } = usePrivy();
   return (
     <section className="w-full md:w-1/2 mx-auto py-8 px-4 grow overflow-y-scroll">
-      {/* {hasUserSigned ? (
-        <p>you already signed</p>
-      ) : (
-        <div>
-          {!authenticated ? (
-            <p>
-              to sign this document, please first{" "}
-              <span
-                className="cursor-pointer text-blue-600 hover:text-yellow-600"
-                onClick={login}
-              >
-                login
-              </span>
-            </p>
-          ) : (
-            <p></p>
-          )}
-        </div>
-      )} */}
       <h2 class="text-xl font-bold mb-4">
         anky third sojourn · terms & conditions
       </h2>

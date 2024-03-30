@@ -133,7 +133,6 @@ export const UserProvider = ({ children }) => {
       setUserOwnsAnky(true);
       setMainAppLoading(false);
       if (loadingUserStoredData) return;
-
       setAppLoading(false);
     }
 
@@ -170,40 +169,45 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const loadUserDatabaseInformation = async () => {
       try {
-        if (!authenticated) return;
-        console.log("inside the load user database information function");
-        const authToken = await getAccessToken();
-        const thisUserPrivyId = user.id.replace("did:privy:", "");
-        console.log("the user is: ", user, authToken);
+        if (authenticated) {
+          console.log("inside the load user database information function");
+          const authToken = await getAccessToken();
+          const thisUserPrivyId = user.id.replace("did:privy:", "");
+          console.log("the user is: ", user, authToken);
 
-        if (!authToken) return;
-        console.log("right before sending shittss");
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
-          { walletAddress: user.wallet.address },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-        console.log("the response here is: ", response);
-        let todayWriting;
-        if (response?.data?.user?.todayCid) {
-          todayWriting = await fetchTextFromIrys(
-            response?.data?.user?.todayCid
+          if (!authToken) return;
+          console.log("right before sending shittss");
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
+            { walletAddress: user.wallet.address },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
           );
-        }
+          console.log("the response here is: ", response);
+          let todayWriting;
+          if (response?.data?.user?.todayCid) {
+            todayWriting = await fetchTextFromIrys(
+              response?.data?.user?.todayCid
+            );
+          }
 
-        setUserDatabaseInformation({
-          ankyMentorIndex: response.data.mentor.mentorIndex || null,
-          streak: response.data.user.streak || 0,
-          manaBalance: response.data.user.manaBalance || 0,
-          wroteToday: response?.data?.user?.wroteToday || false,
-          todayCid: response?.data?.user?.todayCid || "",
-          todayWriting: todayWriting || "",
-        });
+          setUserDatabaseInformation({
+            ankyMentorIndex: response.data.mentor.mentorIndex || null,
+            streak: response.data.user.streak || 0,
+            manaBalance: response.data.user.manaBalance || 0,
+            wroteToday: response?.data?.user?.wroteToday || false,
+            todayCid: response?.data?.user?.todayCid || "",
+            todayWriting: todayWriting || "",
+          });
+          setAppLoading(false);
+        }
+        if (ready && !authenticated) {
+          setAppLoading(false);
+        }
       } catch (error) {
         console.log("there was an errror here0, ", error);
       }
