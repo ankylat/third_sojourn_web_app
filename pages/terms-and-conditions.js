@@ -109,7 +109,7 @@ const TermsAndConditions = () => {
           .
         </li>
         <li>
-          You acknowledge that for writing you will earn a cryptocurrency called
+          You acknowledge that for writing you will receive a token called
           $newen. This is a representation (and honoring) of the harnessing of
           life force that happened on an 8-minute writing session.
         </li>
