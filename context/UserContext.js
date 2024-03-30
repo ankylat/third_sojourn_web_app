@@ -175,10 +175,11 @@ export const UserProvider = ({ children }) => {
         console.log("the response here is: ", response);
 
         setUserDatabaseInformation({
-          ankyMentorIndex: response.data.user.mentorIndex || null,
+          ankyMentorIndex: response.data.mentor.mentorIndex || null,
           streak: response.data.user.streak || 0,
           manaBalance: response.data.user.manaBalance || 0,
           wroteToday: response?.data?.user?.wroteToday || false,
+          todayCid: response?.data?.user?.todayCid || "",
         });
       } catch (error) {
         console.log("there was an errror here0, ", error);

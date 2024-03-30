@@ -120,7 +120,6 @@ const LandingPage = ({
   }, [sessionStarted, lastKeystroke]);
 
   const ankyverseToday = getAnkyverseDay(new Date());
-  console.log("the ankyverse today is: ", ankyverseToday);
   const ankyverseQuestion = getAnkyverseQuestion(ankyverseToday.wink);
 
   const { userDatabaseInformation } = useUser();
@@ -159,17 +158,18 @@ const LandingPage = ({
 
   async function sendTextToIrys() {
     try {
-      let ankyMentorIndex;
-
       const tags = [
         { name: "Content-Type", value: "text/plain" },
         { name: "application-id", value: "Anky Third Sojourn - v0" },
         {
           name: "mentor-index",
-          value: userDatabaseInformation.ankyMentorIndex,
+          value: userDatabaseInformation.ankyMentorIndex.toString() || null,
         },
-        { name: "sojourn", value: ankyverseDay.currentSojourn.toString() },
-        { name: "day", value: ankyverseDay.wink.toString() },
+        {
+          name: "sojourn",
+          value: ankyverseDay?.currentSojourn?.toString() || "2",
+        },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "0" },
         { name: "time-user-wrote", value: time.toString() },
         {
           name: "uuid",
@@ -184,7 +184,7 @@ const LandingPage = ({
         console.log("Error uploading data ", e);
       }
     } catch (error) {
-      console.log("there was a problem uploading to irys");
+      console.log("there was a problem uploading to irys", error);
     }
   }
 
@@ -284,8 +284,6 @@ const LandingPage = ({
           duration: time,
         })
       );
-      setSavingSession(false);
-      setSessionSaved(true);
       if (authenticated) {
         const receipt = await sendTextToIrys();
         const authToken = await getAccessToken();
@@ -303,6 +301,8 @@ const LandingPage = ({
             },
           }
         );
+        setSavingSession(false);
+        setSessionSaved(true);
         console.log("the response from saving the cid is: ", response);
       }
     } catch (error) {
@@ -332,13 +332,25 @@ const LandingPage = ({
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center">
         <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
-          <span className="w-24 h-24 relative">
-            <Image src="/images/Icon_copy_2.svg" fill />
-          </span>
-          <p className="my-2">you already wrote today</p>
-          <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-            <span className="mx-2">{userDatabaseInformation.streak}</span>
-            <span className="">day streak</span>
+          <h2 className="text-xl">
+            sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
+          </h2>
+          <small className="text-lg">{ankyverseDay.currentKingdom}</small>
+          <div
+            onClick={() => {
+              setMoveText(true);
+              setTimeout(() => {
+                setMoveText(false);
+              }, 888);
+              copyText();
+            }}
+            className={`${
+              moveText &&
+              "translate-x-2 tranlate-y-2 text-yellow-600 text-red-200"
+            } text-left cursor-pointer bg-white rounded-xl shadow-lg px-8 py-8 hover: hover:bg-blue-600 hover:text-pink-300 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center`}
+          >
+            <p>{text}</p>
+            {moveText && <p className="text-red-600 mt-8">copied</p>}
           </div>
 
           <div className="flex justify-center w-full ">
@@ -419,14 +431,7 @@ const LandingPage = ({
                         {copyWritingText}
                       </span>
                     )}
-                    {/*{" "}
-                    <span
-                      onClick={() => alert("share on socials")}
-                      className="bg-red-100 border-black border rounded-xl p-2 cursor-pointer hover:bg-red-200"
-                    >
-                      share
-                    </span>{" "}
-                    */}
+
                     <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
                       <a
                         href="https://www.paragraph.xyz/@ankytheape"
@@ -438,26 +443,12 @@ const LandingPage = ({
                   </div>
                 </div>
               ) : (
-                <div
-                  onClick={() => {
-                    setMoveText(true);
-                    setTimeout(() => {
-                      setMoveText(false);
-                    }, 888);
-                    copyText();
-                  }}
-                  className={`${
-                    moveText &&
-                    "translate-x-2 tranlate-y-2 text-yellow-600 text-red-200"
-                  } text-left cursor-pointer bg-white rounded-xl shadow-lg px-8 py-8 hover: hover:bg-blue-600 hover:text-pink-300 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center`}
-                >
-                  <p>{text}</p>
-                  {moveText && <p className="text-red-600 mt-8">copied</p>}
-                  {/* <span className="w-24 h-24 relative">
+                <div className="text-left bg-white rounded-xl shadow-lg px-8 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center">
+                  <span className="w-24 h-24 relative">
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="flex w-full  space-y-2 flex-col justify-between mt-8">
-                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 shadow-lg flex items-center">
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                       <div className="w-1/4 flex flex-col items-center">
                         <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
                         <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
@@ -469,7 +460,7 @@ const LandingPage = ({
                         <span className="">words</span>
                       </div>
                     </div>
-                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 shadow-lg flex items-center">
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                       <div className="w-1/4 aspect-square flex flex-col items-center relative">
                         <Image src="/images/newen.svg" fill />
                       </div>
@@ -478,7 +469,7 @@ const LandingPage = ({
                         <span>$newen</span>
                       </div>
                     </div>
-                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 shadow-lg flex items-center">
+                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                       <div className="w-1/4 aspect-square flex flex-col items-center relative">
                         <Image src="/images/Icon_copy_3.svg" fill />
                       </div>
@@ -495,7 +486,7 @@ const LandingPage = ({
                         {savingSession ? "saving..." : "save session"}
                       </button>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
               )}
             </div>
