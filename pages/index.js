@@ -307,10 +307,10 @@ const LandingPage = ({
             },
           }
         );
-        setSavingSession(false);
-        setSessionSaved(true);
         console.log("the response from saving the cid is: ", response);
       }
+      setSavingSession(false);
+      setSessionSaved(true);
     } catch (error) {
       console.log("there is an error here", error);
     }
@@ -368,7 +368,17 @@ const LandingPage = ({
                grow overflow-y-scroll mt-3 hover:text-shadow-lg hover:text-purple-800 cursor-pointer 
             } `}
           >
-            <p>{userDatabaseInformation.todayWriting}</p>
+            {userDatabaseInformation.todayWriting ? (
+              userDatabaseInformation.todayWriting.includes("\n") ? (
+                userDatabaseInformation.todayWriting.split("\n").map((x, i) => (
+                  <p className="my-2" key={i}>
+                    {x}
+                  </p>
+                ))
+              ) : (
+                <p className="my-2">{userDatabaseInformation.todayWriting}</p>
+              )
+            ) : null}
             {moveText && <p className="text-red-600 mt-8">copied</p>}
           </div>
         </div>
