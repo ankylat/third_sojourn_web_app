@@ -57,6 +57,8 @@ const LandingPage = ({
   const [startTime, setStartTime] = useState(null);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
+  const [ankyverseDay, setAnkyverseDay] = useState({});
+  const [ankyverseQuestion, setAnkyverseQuestion] = useState("");
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
@@ -77,6 +79,13 @@ const LandingPage = ({
   const textareaRef = useRef(null);
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
+
+  useEffect(() => {
+    const respo = getAnkyverseDay(new Date());
+    setAnkyverseDay(respo);
+    const questionOfToday = getAnkyverseQuestion(respo.wink);
+    setAnkyverseQuestion(questionOfToday);
+  }, []);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -118,9 +127,6 @@ const LandingPage = ({
     }
     return () => clearInterval(keystrokeIntervalRef.current);
   }, [sessionStarted, lastKeystroke]);
-
-  const ankyverseToday = getAnkyverseDay(new Date());
-  const ankyverseQuestion = getAnkyverseQuestion(ankyverseToday.wink);
 
   const { userDatabaseInformation } = useUser();
 
@@ -313,9 +319,22 @@ const LandingPage = ({
     try {
       await navigator.clipboard.writeText(text);
       setCopyWritingText("copied");
+      setTimeout(() => {
+        setCopyWritingText("");
+      }, 2222);
     } catch (error) {
       console.log("there was an error copying the text");
     }
+  };
+
+  const copyTodaysText = async () => {
+    try {
+      await navigator.clipboard.writeText(userDatabaseInformation.todayWriting);
+      setCopyWritingText("copied");
+      setTimeout(() => {
+        setCopyWritingText("");
+      }, 2222);
+    } catch (error) {}
   };
 
   const handleTextChange = (e) => {
@@ -330,35 +349,27 @@ const LandingPage = ({
 
   if (userDatabaseInformation.wroteToday) {
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center">
-        <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
-          <h2 className="text-xl">
+      <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
+        <div className="w-full h-full md:w-1/2">
+          <h2 className="text-xl md:text-3xl">
             sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
           </h2>
           <small className="text-lg">{ankyverseDay.currentKingdom}</small>
+          <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
               setMoveText(true);
               setTimeout(() => {
                 setMoveText(false);
               }, 888);
-              copyText();
+              copyTodaysText();
             }}
-            className={`${
-              moveText &&
-              "translate-x-2 tranlate-y-2 text-yellow-600 text-red-200"
-            } text-left cursor-pointer bg-white rounded-xl shadow-lg px-8 py-8 hover: hover:bg-blue-600 hover:text-pink-300 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center`}
+            className={`${moveText && " translate-x-2 tranlate-y-2"}
+               grow overflow-y-scroll mt-3 hover:text-shadow-lg hover:text-purple-800 cursor-pointer 
+            } `}
           >
-            <p>{text}</p>
+            <p>{userDatabaseInformation.todayWriting}</p>
             {moveText && <p className="text-red-600 mt-8">copied</p>}
-          </div>
-
-          <div className="flex justify-center w-full ">
-            <span className="border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full">
-              <a href="https://www.paragraph.xyz/@ankytheape" target="_blank">
-                read book of anky
-              </a>
-            </span>
           </div>
         </div>
       </div>

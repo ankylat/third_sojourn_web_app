@@ -5,6 +5,8 @@ import axios from "axios";
 import { getThisUserWritings } from "../lib/irys";
 import { setUserData, getUserData } from "../lib/idbHelper";
 import ankyMentorsABI from "../lib/ankyMentorsABI";
+import { WebIrys } from "@irys/sdk";
+import Query from "@irys/query";
 
 const UserContext = createContext();
 
@@ -151,6 +153,20 @@ export const UserProvider = ({ children }) => {
     }
   }, [finalSetup]);
 
+  async function fetchTextFromIrys(cid) {
+    try {
+      const response = await axios.get(`https://gateway.irys.xyz/${cid}`);
+
+      if (!response) {
+        throw new Error(`HTTP error! Status: ${response}`);
+      }
+      const usable = await response.data;
+      return usable;
+    } catch (error) {
+      console.log("there was an error fetching the text from irys", error);
+    }
+  }
+
   useEffect(() => {
     const loadUserDatabaseInformation = async () => {
       try {
@@ -173,6 +189,12 @@ export const UserProvider = ({ children }) => {
           }
         );
         console.log("the response here is: ", response);
+        let todayWriting;
+        if (response?.data?.user?.todayCid) {
+          todayWriting = await fetchTextFromIrys(
+            response?.data?.user?.todayCid
+          );
+        }
 
         setUserDatabaseInformation({
           ankyMentorIndex: response.data.mentor.mentorIndex || null,
@@ -180,6 +202,7 @@ export const UserProvider = ({ children }) => {
           manaBalance: response.data.user.manaBalance || 0,
           wroteToday: response?.data?.user?.wroteToday || false,
           todayCid: response?.data?.user?.todayCid || "",
+          todayWriting: todayWriting || "",
         });
       } catch (error) {
         console.log("there was an errror here0, ", error);
@@ -207,26 +230,6 @@ export const UserProvider = ({ children }) => {
 
       if (usersAnkys > 0) {
         setUserOwnsAnky(true);
-        // for (let i = 0; i < usersAnkys; i++) {
-        //   const usersAnkyId = await ankyMentorsContract.tokenOfOwnerByIndex(
-        //     wallet.address,
-        //     0
-        //   );
-        //   const highlightUri =
-        //     "https://highlight-creator-assets.highlight.xyz/main/base-dir/278b5bb6-5920-40cf-ab4b-f733184a871c/onChainDir/";
-
-        //   const fetchableUri = transformUri(usersAnkyUri);
-        //   const metadata = await fetch(fetchableUri);
-        //   const jsonMetadata = await metadata.json();
-        //   let imageUrl = transformUri(jsonMetadata.image);
-        //   setUsersAnky({
-        //     ankyIndex: usersAnkys,
-        //     ankyUri: usersAnkyUri,
-        //     imageUrl: imageUrl,
-        //   });
-        // }
-
-        // return { usersAnkys, usersAnkyUri, imageUrl };
       } else {
         // setUsersAnky({ ankyIndex: undefined, ankyUri: undefined });
         // return { usersAnkys: 0, usersAnkyUri: "", imageUrl: "" };
