@@ -62,7 +62,11 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <main
-      className={`${montserratAlternates.className} h-screen flex flex-col`}
+      className={`${
+        montserratAlternates.className
+      } h-screen flex flex-col background-transition ${
+        isTextareaClicked ? "withoutBg" : "bodyBg"
+      }`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <Head>

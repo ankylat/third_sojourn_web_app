@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1876px" height="1936px" viewBox="0 0 1876 1936" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Shape copy</title>
+    <defs>
+        <linearGradient x1="50.6443487%" y1="50%" x2="7.1533814%" y2="73.4876473%" id="linearGradient-1">
+            <stop stop-color="#FAD961" offset="0%"></stop>
+            <stop stop-color="#F76B1C" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="landing2" transform="translate(0, -1500)" fill="url(#linearGradient-1)">
+            <path d="M1549.25424,3140.13219 C1252.45415,3399.40673 224.975662,3051.54387 148.146884,2665.76974 C71.3181062,2279.9956 887.518348,1566.98602 1261.14721,1693.4801 C1634.77252,1819.97602 1846.05255,2880.85214 1549.25424,3140.13219 Z" id="Shape-copy" transform="translate(959.5634, 2482.8526) rotate(-17) translate(-959.5634, -2482.8526)"></path>
+        </g>
+    </g>
+</svg>

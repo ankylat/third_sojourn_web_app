@@ -158,11 +158,13 @@ export const UserProvider = ({ children }) => {
         console.log("inside the load user database information function");
         const authToken = await getAccessToken();
         const thisUserPrivyId = user.id.replace("did:privy:", "");
+        console.log("the user is: ", user, authToken);
 
         if (!authToken) return;
+        console.log("right before sending shittss");
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
-          {},
+          { walletAddress: user.wallet.address },
           {
             headers: {
               "Content-Type": "application/json",
@@ -173,6 +175,7 @@ export const UserProvider = ({ children }) => {
         console.log("the response here is: ", response);
 
         setUserDatabaseInformation({
+          ankyMentorIndex: response.data.user.mentorIndex || null,
           streak: response.data.user.streak || 0,
           manaBalance: response.data.user.manaBalance || 0,
           wroteToday: response?.data?.user?.wroteToday || false,
