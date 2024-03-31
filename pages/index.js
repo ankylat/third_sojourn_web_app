@@ -355,7 +355,10 @@ const LandingPage = ({
             sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
           </h2>
           <small className="text-lg">{ankyverseDay.currentKingdom}</small>
-          <p className="text-purple-600">{ankyverseQuestion}</p>
+          <p className="text-purple-600">
+            Describe the big bang in your words. How do you make sense of this
+            event?
+          </p>
           <div
             onClick={() => {
               setMoveText(true);
