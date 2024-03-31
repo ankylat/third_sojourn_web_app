@@ -6,6 +6,7 @@ import { setUserData, getUserData } from "../lib/idbHelper";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
+import { FaTelegram } from "react-icons/fa";
 import { WebIrys } from "@irys/sdk";
 import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
@@ -293,8 +294,9 @@ const LandingPage = ({
           `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
           {
             cid: receipt,
-            sessionId: sessionId,
+            sessionId: sessionId || "",
             user: user.id.replace("did:privy:", ""),
+            userWallet: user.wallet.address,
           },
           {
             headers: {
@@ -547,6 +549,13 @@ const LandingPage = ({
               className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-gray-400 text-center flex mt-8 hover:text-gray-500`}
             >
               <Link href="/terms-and-conditions">terms & conditions</Link>
+              <a
+                href="https://t.me/ankytheape"
+                target="_blank"
+                className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
+              >
+                telegram
+              </a>
             </div>
           )}
         </div>
