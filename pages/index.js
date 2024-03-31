@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 480;
+const totalSessionDuration = 60;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -433,8 +433,9 @@ const LandingPage = ({
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     <div>
                       <p className="wrap  text-md text-center">
-                        congratulations. the scariest moment of writing is
-                        always before you start.
+                        congratulations. for today, the target time was 1
+                        minute. this number will grow, but slowly... we have
+                        plenty of time. thank you.
                       </p>
                     </div>
                   </div>
