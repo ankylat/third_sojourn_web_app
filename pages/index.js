@@ -1,7 +1,6 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
-import DesktopWritingGame from "../components/DesktopWritingGame";
 import { setUserData, getUserData } from "../lib/idbHelper";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
@@ -28,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 60;
+const totalSessionDuration = 12;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -56,6 +55,7 @@ const LandingPage = ({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [startTime, setStartTime] = useState(null);
+  const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
   const [ankyverseDay, setAnkyverseDay] = useState({});
@@ -73,6 +73,7 @@ const LandingPage = ({
     authenticated,
     logout,
     getAccessToken,
+    ready,
     user,
   } = usePrivy();
   const w = wallets.at(0);
@@ -188,6 +189,7 @@ const LandingPage = ({
         const receipt = await webIrys.upload(text, { tags });
         return receipt.id;
       } catch (e) {
+        setErrorUploadingToIrys(true);
         console.log("Error uploading data ", e);
       }
     } catch (error) {
@@ -309,6 +311,7 @@ const LandingPage = ({
       setSavingSession(false);
       setSessionSaved(true);
     } catch (error) {
+      setErrorUploadingToIrys(true);
       console.log("there is an error here", error);
     }
   };
@@ -434,7 +437,7 @@ const LandingPage = ({
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     <div>
-                      <p className="wrap  text-md text-center">
+                      <p className="wrap p-2 text-md text-center">
                         congratulations. for today, the target time was 1
                         minute. this number will grow, but slowly... we have
                         plenty of time. thank you.
@@ -493,6 +496,21 @@ const LandingPage = ({
                         {savingSession ? "saving..." : "save session"}
                       </button>
                     </div>
+                    {errorUploadingToIrys && (
+                      <div className="flex flex-col">
+                        <p>
+                          there was an error uploading your session. please let
+                          jp know asap in order to fix it.
+                        </p>
+                        <a
+                          className="text-gray-400 hover:text-gray-500"
+                          href="https://t.me/jpfraneto"
+                          target="_blank"
+                        >
+                          message on telegram
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -539,7 +557,11 @@ const LandingPage = ({
                 !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
               } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
               placeholder={`${
-                !authenticated ? "log in to write..." : "start writing..."
+                !ready
+                  ? "loading..."
+                  : !authenticated
+                  ? "log in to write..."
+                  : "start writing..."
               }`}
             />
           </div>
@@ -554,7 +576,11 @@ const LandingPage = ({
               >
                 terms & conditions
               </Link>
-              <a href="https://t.me/ankytheape" target="_blank">
+              <a
+                className="text-gray-400 hover:text-gray-500"
+                href="https://t.me/ankytheape"
+                target="_blank"
+              >
                 telegram
               </a>
             </div>

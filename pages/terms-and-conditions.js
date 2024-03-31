@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import Button from "../components/Button";
 import Link from "next/link";
+import { Montserrat_Alternates } from "next/font/google";
+
+const montserratAlternates = Montserrat_Alternates({
+  subsets: ["latin"],
+  weight: ["400"],
+});
 
 const TermsAndConditions = () => {
   const [hasUserSigned, setHasUserSigned] = useState(false);
@@ -136,8 +142,13 @@ const TermsAndConditions = () => {
         <li>You acknowledge that your uniqueness is a gift.</li>
       </ul>
       <div className="my-8 mx-8">
-        <div className="px-8 bg-orange-300 w-fit mt-4 mx-auto rounded-sm cursor-pointer hover:bg-orange-400 active:translate-y-1 active:translate-x-1 text-white py-2">
-          <Link href="/">go back</Link>
+        <div className="w-full flex justify-center">
+          <Link
+            className={`${montserratAlternates.className} border-solid w-fit  mx-auto active:translate-x-1 active:translate-y-1 py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+            href="/"
+          >
+            go back
+          </Link>
         </div>
       </div>
     </section>
