@@ -59,7 +59,9 @@ const LandingPage = ({
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
   const [ankyverseDay, setAnkyverseDay] = useState({});
-  const [ankyverseQuestion, setAnkyverseQuestion] = useState("");
+  const [ankyverseQuestion, setAnkyverseQuestion] = useState(
+    "Describe the big bang in your words. How do you make sense of this event?"
+  );
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
@@ -82,12 +84,12 @@ const LandingPage = ({
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
 
-  useEffect(() => {
-    const respo = getAnkyverseDay(new Date());
-    setAnkyverseDay(respo);
-    const questionOfToday = getAnkyverseQuestion(respo.wink);
-    setAnkyverseQuestion(questionOfToday);
-  }, []);
+  // useEffect(() => {
+  //   const respo = getAnkyverseDay(new Date());
+  //   setAnkyverseDay(respo);
+  //   const questionOfToday = getAnkyverseQuestion(respo.wink);
+  //   setAnkyverseQuestion(questionOfToday);
+  // }, []);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -355,10 +357,7 @@ const LandingPage = ({
             sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
           </h2>
           <small className="text-lg">{ankyverseDay.currentKingdom}</small>
-          <p className="text-purple-600">
-            Describe the big bang in your words. How do you make sense of this
-            event?
-          </p>
+          <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
               setMoveText(true);
