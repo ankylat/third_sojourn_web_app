@@ -546,14 +546,15 @@ const LandingPage = ({
 
           {!isTextareaClicked && (
             <div
-              className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-gray-400 text-center flex mt-8 hover:text-gray-500`}
+              className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-center flex mt-8 `}
             >
-              <Link href="/terms-and-conditions">terms & conditions</Link>
-              <a
-                href="https://t.me/ankytheape"
-                target="_blank"
-                className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
+              <Link
+                className="text-gray-400 hover:text-gray-500"
+                href="/terms-and-conditions"
               >
+                terms & conditions
+              </Link>
+              <a href="https://t.me/ankytheape" target="_blank">
                 telegram
               </a>
             </div>
