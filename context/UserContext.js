@@ -54,7 +54,6 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadStoredUserData() {
-      console.log("load the user darta");
       if (ready && isEmpty(userAppInformation)) {
         const ankyIndex = await getUserData("ankyIndex");
         const userWalletAddress = await getUserData("userWalletAddress");
@@ -79,7 +78,6 @@ export const UserProvider = ({ children }) => {
     async function getAllUserWritings() {
       if (!wallet) return;
       if (!authenticated) return;
-      console.log("the wallet issss:", wallet);
       const writings = await getThisUserWritings(wallet.address);
       const sortedWritings = writings.sort(sortWritings);
 
@@ -105,9 +103,7 @@ export const UserProvider = ({ children }) => {
 
   // Check initialization and setup status
   useEffect(() => {
-    console.log("on this useEffect");
     async function handleInitialization() {
-      console.log("IN HERE");
       if (loading && !ready) return;
       if (ready && !wallet && !authenticated) {
         setMainAppLoading(false);
@@ -170,13 +166,10 @@ export const UserProvider = ({ children }) => {
     const loadUserDatabaseInformation = async () => {
       try {
         if (authenticated) {
-          console.log("inside the load user database information function");
           const authToken = await getAccessToken();
           const thisUserPrivyId = user.id.replace("did:privy:", "");
-          console.log("the user is: ", user, authToken);
 
           if (!authToken) return;
-          console.log("right before sending shittss");
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
             { walletAddress: user.wallet.address },
@@ -187,7 +180,6 @@ export const UserProvider = ({ children }) => {
               },
             }
           );
-          console.log("the response here is: ", response);
           let todayWriting;
           if (response?.data?.user?.todayCid) {
             todayWriting = await fetchTextFromIrys(
@@ -226,11 +218,8 @@ export const UserProvider = ({ children }) => {
         ankyMentorsABI,
         signer
       );
-      console.log("before calling the contract123", wallet);
       const usersBalance = await ankyMentorsContract.balanceOf(wallet.address);
-      console.log("the users balance of ankys is: ", usersBalance);
       const usersAnkys = ethers.utils.formatUnits(usersBalance, 0);
-      console.log("the users ankys", usersAnkys);
 
       if (usersAnkys > 0) {
         setUserOwnsAnky(true);

@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 16;
+const totalSessionDuration = 480;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -169,7 +169,7 @@ const LandingPage = ({
         { name: "application-id", value: "Anky Third Sojourn - v0" },
         {
           name: "mentor-index",
-          value: userDatabaseInformation.ankyMentorIndex.toString() || null,
+          value: userDatabaseInformation?.ankyMentorIndex?.toString() || null,
         },
         {
           name: "sojourn",
@@ -218,10 +218,6 @@ const LandingPage = ({
             },
           }
         );
-        console.log(
-          "the repsonse from the pinging of the server is: ",
-          response.data
-        );
         setSessionId(response.data.id);
         setSessionStarted(true);
       }
@@ -239,7 +235,6 @@ const LandingPage = ({
         const frontendWrittenTime = Math.floor(
           Math.abs(startTime - now) / 1000
         );
-        console.log("the frontend written time is: ", frontendWrittenTime);
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/end-session`,
           {
@@ -256,7 +251,6 @@ const LandingPage = ({
           }
         );
       }
-      console.log("the response after finishing the session is: ", response);
       setFinishedSession(true);
       return {
         manaBalance: response?.data?.data?.manaBalance || 0,
@@ -309,7 +303,6 @@ const LandingPage = ({
             },
           }
         );
-        console.log("the response from saving the cid is: ", response);
       }
       setSavingSession(false);
       setSessionSaved(true);
@@ -446,14 +439,11 @@ const LandingPage = ({
                     </div>
                   </div>
                   <div className="flex justify-center w-full ">
-                    <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                      <a
-                        href="https://www.paragraph.xyz/@ankytheape"
-                        target="_blank"
-                      >
-                        read book
-                      </a>
-                    </span>
+                    <a href="https://youtu.be/8l36xDYaTtE" target="_blank">
+                      <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
+                        welcome video (8 min)
+                      </span>
+                    </a>
                   </div>
                 </div>
               ) : (
@@ -513,9 +503,9 @@ const LandingPage = ({
             <div
               className={`${ibmPlexSans.className} ${
                 isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
-              } mx-auto h-16 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 text-xl md:text-3xl shadow-lg`}
+              } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 text-xl md:text-3xl shadow-lg`}
             >
-              What happens when we dream?
+              {ankyverseQuestion}
             </div>
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
@@ -533,10 +523,11 @@ const LandingPage = ({
           >
             <textarea
               onClick={() => {
-                if (!sessionStarted) {
+                if (authenticated && !sessionStarted) {
                   handleClick();
                 }
               }}
+              disabled={!authenticated}
               style={{ fontStyle: "italic" }}
               onChange={handleTextChange}
               className={`${
@@ -544,7 +535,9 @@ const LandingPage = ({
               }  w-full md:h-96 h-48 bg-white shadow-md ${
                 !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
               } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-              placeholder={`${appLoading ? "loading..." : "start writing..."}`}
+              placeholder={`${
+                !authenticated ? "log in to write..." : "start writing..."
+              }`}
             />
           </div>
 

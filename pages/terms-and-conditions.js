@@ -12,7 +12,7 @@ const TermsAndConditions = () => {
         anky third sojourn · terms & conditions
       </h2>
       <p class="mb-4">
-        “Anky Is You SpA” is a company that is located in Chile, and that deals
+        “Anky Eres Tu SpA” is a company that is located in Chile, and that deals
         with law through the entity with RUT number “77.796.373-2”. Throughout
         this document, that company will be referred to as “us”, “we”, “our”,
         etc.

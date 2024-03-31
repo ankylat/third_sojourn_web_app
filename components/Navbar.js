@@ -23,9 +23,7 @@ const Navbar = ({ isTextareaClicked }) => {
     >
       <div className="flex w-fit">
         <div className="w-32 h-16 relative ">
-          <Link passHref href="/">
-            <Image src="/images/anky-logo.png" fill />
-          </Link>
+          <Image src="/images/anky-logo.png" fill />
         </div>
       </div>
       {authenticated ? (
