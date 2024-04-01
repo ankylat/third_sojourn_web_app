@@ -247,6 +247,7 @@ const LandingPage = ({
             user: user.id.replace("did:privy:", ""),
             frontendWrittenTime,
             userWallet: user.wallet.address,
+            text: text,
           },
           {
             headers: {
