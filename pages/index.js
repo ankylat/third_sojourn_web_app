@@ -366,7 +366,7 @@ const LandingPage = ({
               copyTodaysText();
             }}
             className={`${moveText && " translate-x-2 tranlate-y-2"}
-               grow overflow-y-scroll mt-3 hover:text-shadow-lg hover:text-purple-800 cursor-pointer 
+               grow overflow-y-scroll mt-3 hover:text-shadow-lg pb-8 hover:text-purple-800 cursor-pointer 
             } `}
           >
             {userDatabaseInformation.todayWriting ? (
