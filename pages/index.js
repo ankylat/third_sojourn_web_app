@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 12;
+const totalSessionDuration = 300;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ const LandingPage = ({
   const [userStreak, setUserStreak] = useState(1);
   const [ankyverseDay, setAnkyverseDay] = useState({});
   const [ankyverseQuestion, setAnkyverseQuestion] = useState(
-    "Describe the big bang in your words. How do you make sense of this event?"
+    "Travel back to the year your were conceived (not born) by your parents: just from memory, what was that year/time/era about? What was important in the realms of culture, history, politics, sports, economy etc.? Refrain from Googling, it is more interesting what you remember."
   );
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
@@ -532,7 +532,7 @@ const LandingPage = ({
             </div>
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
-              <h2 className="text-xl write-text mt-4">Write for 8 minutes.</h2>
+              <h2 className="text-xl write-text mt-4">Write for 5 minutes.</h2>
               <p className={`${montserratAlternates.className} cta `}>
                 Click directly on the box & write about the day theme.
               </p>
