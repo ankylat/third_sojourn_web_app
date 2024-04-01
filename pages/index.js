@@ -54,6 +54,7 @@ const LandingPage = ({
   const [moveText, setMoveText] = useState("");
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
+  const [privyAuthToken, setPrivyAuthToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
@@ -84,12 +85,12 @@ const LandingPage = ({
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
 
-  // useEffect(() => {
-  //   const respo = getAnkyverseDay(new Date());
-  //   setAnkyverseDay(respo);
-  //   const questionOfToday = getAnkyverseQuestion(respo.wink);
-  //   setAnkyverseQuestion(questionOfToday);
-  // }, []);
+  useEffect(() => {
+    const respo = getAnkyverseDay(new Date().getTime());
+    setAnkyverseDay(respo);
+    const questionOfToday = getAnkyverseQuestion(respo.wink);
+    setAnkyverseQuestion(questionOfToday);
+  }, []);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -179,7 +180,7 @@ const LandingPage = ({
           name: "sojourn",
           value: ankyverseDay?.currentSojourn?.toString() || "2",
         },
-        { name: "day", value: ankyverseDay?.wink?.toString() || "0" },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "2" },
         { name: "time-user-wrote", value: time.toString() },
         {
           name: "uuid",
@@ -208,6 +209,7 @@ const LandingPage = ({
       setSessionRandomUUID(newRandomUUID);
       if (authenticated) {
         const authToken = await getAccessToken();
+        setPrivyAuthToken(authToken);
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
           {
@@ -235,7 +237,6 @@ const LandingPage = ({
     try {
       let response;
       if (authenticated) {
-        const authToken = await getAccessToken();
         const now = new Date().getTime();
         const frontendWrittenTime = Math.floor(
           Math.abs(startTime - now) / 1000
@@ -252,7 +253,7 @@ const LandingPage = ({
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
+              Authorization: `Bearer ${privyAuthToken}`,
             },
           }
         );
@@ -294,7 +295,6 @@ const LandingPage = ({
       );
       if (authenticated) {
         const receipt = await sendTextToIrys();
-        const authToken = await getAccessToken();
         let response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
           {
@@ -306,7 +306,7 @@ const LandingPage = ({
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
+              Authorization: `Bearer ${privyAuthToken}`,
             },
           }
         );
