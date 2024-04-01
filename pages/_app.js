@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }) {
   const [loginResponse, setLoginResponse] = useState(null);
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
-  const [lifeBarLength, setLifeBarLength] = useState(100);
+  const [lifeBarLength, setLifeBarLength] = useState(0);
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
   const [newenBarLength, setNewenBarLength] = useState(0);
   const router = useRouter();

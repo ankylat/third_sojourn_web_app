@@ -28,6 +28,7 @@ const getLastSevenDays = () => {
 
 const secondsOfLife = 8;
 const totalSessionDuration = 300;
+const waitingTime = 30;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ const LandingPage = ({
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [privyAuthToken, setPrivyAuthToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
+  const [textareaHidden, setTextareaHidden] = useState(false);
   const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
@@ -86,7 +88,7 @@ const LandingPage = ({
   const keystrokeIntervalRef = useRef(null);
 
   useEffect(() => {
-    const respo = getAnkyverseDay(new Date().getTime());
+    const respo = getAnkyverseDay(new Date());
     setAnkyverseDay(respo);
     const questionOfToday = getAnkyverseQuestion(respo.wink);
     setAnkyverseQuestion(questionOfToday);
@@ -101,7 +103,6 @@ const LandingPage = ({
             2
           );
           setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
-
           return newTime;
         });
         if (time > totalSessionDuration) {
@@ -125,8 +126,8 @@ const LandingPage = ({
           clearInterval(keystrokeIntervalRef.current);
           setFinishedSession(true);
         } else {
-          // const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
-          // setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
+          const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
+          setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
         }
       }, 88);
     }
@@ -137,13 +138,24 @@ const LandingPage = ({
 
   const handleClick = () => {
     setIsTextareaClicked(true);
-    if (authenticated) {
-      pingServerToStartWritingSession();
-    }
-    let now = new Date();
-    setLastKeystroke(now);
-    setStartTime(now);
-    setSessionStarted(true);
+    const startingInterval = setInterval(() => {
+      setLifeBarLength((x) => {
+        if (x >= 90) {
+          setTextareaHidden(false);
+          return clearInterval(startingInterval);
+        }
+        return x + 100 / waitingTime;
+      });
+    }, 1000);
+    setTimeout(() => {
+      if (authenticated) {
+        pingServerToStartWritingSession();
+      }
+      let now = new Date();
+      setLastKeystroke(now);
+      setStartTime(now);
+      setSessionStarted(true);
+    }, waitingTime * 1000);
   };
 
   const getWebIrys = async () => {
@@ -181,10 +193,10 @@ const LandingPage = ({
           value: ankyverseDay?.currentSojourn?.toString() || "2",
         },
         { name: "day", value: ankyverseDay?.wink?.toString() || "2" },
-        { name: "time-user-wrote", value: time.toString() },
+        { name: "time-user-wrote", value: time?.toString() },
         {
           name: "uuid",
-          value: sessionRandomUUID,
+          value: sessionRandomUUID || "",
         },
       ];
       const webIrys = await getWebIrys();
@@ -267,20 +279,6 @@ const LandingPage = ({
       console.log("there was an error pinging the server here.", error);
     }
   }
-
-  const finishSession = async () => {
-    try {
-      const finishTimestamp = Date.now();
-      const frontendWrittenTime = Math.floor(
-        (finishTimestamp - startTime) / 1000
-      );
-      if (authenticated) {
-        pingServerToEndWritingSession(finishTimestamp, frontendWrittenTime);
-      }
-    } catch (error) {
-      console.log("there was an error", error);
-    }
-  };
 
   const handleSaveSession = async () => {
     try {
@@ -389,11 +387,19 @@ const LandingPage = ({
 
   return (
     <div className="w-full h-screen flex flex-col items-center">
-      <div className="h-8 w-full pr-12 overflow-hidden">
+      <div className="h-4 w-full overflow-hidden">
         <div
           className="h-full opacity-80 newen-bar rounded-r-xl"
           style={{
             width: `${newenBarLength}%`,
+          }}
+        ></div>
+      </div>
+      <div className="h-4 w-full overflow-hidden">
+        <div
+          className="h-full opacity-80 life-bar rounded-r-xl"
+          style={{
+            width: `${lifeBarLength}%`,
           }}
         ></div>
       </div>
@@ -485,7 +491,7 @@ const LandingPage = ({
                         <span>$newen</span>
                       </div>
                     </div>
-                    <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                    {/* <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                       <div className="w-1/4 aspect-square flex flex-col items-center relative">
                         <Image src="/images/Icon_copy_3.svg" fill />
                       </div>
@@ -493,7 +499,7 @@ const LandingPage = ({
                         <span className="mx-2">1</span>
                         <span className="">streak</span>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="w-fit mt-4 mx-auto">
                       <button
                         className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
@@ -525,7 +531,7 @@ const LandingPage = ({
           <div></div>
         </div>
       ) : (
-        <div className="w-full grow p-2">
+        <div className="w-full grow">
           {isTextareaClicked ? (
             <div
               className={`${ibmPlexSans.className} ${
@@ -543,34 +549,37 @@ const LandingPage = ({
             </div>
           )}
 
-          <div
-            className={`${
-              isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
-            } mx-auto mt-4`}
-          >
-            <textarea
-              onClick={() => {
-                if (authenticated && !sessionStarted) {
-                  handleClick();
-                }
-              }}
-              disabled={!authenticated}
-              style={{ fontStyle: "italic" }}
-              onChange={handleTextChange}
+          {!textareaHidden && (
+            <div
               className={`${
-                montserratAlternates.className
-              }  w-full md:h-96 h-48 bg-white shadow-md ${
-                !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
-              } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-              placeholder={`${
-                !ready
-                  ? "loading..."
-                  : !authenticated
-                  ? "log in to write..."
-                  : "start writing..."
-              }`}
-            />
-          </div>
+                isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
+              } mx-auto mt-4`}
+            >
+              <textarea
+                onClick={() => {
+                  if (authenticated && !sessionStarted) {
+                    setTextareaHidden(true);
+                    handleClick();
+                  }
+                }}
+                disabled={!authenticated}
+                style={{ fontStyle: "italic" }}
+                onChange={handleTextChange}
+                className={`${
+                  montserratAlternates.className
+                }  w-full md:h-96 h-48 bg-white shadow-md ${
+                  !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
+                } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
+                placeholder={`${
+                  !ready
+                    ? "loading..."
+                    : !authenticated
+                    ? "log in to write..."
+                    : "start writing..."
+                }`}
+              />
+            </div>
+          )}
 
           {!isTextareaClicked && (
             <div

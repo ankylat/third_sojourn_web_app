@@ -65,6 +65,15 @@ section p {
   );
 }
 
+.life-bar {
+  background: rgb(0, 142, 43);
+  background: linear-gradient(
+    90deg,
+    rgb(255, 121, 19) 0%,
+    rgb(0, 142, 59) 100%
+  );
+}
+
 .prompt {
   color: #f6468a;
   font-family: "IBM Plex Sans", sans-serif;
