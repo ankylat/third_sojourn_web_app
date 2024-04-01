@@ -434,15 +434,17 @@ const LandingPage = ({
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                    <span className="mx-2">1</span>
-                    <span className="">streak</span>
+                    <span className="mx-2">day 2</span>
+                    <span className="">ready</span>
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     <div>
                       <p className="wrap p-2 text-md text-center">
-                        congratulations. for today, the target time was 1
-                        minute. this number will grow, but slowly... we have
-                        plenty of time. thank you.
+                        congratulations. today it was more intense, with a
+                        target time of 5 minutes. the invitation is to remain in
+                        the awareness of this prompt, and dive into it
+                        throughout the day. how did the world that received you
+                        look like?
                       </p>
                     </div>
                   </div>
