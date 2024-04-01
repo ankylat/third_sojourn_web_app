@@ -354,10 +354,8 @@ const LandingPage = ({
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">
-            sojourn #{ankyverseDay.currentSojourn} · wink {ankyverseDay.wink}
-          </h2>
-          <small className="text-lg">{ankyverseDay.currentKingdom}</small>
+          <h2 className="text-xl md:text-3xl">sojourn #2 · wink 2</h2>
+          <small className="text-lg text-orange-500">emblazion</small>
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
