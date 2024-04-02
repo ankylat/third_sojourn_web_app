@@ -101,10 +101,10 @@ const LandingPage = ({
         if (time > totalSessionDuration) {
           setIsTextareaClicked(false);
           setUserLost(false);
-          setFinishedSession(true);
-          pingServerToEndWritingSession("won");
           clearInterval(intervalRef.current);
           clearInterval(keystrokeIntervalRef.current);
+          setFinishedSession(true);
+          pingServerToEndWritingSession("won");
         }
       }, 1000);
     }
