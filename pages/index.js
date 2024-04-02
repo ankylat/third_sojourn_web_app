@@ -24,7 +24,7 @@ const getLastSevenDays = () => {
 
 const secondsOfLife = 8;
 const totalSessionDuration = 300;
-const waitingTime = 8;
+const waitingTime = 30;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -144,7 +144,7 @@ const LandingPage = ({
     } else {
       const startingInterval = setInterval(() => {
         setLifeBarLength((x) => {
-          if (x >= 80) {
+          if (x >= 90) {
             setTextareaHidden(false);
             return clearInterval(startingInterval);
           }
