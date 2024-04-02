@@ -107,7 +107,7 @@ const LandingPage = ({
           setIsTextareaClicked(false);
           setUserLost(false);
           setFinishedSession(true);
-          pingServerToEndWritingSession();
+          pingServerToEndWritingSession("won");
           clearInterval(intervalRef.current);
           clearInterval(keystrokeIntervalRef.current);
         }
@@ -121,6 +121,7 @@ const LandingPage = ({
       keystrokeIntervalRef.current = setInterval(() => {
         const elapsedTime = Date.now() - lastKeystroke;
         if (elapsedTime > secondsOfLife * 1000) {
+          pingServerToEndWritingSession("lost");
           clearInterval(keystrokeIntervalRef.current);
           setFinishedSession(true);
         } else {
@@ -200,6 +201,7 @@ const LandingPage = ({
       const webIrys = await getWebIrys();
       try {
         const receipt = await webIrys.upload(text, { tags });
+
         return receipt.id;
       } catch (e) {
         setErrorUploadingToIrys(true);
@@ -243,7 +245,7 @@ const LandingPage = ({
     }
   }
 
-  async function pingServerToEndWritingSession() {
+  async function pingServerToEndWritingSession(result) {
     try {
       let response;
       if (authenticated) {
@@ -259,6 +261,7 @@ const LandingPage = ({
             frontendWrittenTime,
             userWallet: user.wallet.address,
             text: text,
+            result: result,
           },
           {
             headers: {
