@@ -62,9 +62,7 @@ const LandingPage = ({
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
   const [ankyverseDay, setAnkyverseDay] = useState({});
-  const [ankyverseQuestion, setAnkyverseQuestion] = useState(
-    "Travel back to the year your were conceived (not born) by your parents: just from memory, what was that year/time/era about? What was important in the realms of culture, history, politics, sports, economy etc.? Refrain from Googling, it is more interesting what you remember."
-  );
+  const [ankyverseQuestion, setAnkyverseQuestion] = useState("");
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
@@ -192,7 +190,7 @@ const LandingPage = ({
           name: "sojourn",
           value: ankyverseDay?.currentSojourn?.toString() || "2",
         },
-        { name: "day", value: ankyverseDay?.wink?.toString() || "2" },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "3" },
         { name: "time-user-wrote", value: time?.toString() },
         {
           name: "uuid",
@@ -352,8 +350,8 @@ const LandingPage = ({
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">sojourn #2 · wink 2</h2>
-          <small className="text-lg text-orange-500">emblazion</small>
+          <h2 className="text-xl md:text-3xl">sojourn #2 · wink 3</h2>
+          <small className="text-lg text-orange-500">chryseos</small>
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
@@ -439,7 +437,7 @@ const LandingPage = ({
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                    <span className="mx-2">day 2</span>
+                    <span className="mx-2">day 3</span>
                     <span className="">ready</span>
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
