@@ -1,17 +1,13 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
-import { setUserData, getUserData } from "../lib/idbHelper";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
-import { FaTelegram } from "react-icons/fa";
 import { WebIrys } from "@irys/sdk";
 import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import Button from "../components/Button";
-import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
 
 const getLastSevenDays = () => {
@@ -27,8 +23,8 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 300;
-const waitingTime = 30;
+const totalSessionDuration = 10;
+const waitingTime = 8;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -41,8 +37,6 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 const LandingPage = ({
-  displayWritingGameLanding,
-  setDisplayWritingGameLanding,
   setLifeBarLength,
   lifeBarLength,
   setNewenBarLength,
@@ -53,6 +47,7 @@ const LandingPage = ({
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
   const [moveText, setMoveText] = useState("");
+  const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [privyAuthToken, setPrivyAuthToken] = useState(null);
@@ -137,16 +132,8 @@ const LandingPage = ({
 
   const handleClick = () => {
     setIsTextareaClicked(true);
-    const startingInterval = setInterval(() => {
-      setLifeBarLength((x) => {
-        if (x >= 90) {
-          setTextareaHidden(false);
-          return clearInterval(startingInterval);
-        }
-        return x + 100 / waitingTime;
-      });
-    }, 1000);
-    setTimeout(() => {
+    if (alreadyStartedOnce) {
+      setLifeBarLength(100);
       if (authenticated) {
         pingServerToStartWritingSession();
       }
@@ -154,7 +141,26 @@ const LandingPage = ({
       setLastKeystroke(now);
       setStartTime(now);
       setSessionStarted(true);
-    }, waitingTime * 1000);
+    } else {
+      const startingInterval = setInterval(() => {
+        setLifeBarLength((x) => {
+          if (x >= 80) {
+            setTextareaHidden(false);
+            return clearInterval(startingInterval);
+          }
+          return x + 100 / waitingTime;
+        });
+      }, 1000);
+      setTimeout(() => {
+        if (authenticated) {
+          pingServerToStartWritingSession();
+        }
+        let now = new Date();
+        setLastKeystroke(now);
+        setStartTime(now);
+        setSessionStarted(true);
+      }, waitingTime * 1000);
+    }
   };
 
   const getWebIrys = async () => {
@@ -204,7 +210,7 @@ const LandingPage = ({
 
         return receipt.id;
       } catch (e) {
-        setErrorUploadingToIrys(true);
+        // setErrorUploadingToIrys(true);
         console.log("Error uploading data ", e);
       }
     } catch (error) {
@@ -292,6 +298,8 @@ const LandingPage = ({
           duration: time,
         })
       );
+      setSavingSession(false);
+      setSessionSaved(true);
       if (authenticated) {
         const receipt = await sendTextToIrys();
         let response = await axios.post(
@@ -310,11 +318,7 @@ const LandingPage = ({
           }
         );
       }
-      setSavingSession(false);
-      setSessionSaved(true);
     } catch (error) {
-      setSavingSession(false);
-      setSessionSaved(true);
       console.log("there is an error here", error);
     }
   };
@@ -397,7 +401,7 @@ const LandingPage = ({
           }}
         ></div>
       </div>
-      <div className="h-4 w-full overflow-hidden">
+      <div className="h-1 w-full overflow-hidden">
         <div
           className="h-full opacity-80 life-bar rounded-r-xl"
           style={{
@@ -418,7 +422,9 @@ const LandingPage = ({
                   <PiWarningCircle size={33} />{" "}
                 </span>
                 <span className="text-left text-black">
-                  You stopped writing for more than 8 seconds.
+                  You stopped writing for more than 8 seconds. This mechanism is
+                  intended for you to not think, just write. There is no right
+                  or wrong here.
                 </span>
               </div>
               <div
@@ -560,8 +566,12 @@ const LandingPage = ({
               <textarea
                 onClick={() => {
                   if (authenticated && !sessionStarted) {
-                    setTextareaHidden(true);
+                    setAlreadyStartedOnce(true);
                     handleClick();
+
+                    if (!alreadyStartedOnce) {
+                      setTextareaHidden(true);
+                    }
                   }
                 }}
                 disabled={!authenticated}
