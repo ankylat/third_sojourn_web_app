@@ -207,7 +207,8 @@ const LandingPage = ({
       const webIrys = await getWebIrys();
       try {
         const receipt = await webIrys.upload(text, { tags });
-
+        setSavingSession(false);
+        setSessionSaved(true);
         return receipt.id;
       } catch (e) {
         // setErrorUploadingToIrys(true);
@@ -298,8 +299,7 @@ const LandingPage = ({
           duration: time,
         })
       );
-      setSavingSession(false);
-      setSessionSaved(true);
+
       if (authenticated) {
         const receipt = await sendTextToIrys();
         let response = await axios.post(
