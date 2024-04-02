@@ -444,11 +444,9 @@ const LandingPage = ({
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     <div>
                       <p className="wrap p-2 text-md text-center">
-                        congratulations. today it was more intense, with a
-                        target time of 5 minutes. the invitation is to remain in
-                        the awareness of this prompt, and dive into it
-                        throughout the day. how did the world that received you
-                        look like?
+                        congratulations. the invitation is to remain in the
+                        awareness of this prompt, and dive into it throughout
+                        the day.
                       </p>
                     </div>
                   </div>
@@ -499,10 +497,12 @@ const LandingPage = ({
                         <span className="">streak</span>
                       </div>
                     </div> */}
-                    <div className="w-fit mt-4 mx-auto">
+                    <div
+                      className="w-fit mt-4 mx-auto"
+                      onClick={handleSaveSession}
+                    >
                       <button
                         className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                        onClick={handleSaveSession}
                       >
                         {savingSession ? "saving..." : "save session"}
                       </button>
