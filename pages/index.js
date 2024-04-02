@@ -310,7 +310,8 @@ const LandingPage = ({
       setSavingSession(false);
       setSessionSaved(true);
     } catch (error) {
-      setErrorUploadingToIrys(true);
+      setSavingSession(false);
+      setSessionSaved(true);
       console.log("there is an error here", error);
     }
   };
