@@ -453,11 +453,11 @@ const LandingPage = ({
                   </div>
                   <div className="flex justify-center w-full ">
                     <a
-                      href="https://paragraph.xyz/@ankytheape/introduction-%C2%B7-wink-1"
+                      href="https://paragraph.xyz/@ankytheape/chapter-one"
                       target="_blank"
                     >
                       <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read introduction
+                        read chapter one
                       </span>
                     </a>
                   </div>
