@@ -32,10 +32,6 @@ const settings = {
   network: Network.BASE_MAINNET,
 };
 
-const alchemy = new Alchemy(settings);
-
-const inter = Inter({ subsets: ["cyrillic"], weight: ["400"] });
-
 function MyApp({ Component, pageProps }) {
   const [loginResponse, setLoginResponse] = useState(null);
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =

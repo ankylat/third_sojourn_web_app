@@ -74,7 +74,8 @@ const LandingPage = ({
     ready,
     user,
   } = usePrivy();
-  const w = wallets.at(0);
+  const thisUserWallet = wallets.at(0);
+  console.log("this user wallet is: ", thisUserWallet);
 
   const textareaRef = useRef(null);
   const intervalRef = useRef(null);
@@ -130,7 +131,12 @@ const LandingPage = ({
 
   const { userDatabaseInformation, appLoading } = useUser();
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    const provider = await thisUserWallet?.getEthersProvider();
+    if (!provider)
+      alert(
+        "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
+      );
     setIsTextareaClicked(true);
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
@@ -167,12 +173,9 @@ const LandingPage = ({
     const url = "https://node2.irys.xyz";
     const token = "ethereum";
 
-    const provider = await w?.getEthersProvider();
+    const provider = await thisUserWallet?.getEthersProvider();
     if (!provider) throw new Error(`Cannot find privy wallet`);
-    const irysWallet =
-      w?.walletClientType === "privy"
-        ? { name: "privy-embedded", provider, sendTransaction }
-        : { name: "privy", provider };
+    const irysWallet = { name: "privy", provider };
 
     const webIrys = new WebIrys({
       url: url,
