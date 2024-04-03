@@ -9,6 +9,7 @@ import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
+import { FaCopy } from "react-icons/fa";
 
 const getLastSevenDays = () => {
   const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -23,8 +24,8 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 360;
-const waitingTime = 30;
+const totalSessionDuration = 12;
+const waitingTime = 8;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -36,16 +37,11 @@ const ibmPlexSans = IBM_Plex_Sans({
   weight: ["400", "500"],
 });
 
-const LandingPage = ({
-  setLifeBarLength,
-  lifeBarLength,
-  setNewenBarLength,
-  newenBarLength,
-  isTextareaClicked,
-  setIsTextareaClicked,
-}) => {
+const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
+  const [lifeBarLength, setLifeBarLength] = useState(0);
+  const [newenBarLength, setNewenBarLength] = useState(0);
   const [moveText, setMoveText] = useState("");
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -75,7 +71,6 @@ const LandingPage = ({
     user,
   } = usePrivy();
   const thisUserWallet = wallets.at(0);
-  console.log("this user wallet is: ", thisUserWallet);
 
   const textareaRef = useRef(null);
   const intervalRef = useRef(null);
@@ -120,9 +115,6 @@ const LandingPage = ({
           pingServerToEndWritingSession("lost");
           clearInterval(keystrokeIntervalRef.current);
           setFinishedSession(true);
-        } else {
-          const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
-          setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
         }
       }, 88);
     }
@@ -329,10 +321,7 @@ const LandingPage = ({
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopyWritingText("copied");
-      setTimeout(() => {
-        setCopyWritingText("copy text");
-      }, 2222);
+      alert("copied");
     } catch (error) {
       console.log("there was an error copying the text");
     }
@@ -510,16 +499,32 @@ const LandingPage = ({
                         <span className="">streak</span>
                       </div>
                     </div> */}
-                    <div
-                      className="w-fit mt-4 mx-auto"
-                      onClick={handleSaveSession}
-                    >
-                      <button
-                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    <div className="flex">
+                      <div className="w-fit mt-4 mx-auto" onClick={copyText}>
+                        <button
+                          className={`${montserratAlternates.className} border-solid py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                        >
+                          <FaCopy />
+                        </button>
+                      </div>
+                      <div
+                        className="w-fit mt-4 mx-auto"
+                        onClick={handleSaveSession}
                       >
-                        {savingSession ? "saving..." : "save session"}
-                      </button>
+                        <button
+                          className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                        >
+                          {savingSession ? "saving..." : "save session"}
+                        </button>
+                      </div>
                     </div>
+
+                    <p>
+                      if there was an error somehow, please copy your text and
+                      save it somewhere on your device. it is valuable, and a
+                      session that counts is one that happened. it is all an
+                      excuse.
+                    </p>
                     {errorUploadingToIrys && (
                       <div className="flex flex-col">
                         <p>

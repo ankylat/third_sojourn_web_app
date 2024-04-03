@@ -34,11 +34,10 @@ const settings = {
 
 function MyApp({ Component, pageProps }) {
   const [loginResponse, setLoginResponse] = useState(null);
+  const [isTextareaClicked, setIsTextareaClicked] = useState(false);
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
-  const [lifeBarLength, setLifeBarLength] = useState(0);
-  const [isTextareaClicked, setIsTextareaClicked] = useState(false);
-  const [newenBarLength, setNewenBarLength] = useState(0);
+
   const router = useRouter();
 
   const handleLogin = async (user) => {
@@ -177,10 +176,6 @@ function MyApp({ Component, pageProps }) {
                 {...pageProps}
                 displayWritingGameLanding={displayWritingGameLanding}
                 setDisplayWritingGameLanding={setDisplayWritingGameLanding}
-                setLifeBarLength={setLifeBarLength}
-                lifeBarLength={lifeBarLength}
-                newenBarLength={newenBarLength}
-                setNewenBarLength={setNewenBarLength}
                 isTextareaClicked={isTextareaClicked}
                 setIsTextareaClicked={setIsTextareaClicked}
               />
