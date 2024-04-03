@@ -23,7 +23,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 300;
+const totalSessionDuration = 360;
 const waitingTime = 30;
 
 const montserratAlternates = Montserrat_Alternates({
@@ -197,7 +197,7 @@ const LandingPage = ({
           name: "sojourn",
           value: ankyverseDay?.currentSojourn?.toString() || "2",
         },
-        { name: "day", value: ankyverseDay?.wink?.toString() || "3" },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "4" },
         { name: "time-user-wrote", value: time?.toString() },
         {
           name: "uuid",
@@ -358,8 +358,8 @@ const LandingPage = ({
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">sojourn #2 · wink 3</h2>
-          <small className="text-lg text-orange-500">chryseos</small>
+          <h2 className="text-xl md:text-3xl">sojourn #2 · wink 4</h2>
+          <small className="text-lg text-orange-500">eleasis</small>
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
@@ -447,7 +447,7 @@ const LandingPage = ({
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                    <span className="mx-2">day 3</span>
+                    <span className="mx-2">day 4</span>
                     <span className="">ready</span>
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
@@ -461,11 +461,11 @@ const LandingPage = ({
                   </div>
                   <div className="flex justify-center w-full ">
                     <a
-                      href="https://paragraph.xyz/@ankytheape/chapter-one"
+                      href="https://paragraph.xyz/@ankytheape/chapter-two"
                       target="_blank"
                     >
                       <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read chapter one
+                        read chapter two
                       </span>
                     </a>
                   </div>
@@ -552,7 +552,7 @@ const LandingPage = ({
             </div>
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
-              <h2 className="text-xl write-text mt-4">Write for 5 minutes.</h2>
+              <h2 className="text-xl write-text mt-4">Write for 6 minutes.</h2>
               <p className={`${montserratAlternates.className} cta `}>
                 Click directly on the box & write about the day theme.
               </p>
