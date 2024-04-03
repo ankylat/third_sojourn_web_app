@@ -558,7 +558,8 @@ const LandingPage = ({
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
               <h2 className="text-xl write-text mt-4">Write for 6 minutes.</h2>
               <p className={`${montserratAlternates.className} cta `}>
-                Click directly on the box & write about the day theme.
+                This app is in BETA, and there may be errors. Hang on, we are
+                working to fix everything.
               </p>
             </div>
           )}
