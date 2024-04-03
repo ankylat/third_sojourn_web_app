@@ -94,6 +94,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
           return newTime;
         });
+
         if (time > totalSessionDuration) {
           setIsTextareaClicked(false);
           setUserLost(false);
@@ -106,20 +107,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
     return () => clearInterval(intervalRef.current);
   }, [sessionStarted, time]);
-
-  useEffect(() => {
-    if (sessionStarted && !finishedSession) {
-      keystrokeIntervalRef.current = setInterval(() => {
-        const elapsedTime = Date.now() - lastKeystroke;
-        if (elapsedTime > secondsOfLife * 1000) {
-          pingServerToEndWritingSession("lost");
-          clearInterval(keystrokeIntervalRef.current);
-          setFinishedSession(true);
-        }
-      }, 88);
-    }
-    return () => clearInterval(keystrokeIntervalRef.current);
-  }, [sessionStarted, lastKeystroke]);
 
   const { userDatabaseInformation, appLoading } = useUser();
 
