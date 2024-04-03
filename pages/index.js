@@ -207,8 +207,7 @@ const LandingPage = ({
       const webIrys = await getWebIrys();
       try {
         const receipt = await webIrys.upload(text, { tags });
-        setSavingSession(false);
-        setSessionSaved(true);
+
         return receipt.id;
       } catch (e) {
         // setErrorUploadingToIrys(true);
@@ -321,6 +320,8 @@ const LandingPage = ({
     } catch (error) {
       console.log("there is an error here", error);
     }
+    setSavingSession(false);
+    setSessionSaved(true);
   };
   const copyText = async () => {
     try {
