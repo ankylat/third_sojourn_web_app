@@ -24,8 +24,8 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 8;
-const totalSessionDuration = 12;
-const waitingTime = 8;
+const totalSessionDuration = 360;
+const waitingTime = 30;
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -126,7 +126,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const handleClick = async () => {
     const provider = await thisUserWallet?.getEthersProvider();
     if (!provider)
-      alert(
+      return alert(
         "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
       );
     setIsTextareaClicked(true);
