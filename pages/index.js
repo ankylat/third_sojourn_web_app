@@ -1,6 +1,8 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
@@ -41,6 +43,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
+  const [timeIsOver, setTimeIsOver] = useState(false);
   const [lifeBarLength, setLifeBarLength] = useState(0);
   const [newenBarLength, setNewenBarLength] = useState(0);
   const [moveText, setMoveText] = useState("");
@@ -84,6 +87,25 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }, [userSettings.language]);
 
   useEffect(() => {
+    function handleEscKey(event) {
+      if (event.key === "Escape" && timeIsOver) {
+        console.log("ALOJA");
+        setIsTextareaClicked(false);
+        setUserLost(false);
+        clearInterval(intervalRef.current);
+        clearInterval(keystrokeIntervalRef.current);
+        setFinishedSession(true);
+        pingServerToEndWritingSession("won");
+      }
+    }
+
+    window.addEventListener("keydown", handleEscKey);
+    return () => {
+      window.removeEventListener("keydown", handleEscKey);
+    };
+  }, [finishedSession]);
+
+  useEffect(() => {
     if (sessionStarted && !finishedSession) {
       intervalRef.current = setInterval(() => {
         setTime((time) => {
@@ -91,18 +113,24 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           const newenLength = ((newTime / totalSessionDuration) * 100).toFixed(
             2
           );
+          if (totalSessionDuration - newTime == 5) {
+            toast("5 seconds left!");
+          }
+          if (totalSessionDuration - newTime == 3) {
+            toast("3 seconds left!");
+          }
+          if (totalSessionDuration - newTime == 0) {
+            console.log("IN HERE");
+            clearInterval(keystrokeIntervalRef.current);
+            setTimeIsOver(true);
+            setText((prevText) => prevText + "👽👽👽"); // Append emojis to the text
+            toast(
+              "time complete! to finish your session, press the esc key. or just keep writing until you are over."
+            );
+          }
           setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
           return newTime;
         });
-
-        if (time > totalSessionDuration) {
-          setIsTextareaClicked(false);
-          setUserLost(false);
-          clearInterval(intervalRef.current);
-          clearInterval(keystrokeIntervalRef.current);
-          setFinishedSession(true);
-          pingServerToEndWritingSession("won");
-        }
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
@@ -406,6 +434,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           }}
         ></div>
       </div>
+      <ToastContainer />
       {finishedSession ? (
         <div
           className={`${

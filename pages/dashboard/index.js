@@ -64,11 +64,13 @@ const DashboardIndex = () => {
     return (
       <div>
         <p>please login first</p>
-        <Button
-          buttonAction={login}
-          buttonColor="bg-purple-300"
-          buttonText="login"
-        />
+        <div className="mt-4 w-fit">
+          <Button
+            buttonAction={login}
+            buttonColor="bg-purple-300"
+            buttonText="login"
+          />
+        </div>
       </div>
     );
   return (
