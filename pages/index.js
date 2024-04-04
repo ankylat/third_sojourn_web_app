@@ -434,7 +434,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   right or wrong here.
                 </span>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex mx-auto w-96 space-x-2">
                 <div className="w-fit mt-4 mx-auto" onClick={copyText}>
                   <button
                     className={`${montserratAlternates.className} border-solid py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
