@@ -434,16 +434,25 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   right or wrong here.
                 </span>
               </div>
-              <div
-                onClick={() => {
-                  setFinishedSession(false);
-                  setNewenBarLength(0);
-                  setSessionStarted(false);
-                  setTime(0);
-                }}
-                className="w-36 mx-auto mt-4 border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
-              >
-                retry
+              <div className="flex space-x-2">
+                <div className="w-fit mt-4 mx-auto" onClick={copyText}>
+                  <button
+                    className={`${montserratAlternates.className} border-solid py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                  >
+                    <FaCopy />
+                  </button>
+                </div>
+                <div
+                  onClick={() => {
+                    setFinishedSession(false);
+                    setNewenBarLength(0);
+                    setSessionStarted(false);
+                    setTime(0);
+                  }}
+                  className="w-36 mx-auto mt-4 border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
+                >
+                  retry
+                </div>
               </div>
             </div>
           ) : (
