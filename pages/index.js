@@ -79,6 +79,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const keystrokeIntervalRef = useRef(null);
 
   useEffect(() => {
+    const questionOfToday = getAnkyverseQuestion(userSettings.language);
+    setAnkyverseQuestion(questionOfToday);
+  }, [userSettings.language]);
+
+  useEffect(() => {
     if (sessionStarted && !finishedSession) {
       intervalRef.current = setInterval(() => {
         setTime((time) => {
@@ -123,8 +128,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const { userDatabaseInformation, appLoading } = useUser();
 
   const handleClick = async () => {
-    const questionOfToday = getAnkyverseQuestion(userSettings.language);
-    setAnkyverseQuestion(questionOfToday);
     const provider = await thisUserWallet?.getEthersProvider();
     if (!provider)
       return alert(

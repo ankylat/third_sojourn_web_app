@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
+import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
+import Button from "../../components/Button";
 
 const DashboardIndex = () => {
+  const { authenticated, login } = usePrivy();
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [totalNewenEarned, setTotalNewenEarned] = useState(0);
   const [userMentor, setUserMentor] = useState({
@@ -56,6 +59,18 @@ const DashboardIndex = () => {
   useEffect(() => {
     checkUserActivity();
   }, [allUserWritings]);
+
+  if (!authenticated)
+    return (
+      <div>
+        <p>please login first</p>
+        <Button
+          buttonAction={login}
+          buttonColor="bg-purple-300"
+          buttonText="login"
+        />
+      </div>
+    );
   return (
     <div className="h-full w-full flex flex-col px-8 ">
       <div className="flex w-full mx-auto w-fit">
@@ -75,7 +90,7 @@ const DashboardIndex = () => {
           }
         )}
       </div>
-      <p>total $newen earned: {totalNewenEarned}</p>
+      <p className="mt-3">total $newen earned: {totalNewenEarned}</p>
 
       <div className="h-full w-full flex flex-col md:flex-row px-2 pb-4">
         {writingForDisplay && (
