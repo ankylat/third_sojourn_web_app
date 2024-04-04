@@ -87,19 +87,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }, [userSettings.language]);
 
   useEffect(() => {
-    function handleEscKey(event) {
-      if (event.key === "Escape" && timeIsOver) {
-        console.log("ALOJA");
-      }
-    }
-
-    window.addEventListener("keydown", handleEscKey);
-    return () => {
-      window.removeEventListener("keydown", handleEscKey);
-    };
-  }, [finishedSession]);
-
-  useEffect(() => {
     if (sessionStarted && !finishedSession) {
       intervalRef.current = setInterval(() => {
         setTime((time) => {
@@ -107,16 +94,14 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           const newenLength = ((newTime / totalSessionDuration) * 100).toFixed(
             2
           );
-          if (totalSessionDuration - newTime == 5) {
-            toast("5 seconds left!");
+          if (totalSessionDuration - newTime == 30) {
+            toast("30 seconds left!");
           }
-          if (totalSessionDuration - newTime == 3) {
-            toast("3 seconds left!");
+          if (totalSessionDuration - newTime == 10) {
+            toast("10 seconds left!");
           }
           if (totalSessionDuration - newTime == 0) {
-            console.log("IN HERE");
             clearInterval(keystrokeIntervalRef.current);
-
             setIsTextareaClicked(false);
             setUserLost(false);
             clearInterval(intervalRef.current);
