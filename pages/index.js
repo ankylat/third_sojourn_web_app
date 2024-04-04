@@ -90,12 +90,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     function handleEscKey(event) {
       if (event.key === "Escape" && timeIsOver) {
         console.log("ALOJA");
-        setIsTextareaClicked(false);
-        setUserLost(false);
-        clearInterval(intervalRef.current);
-        clearInterval(keystrokeIntervalRef.current);
-        setFinishedSession(true);
-        pingServerToEndWritingSession("won");
       }
     }
 
@@ -122,11 +116,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           if (totalSessionDuration - newTime == 0) {
             console.log("IN HERE");
             clearInterval(keystrokeIntervalRef.current);
-            setTimeIsOver(true);
-            setText((prevText) => prevText + "👽👽👽"); // Append emojis to the text
-            toast(
-              "time complete! to finish your session, press the esc key. or just keep writing until you are over."
-            );
+
+            setIsTextareaClicked(false);
+            setUserLost(false);
+            clearInterval(intervalRef.current);
+            clearInterval(keystrokeIntervalRef.current);
+            setFinishedSession(true);
+            pingServerToEndWritingSession("won");
           }
           setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
           return newTime;
