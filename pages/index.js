@@ -146,7 +146,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     } else {
       const startingInterval = setInterval(() => {
         setLifeBarLength((x) => {
-          if (x >= 100) {
+          if (x >= 90) {
             setTextareaHidden(false);
             return clearInterval(startingInterval);
           }
