@@ -4,6 +4,7 @@ const SettingsContext = createContext();
 export const SettingsProvider = ({ children }) => {
   const [userSettings, setUserSettings] = useState({
     secondsBetweenKeystrokes: 8,
+    language: "en",
   });
   return (
     <SettingsContext.Provider

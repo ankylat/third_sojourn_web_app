@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
 import { FaCopy } from "react-icons/fa";
+import { useSettings } from "../context/SettingsContext";
 
 const getLastSevenDays = () => {
   const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -46,6 +47,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
+  const { userSettings } = useSettings();
   const [privyAuthToken, setPrivyAuthToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [textareaHidden, setTextareaHidden] = useState(false);
@@ -75,13 +77,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const textareaRef = useRef(null);
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
-
-  useEffect(() => {
-    const respo = getAnkyverseDay(new Date());
-    setAnkyverseDay(respo);
-    const questionOfToday = getAnkyverseQuestion(respo.wink);
-    setAnkyverseQuestion(questionOfToday);
-  }, []);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -128,6 +123,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const { userDatabaseInformation, appLoading } = useUser();
 
   const handleClick = async () => {
+    const questionOfToday = getAnkyverseQuestion(userSettings.language);
+    setAnkyverseQuestion(questionOfToday);
     const provider = await thisUserWallet?.getEthersProvider();
     if (!provider)
       return alert(

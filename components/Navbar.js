@@ -3,6 +3,8 @@ import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
+import { FaRegUser } from "react-icons/fa";
+import { useSettings } from "../context/SettingsContext";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -11,6 +13,7 @@ const montserratAlternates = Montserrat_Alternates({
 
 const Navbar = ({ isTextareaClicked }) => {
   const { logout, login, authenticated } = usePrivy();
+  const { userSettings, setUserSettings } = useSettings();
   return (
     <nav
       style={{
@@ -22,17 +25,56 @@ const Navbar = ({ isTextareaClicked }) => {
       }   w-full md:px-24 px-12 flex flex-row justify-between items-center`}
     >
       <div className="flex w-fit">
-        <div className="w-32 h-16 relative ">
+        <Link href="/" className="w-32 h-16 relative cursor-pointer" passHref>
           <Image src="/images/anky-logo.png" fill />
-        </div>
+        </Link>
       </div>
       {authenticated ? (
-        <button
-          className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100  shadow-xl border-black border rounded`}
-          onClick={logout}
-        >
-          LOGOUT
-        </button>
+        <div className="flex space-x-4 items-center">
+          <div className="flex space-x-2">
+            <span
+              className={`mx-2 cursor-pointer hover:opacity-70 ${
+                userSettings.language == "en" ? "text-green-600" : "text-black"
+              }`}
+              onClick={() =>
+                setUserSettings((x) => {
+                  console.log("IN HERE", x);
+                  return { ...x, language: "en" };
+                })
+              }
+            >
+              en
+            </span>{" "}
+            /{" "}
+            <span
+              className={`cursor-pointer hover:opacity-70 ${
+                userSettings.language == "es" ? "text-green-600" : "text-black"
+              }`}
+              onClick={() =>
+                setUserSettings((x) => {
+                  console.log("IN HERE", x);
+                  return { ...x, language: "es" };
+                })
+              }
+            >
+              es
+            </span>
+          </div>
+          <Link
+            className="p-2 rounded-full border border-black hover:bg-purple-200 cursor-pointer"
+            href="/dashboard"
+            passHref
+          >
+            <FaRegUser size={22} />
+          </Link>
+
+          <button
+            className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100  shadow-xl border-black border rounded`}
+            onClick={logout}
+          >
+            LOGOUT
+          </button>
+        </div>
       ) : (
         <button
           className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100 shadow-xl border-black border rounded`}
