@@ -27,7 +27,7 @@ const getLastSevenDays = () => {
 };
 
 const secondsOfLife = 12;
-const totalSessionDuration = 420;
+const totalSessionDuration = 480;
 const waitingTime = 30;
 
 const montserratAlternates = Montserrat_Alternates({
@@ -205,7 +205,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           name: "sojourn",
           value: ankyverseDay?.currentSojourn?.toString() || "3",
         },
-        { name: "day", value: ankyverseDay?.wink?.toString() || "5" },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "6" },
         { name: "time-user-wrote", value: time?.toString() },
         {
           name: "uuid",
@@ -364,8 +364,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">sojourn #3 · wink 5</h2>
-          <small className="text-lg text-orange-500">voxlumis</small>
+          <h2 className="text-xl md:text-3xl">sojourn #3 · wink 6</h2>
+          <small className="text-lg text-orange-500">insightia</small>
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
@@ -463,25 +463,25 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                    <span className="mx-2">day 5</span>
+                    <span className="mx-2">day 6</span>
                     <span className="">ready</span>
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
                     <div>
                       <p className="wrap p-2 text-md text-center">
                         congratulations. the invitation is to remain in the
-                        awareness of this prompt, and the way that you
-                        communicate today.
+                        awareness of this prompt, and your connection with your
+                        intuition.
                       </p>
                     </div>
                   </div>
                   <div className="flex justify-center w-full ">
                     <a
-                      href="https://paragraph.xyz/@ankytheape/chapter-three"
+                      href="https://paragraph.xyz/@ankytheape/chapter-4"
                       target="_blank"
                     >
                       <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read chapter three
+                        read chapter four
                       </span>
                     </a>
                   </div>
@@ -584,7 +584,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
-              <h2 className="text-xl write-text mt-4">Write for 7 minutes.</h2>
+              <h2 className="text-xl write-text mt-4">Write for 8 minutes.</h2>
               <p className={`${montserratAlternates.className} cta `}>
                 This app is in BETA, and there may be errors. Hang on, we are
                 working to fix everything.
