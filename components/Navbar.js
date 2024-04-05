@@ -22,7 +22,7 @@ const Navbar = ({ isTextareaClicked }) => {
       }}
       className={`transition-all duration-500 ease-in-out ${
         isTextareaClicked ? "h-0 opacity-0" : "h-24 py-6 opacity-100"
-      }   w-full md:px-24 px-12 flex flex-row justify-between items-center`}
+      }   w-full md:px-24 px-2 flex flex-row justify-between items-center`}
     >
       <div className="flex w-fit">
         <Link href="/" className="w-32 h-16 relative cursor-pointer" passHref>

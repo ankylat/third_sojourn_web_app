@@ -3,10 +3,12 @@ import { useUser } from "../../context/UserContext";
 import { usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import Button from "../../components/Button";
+import { FaCopy, FaShareFromSquare } from "react-icons/fa";
 
 const DashboardIndex = () => {
   const { authenticated, login } = usePrivy();
   const [writingForDisplay, setWritingForDisplay] = useState(null);
+  const [textCopied, setTextCopied] = useState(false);
   const [totalNewenEarned, setTotalNewenEarned] = useState(0);
   const [userMentor, setUserMentor] = useState({
     imageUrl: "/images/darkoh.png",
@@ -15,6 +17,11 @@ const DashboardIndex = () => {
   const [userActivity, setUserActivity] = useState({});
   const { allUserWritings } = useUser();
   const startTimestamp = 1711861200;
+
+  // Run the check when component mounts or writings change
+  useEffect(() => {
+    checkUserActivity();
+  }, [allUserWritings]);
 
   // Calculate the current Ankyverse day
   const getCurrentAnkyverseDay = () => {
@@ -55,10 +62,17 @@ const DashboardIndex = () => {
     setUserActivity(activity);
   };
 
-  // Run the check when component mounts or writings change
-  useEffect(() => {
-    checkUserActivity();
-  }, [allUserWritings]);
+  const copyText = async () => {
+    try {
+      await navigator.clipboard.writeText(writingForDisplay.text);
+      setTextCopied(true);
+      setTimeout(() => {
+        setTextCopied(false);
+      }, 222);
+    } catch (error) {
+      console.log("there was an error copying the text");
+    }
+  };
 
   if (!authenticated)
     return (
@@ -92,23 +106,40 @@ const DashboardIndex = () => {
           }
         )}
       </div>
-      <p className="mt-3">total $newen earned: {totalNewenEarned}</p>
+      <p className="mt-3 text-center w-full">
+        total $newen earned: {totalNewenEarned}
+      </p>
 
-      <div className="h-full w-full flex flex-col md:flex-row px-2 pb-4">
+      <div className="h-full w-full flex flex-col items-center md:flex-row px-2 pb-4">
         {writingForDisplay && (
-          <div className="flex w-96 mx-4 mt-2 flex-col px-4 py-2 bg-purple-200 rounded-xl h-96 overflow-y-scroll">
-            <p className=""> ankyverse day: {writingForDisplay.ankyverseDay}</p>
-            {writingForDisplay.text ? (
-              writingForDisplay.text.includes("\n") ? (
-                writingForDisplay.text.split("\n").map((x, i) => (
-                  <p className="my-2" key={i}>
-                    {x}
-                  </p>
-                ))
-              ) : (
-                <p className="my-2">{writingForDisplay.text}</p>
-              )
-            ) : null}
+          <div className="flex flex-col w-full items-center md:w-96">
+            <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 bg-purple-200 rounded-xl h-96 overflow-y-scroll">
+              <p className="">
+                ankyverse day: {writingForDisplay.ankyverseDay}
+              </p>
+              <hr className="my-2" />
+              {writingForDisplay.text ? (
+                writingForDisplay.text.includes("\n") ? (
+                  writingForDisplay.text.split("\n").map((x, i) => (
+                    <p className="my-2" key={i}>
+                      {x}
+                    </p>
+                  ))
+                ) : (
+                  <p className="my-2">{writingForDisplay.text}</p>
+                )
+              ) : null}
+            </div>
+            <div className="flex mt-2">
+              <button
+                onClick={copyText}
+                className={`border-solid py-2 ${
+                  textCopied ? "bg-green-300" : "bg-purple-300"
+                } 00 px-8  shadow-xl border rounded-full`}
+              >
+                <FaCopy />
+              </button>
+            </div>
           </div>
         )}
       </div>

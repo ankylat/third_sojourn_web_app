@@ -6,7 +6,7 @@ import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { MdMenuOpen } from "react-icons/md";
 import Link from "next/link";
-import { FaPencilAlt } from "react-icons/fa";
+import Offcanvas from "react-bootstrap/Offcanvas";
 import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { base } from "@wagmi/chains";
 import { configureChains, createConfig } from "wagmi";
@@ -34,6 +34,10 @@ const settings = {
 function MyApp({ Component, pageProps }) {
   const [loginResponse, setLoginResponse] = useState(null);
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+
   const [displayWritingGameLanding, setDisplayWritingGameLanding] =
     useState(false);
 
@@ -170,13 +174,14 @@ function MyApp({ Component, pageProps }) {
               <Navbar
                 isTextareaClicked={isTextareaClicked}
                 setIsTextareaClicked={setIsTextareaClicked}
+                setShow={setShow}
               />
               <Component
                 {...pageProps}
-                displayWritingGameLanding={displayWritingGameLanding}
-                setDisplayWritingGameLanding={setDisplayWritingGameLanding}
                 isTextareaClicked={isTextareaClicked}
                 setIsTextareaClicked={setIsTextareaClicked}
+                show={show}
+                handleClose={handleClose}
               />
             </SettingsProvider>
           </UserProvider>
