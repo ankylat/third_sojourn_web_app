@@ -88,8 +88,8 @@ const DashboardIndex = () => {
       </div>
     );
   return (
-    <div className="h-full w-full flex flex-col px-8 ">
-      <div className="flex w-full mx-auto w-fit">
+    <div className="h-full w-full flex flex-col items-center px-8 ">
+      <div className="flex w-full justify-center mx-auto w-fit">
         {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
           (day) => {
             return (
@@ -110,7 +110,7 @@ const DashboardIndex = () => {
         total $newen earned: {totalNewenEarned}
       </p>
 
-      <div className="h-full w-full flex flex-col items-center md:flex-row px-2 pb-4">
+      <div className="h-full w-full flex flex-col justify-center items-center md:flex-row px-2 pb-4">
         {writingForDisplay && (
           <div className="flex flex-col w-full items-center md:w-96">
             <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 bg-purple-200 rounded-xl h-96 overflow-y-scroll">
