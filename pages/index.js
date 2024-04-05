@@ -40,7 +40,12 @@ const ibmPlexSans = IBM_Plex_Sans({
   weight: ["400", "500"],
 });
 
-const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
+const LandingPage = ({
+  serverTimestamp,
+  isTextareaClicked,
+  setIsTextareaClicked,
+}) => {
+  console.log("thje server timestamp ois_ ", serverTimestamp);
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
   const [timeIsOver, setTimeIsOver] = useState(false);
