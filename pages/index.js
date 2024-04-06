@@ -210,7 +210,7 @@ const LandingPage = ({
           name: "sojourn",
           value: ankyverseDay?.currentSojourn?.toString() || "3",
         },
-        { name: "day", value: ankyverseDay?.wink?.toString() || "6" },
+        { name: "day", value: ankyverseDay?.wink?.toString() || "7" },
         { name: "time-user-wrote", value: time?.toString() },
         {
           name: "uuid",
@@ -369,8 +369,8 @@ const LandingPage = ({
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">sojourn #3 · wink 6</h2>
-          <small className="text-lg text-orange-500">insightia</small>
+          <h2 className="text-xl md:text-3xl">sojourn #3 · wink 7</h2>
+          <small className="text-lg text-orange-500">claridium</small>
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
@@ -468,7 +468,7 @@ const LandingPage = ({
                     <Image src="/images/Icon_copy_2.svg" fill />
                   </span>
                   <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                    <span className="mx-2">day 6</span>
+                    <span className="mx-2">day 7</span>
                     <span className="">ready</span>
                   </div>
                   <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
@@ -476,17 +476,17 @@ const LandingPage = ({
                       <p className="wrap p-2 text-md text-center">
                         congratulations. the invitation is to remain in the
                         awareness of this prompt, and your connection with your
-                        intuition.
+                        true self.
                       </p>
                     </div>
                   </div>
                   <div className="flex justify-center w-full ">
                     <a
-                      href="https://paragraph.xyz/@ankytheape/chapter-4"
+                      href="https://paragraph.xyz/@ankytheape/chapter-5"
                       target="_blank"
                     >
                       <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read chapter four
+                        read chapter five
                       </span>
                     </a>
                   </div>
@@ -659,3 +659,13 @@ const LandingPage = ({
 };
 
 export default LandingPage;
+
+// export const getServerSideProps = async () => {
+//   const res = await axios.get(
+//     `${process.env.NEXT_PUBLIC_API_ROUTE}/welcome-user`
+//   );
+//   const response = await res.json();
+//   console.log("the response is: ", response);
+//   // Pass data to the page via props
+//   return { props: { repo } };
+// };
