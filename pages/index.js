@@ -14,21 +14,10 @@ import axios from "axios";
 import { FaCopy } from "react-icons/fa";
 import { useSettings } from "../context/SettingsContext";
 
-const getLastSevenDays = () => {
-  const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-  const lastSevenDays = [];
-  const today = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const day = new Date(today);
-    day.setDate(day.getDate() - i);
-    lastSevenDays.push(days[day.getDay()]);
-  }
-  return lastSevenDays;
-};
-
 const secondsOfLife = 12;
 const totalSessionDuration = 480;
 const waitingTime = 30;
+const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -43,7 +32,6 @@ const ibmPlexSans = IBM_Plex_Sans({
 const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
-  const [timeIsOver, setTimeIsOver] = useState(false);
   const [lifeBarLength, setLifeBarLength] = useState(0);
   const [newenBarLength, setNewenBarLength] = useState(0);
   const [moveText, setMoveText] = useState("");
@@ -57,10 +45,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
-  const [ankyverseDay, setAnkyverseDay] = useState({
-    wink: 7,
-    kingdom: "claridium",
-  });
   const [ankyverseQuestion, setAnkyverseQuestion] = useState("");
   const [savingSession, setSavingSession] = useState(false);
   const [sessionId, setSessionId] = useState("");
@@ -69,15 +53,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [userLost, setUserLost] = useState(true);
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
-  const {
-    sendTransaction,
-    login,
-    authenticated,
-    logout,
-    getAccessToken,
-    ready,
-    user,
-  } = usePrivy();
+  const { authenticated, getAccessToken, ready, user } = usePrivy();
   const thisUserWallet = wallets.at(0);
 
   const textareaRef = useRef(null);
@@ -85,8 +61,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const keystrokeIntervalRef = useRef(null);
 
   useEffect(() => {
-    const questionOfToday = getAnkyverseQuestion(userSettings.language);
-    setAnkyverseQuestion(questionOfToday);
+    setAnkyverseQuestion(ankyverseDay.prompt[userSettings.language]);
   }, [userSettings.language]);
 
   useEffect(() => {
@@ -94,9 +69,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       intervalRef.current = setInterval(() => {
         setTime((time) => {
           const newTime = time + 1;
-          const newenLength = ((newTime / totalSessionDuration) * 100).toFixed(
-            2
-          );
+          const newenBarLength = (
+            (newTime / totalSessionDuration) *
+            100
+          ).toFixed(2);
           if (totalSessionDuration - newTime == 30) {
             toast("30 seconds left!");
           }
@@ -112,7 +88,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             setFinishedSession(true);
             pingServerToEndWritingSession("won");
           }
-          setNewenBarLength(Math.max(0, Math.max(0, newenLength)));
+          setNewenBarLength(Math.max(0, Math.max(0, newenBarLength)));
           return newTime;
         });
       }, 1000);
