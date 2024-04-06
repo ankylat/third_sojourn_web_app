@@ -186,7 +186,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         },
         {
           name: "day",
-          value: ankyverseDay?.wink?.toString() || ankyverseDay.wink.toString(),
+          value: ankyverseDay.wink.toString(),
         },
         { name: "time-user-wrote", value: time?.toString() },
         {
@@ -499,15 +499,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                         <span>$newen</span>
                       </div>
                     </div>
-                    {/* <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
-                      <div className="w-1/4 aspect-square flex flex-col items-center relative">
-                        <Image src="/images/Icon_copy_3.svg" fill />
-                      </div>
-                      <div className="w-3/4 text-center">
-                        <span className="mx-2">1</span>
-                        <span className="">streak</span>
-                      </div>
-                    </div> */}
+
                     <div className="flex">
                       <div className="w-fit mt-4 mx-auto" onClick={copyText}>
                         <button
