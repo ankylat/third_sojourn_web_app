@@ -463,11 +463,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   </div>
                   <div className="flex justify-center w-full ">
                     <a
-                      href="https://paragraph.xyz/@ankytheape/chapter-5"
+                      href={`https://paragraph.xyz/@ankytheape/chapter-${
+                        ankyverseDay.wink - 2
+                      }`}
                       target="_blank"
                     >
                       <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read chapter five
+                        read chapter {ankyverseDay.wink - 2}
                       </span>
                     </a>
                   </div>
