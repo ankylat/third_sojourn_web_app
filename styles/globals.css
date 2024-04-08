@@ -100,3 +100,43 @@ textarea {
   position: absolute;
   top: -200px;
 }
+
+.main-content-layout {
+  height: 100%;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+}
+
+.main-content-layout h1 {
+  font-size: 3rem;
+  text-align: center;
+}
+
+.main-content-layout p {
+  margin-top: 8px;
+  text-align: left;
+}
+
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes stream-text {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.stream-in-text {
+  animation: stream-text 1s steps(50) 1 forwards;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  visibility: visible;
+}

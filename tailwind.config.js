@@ -13,6 +13,10 @@ module.exports = {
       screens: {
         standalone: { raw: "(display-mode:standalone)" },
       },
+      backgroundImage: {
+        "rainbow-text":
+          "linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3)",
+      },
       keyframes: {
         animateSpin: {
           "0%": { transform: "rotate(0)" },
