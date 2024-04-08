@@ -558,7 +558,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
               } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 ${
                 textareaHidden ? "text-xl" : "text-sm"
-              } md:text-3xl shadow-lg`}
+              } md:text-2xl shadow-lg`}
             >
               {ankyverseQuestion}
             </div>
