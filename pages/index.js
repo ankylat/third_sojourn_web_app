@@ -704,7 +704,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <Image src="/images/darkoh.png" width={333} height={555} />
           </div>
         </div>
-        <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
+        <div className="w-full md:w-1/2 h-full py-8 px-4 md:px-0 md:py-0 flex flex-col items-center justify-center">
           <div className="w-96">
             <h2 className="text-3xl mb-8">1. Own an Anky Mentor</h2>
             <p>
@@ -749,7 +749,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           </div>
         </div>
-        <div className="w-full md:w-1/2 bg-black h-full flex items-center justify-center">
+        <div className="w-full md:w-1/2 bg-black  py-8  md:py-0 h-full flex items-center justify-center">
           <div className="relative w-full px-4 md:w-2/3">
             <TextStreamer text={ankyverseDay.prompt["en"]} />
           </div>
