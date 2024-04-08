@@ -388,7 +388,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div
+      className={`${
+        (sessionStarted || isTextareaClicked) && "fixed"
+      } w-full flex flex-col items-center`}
+    >
       <section className="h-screen w-full" id="hero-section">
         <div className="h-4 w-full overflow-hidden">
           <div
@@ -649,10 +653,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         )}
       </section>
       <section
-        className="h-screen w-full flex flex-col items-center  md:flex-row px-2md:px-12"
+        className="h-fit py-8 md:py-0 bg-gray-200 md:h-screen w-full flex flex-col justify-around items-center  md:flex-row px-8 md:px-12"
         id="welcome"
       >
-        <div className="w-full md:w-1/2 md:h-1/2 h-full relative">
+        <div className="w-full md:w-1/2 md:h-1/3 mb-4 md:mb-0 h-48 md:h-full relative">
           <Image src="/images/logo.svg" fill />
         </div>
         <div className="w-full md:w-1/3">
@@ -667,8 +671,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </p>
         </div>
       </section>
-      <section className="h-screen w-full flex justify-around items-center flex-col md:flex-row px:2 md:px-12">
-        <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col items-center ">
+      <section className="h-fit md:h-screen w-full py-12 flex justify-around items-center flex-col space-y-8 md:space-y-0 md:flex-row px:2 md:px-12">
+        <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col  items-center ">
           <div className="w-48 h-48 relative">
             <FiPenTool size={192} />
           </div>
@@ -721,7 +725,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
         </div>
       </section>
-      <section className="h-screen w-full flex justify-around flex-col md:flex-row ">
+      <section className="h-screen w-full flex justify-around flex-col-reverse  md:flex-row ">
         <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
           <div className="w-96">
             <h2 className="text-3xl mb-8">2. Come and write every day</h2>
@@ -746,7 +750,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
         </div>
         <div className="w-full md:w-1/2 bg-black h-full flex items-center justify-center">
-          <div className="relative w-2/3">
+          <div className="relative w-full px-4 md:w-2/3">
             <TextStreamer text={ankyverseDay.prompt["en"]} />
           </div>
         </div>
@@ -779,7 +783,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
         </div>
       </section>
-      <section className="px-2 md:px-16 h-72 bg-purple-400 w-full flex justify-around py-8 justify-between flex-col md:flex-row ">
+      <section className="px-2 md:px-16 h-fit md:h-72 bg-purple-400 w-full flex justify-around py-8 justify-between flex-col md:flex-row ">
         <div className="flex flex-col w-fit">
           <Link href="/" className="w-32 h-16 relative cursor-pointer" passHref>
             <Image src="/images/anky-logo.png" fill />
