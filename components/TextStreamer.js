@@ -2,7 +2,6 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 
 const TextStreamer = ({ text }) => {
-  console.log("the text is: ", text);
   const { ref, inView } = useInView({
     threshold: 0,
     triggerOnce: true, // Trigger this effect once

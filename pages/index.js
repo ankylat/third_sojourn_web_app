@@ -474,7 +474,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       <a
                         href={`https://paragraph.xyz/@ankytheape/chapter-${
                           ankyverseDay.wink - 2
-                        }`}
+                        }-birth`}
                         target="_blank"
                       >
                         <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
@@ -737,7 +737,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <a
                 href={`https://paragraph.xyz/@ankytheape/chapter-${
                   ankyverseDay.wink - 2
-                }`}
+                }-birth`}
                 target="_blank"
               >
                 <Button
@@ -774,7 +774,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <a
                 href={`https://paragraph.xyz/@ankytheape/chapter-${
                   ankyverseDay.wink - 2
-                }`}
+                }-birth`}
                 target="_blank"
               >
                 <Button buttonText="read book" buttonColor="bg-purple-200" />
