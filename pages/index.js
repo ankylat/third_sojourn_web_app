@@ -124,11 +124,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const { userDatabaseInformation, appLoading } = useUser();
 
   const handleClick = async () => {
-    const provider = await thisUserWallet?.getEthersProvider();
-    if (!provider)
-      return alert(
-        "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
-      );
+    if (authenticated) {
+      const provider = await thisUserWallet?.getEthersProvider();
+      if (!provider)
+        return alert(
+          "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
+        );
+    }
     setIsTextareaClicked(true);
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
