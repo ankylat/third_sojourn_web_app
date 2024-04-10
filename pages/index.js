@@ -684,7 +684,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         )}
       </section>
       <section
-        className="h-fit py-8 md:py-0 bg-gray-200 md:h-screen w-full flex flex-col justify-around items-center  md:flex-row px-8 md:px-12"
+        className="h-screen py-8 md:py-0 bg-gray-200 md:h-screen w-full flex flex-col justify-around items-center  md:flex-row px-8 md:px-12"
         id="welcome"
       >
         <div className="w-full md:w-1/2 md:h-1/3 mb-4 md:mb-0 h-48 relative">
@@ -702,8 +702,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </p>
         </div>
       </section>
-      <section className="h-screen flex items-center">
-        <div className="flex  flex-wrap xl:flex-nowrap justify-around items-stretch w-full py-12 px-2 md:px-12">
+      <section className="h-fit md:h-screen flex  items-center">
+        <div className="flex h-fit flex-wrap xl:flex-nowrap justify-around items-stretch w-full py-12 px-2 md:px-12">
           <div className="p-2 max-w-72 border border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
             <div className="w-48 h-48 relative">
               <FiPenTool size={192} />
