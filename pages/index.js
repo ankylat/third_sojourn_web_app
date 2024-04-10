@@ -615,12 +615,19 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             )}
 
             {textareaHidden && (
-              <div className="w-fit mx-auto mt-4">
-                <Button
-                  buttonText="start writing"
-                  buttonAction={startWritingSession}
-                  buttonColor="bg-green-200"
-                />
+              <div className="flex flex-col space-y-2">
+                {!authenticated && (
+                  <p className="my-3 text-red-200">
+                    heads up: you are not logged in
+                  </p>
+                )}
+                <div className="w-fit mx-auto mt-4">
+                  <Button
+                    buttonText="start writing"
+                    buttonAction={startWritingSession}
+                    buttonColor="bg-green-200"
+                  />
+                </div>
               </div>
             )}
 
