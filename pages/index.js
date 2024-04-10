@@ -656,7 +656,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         className="h-fit py-8 md:py-0 bg-gray-200 md:h-screen w-full flex flex-col justify-around items-center  md:flex-row px-8 md:px-12"
         id="welcome"
       >
-        <div className="w-full md:w-1/2 md:h-1/3 mb-4 md:mb-0 h-48 md:h-full relative">
+        <div className="w-full md:w-1/2 md:h-1/3 mb-4 md:mb-0 h-48 relative">
           <Image src="/images/logo.svg" fill />
         </div>
         <div className="w-full md:w-1/3">
@@ -677,7 +677,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <FiPenTool size={192} />
           </div>
           <p className="w-64 mt-4 h-fit">
-            Write 8 minutes a day, every day - each day has a prompt
+            The core practice is writing a stream of consciousness daily, for 8
+            minutes.
           </p>
         </div>
         <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col items-center ">
@@ -686,7 +687,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
           <p className="w-64 mt-4 h-fit">
             All of the writings are used to train a custom AI model that will
-            write a book.
+            write a book. Every day a new chapter is written.
           </p>
         </div>
         <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col items-center ">
@@ -694,7 +695,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <Image src="/images/newen.svg" fill />
           </div>
           <p className="w-64 mt-4 h-fit">
-            Earn $newen in the process. Get familiar with crypto practically.
+            Our writers are rewarded with $newen, which is a cryptocurrency that
+            exists on the blockchain.
           </p>
         </div>
       </section>
@@ -717,7 +719,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 target="_blank"
               >
                 <Button
-                  buttonText="get your mentor"
+                  buttonText="explore mentors"
                   buttonColor="bg-purple-200"
                 />
               </a>
@@ -734,22 +736,22 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               consciousness, answering the prompt of the day.
             </p>
             <div className="mt-4 w-fit">
-              <a
-                href={`https://paragraph.xyz/@ankytheape/chapter-${
-                  ankyverseDay.wink - 2
-                }`}
-                target="_blank"
-              >
-                <Button
-                  buttonText="write"
-                  buttonAction={() => alert("write")}
-                  buttonColor="bg-purple-200"
-                />
-              </a>
+              <Button
+                buttonText="write"
+                buttonAction={() => {
+                  if (authenticated) {
+                    setIsTextareaClicked(true);
+                  } else {
+                    alert("you need to login to write");
+                  }
+                }}
+                buttonColor="bg-purple-200"
+              />
             </div>
           </div>
         </div>
-        <div className="w-full md:w-1/2 bg-black  py-8  md:py-0 h-full flex items-center justify-center">
+        <div className="w-full md:w-1/2 bg-black flex-col  py-8  md:py-0 h-full flex items-center justify-center">
+          <p className="text-purple-400 mb-4">prompt of today:</p>
           <div className="relative w-full px-4 md:w-2/3">
             <TextStreamer text={ankyverseDay.prompt["en"]} />
           </div>
@@ -770,6 +772,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               Our custom trained AI model processes all of what is written on a
               given day into the chapter of that day.
             </p>
+            <p>
+              We are writing, together, the first AI assisted collaborative
+              story of humanity.
+            </p>
             <div className="mt-4 w-fit">
               <a
                 href={`https://paragraph.xyz/@ankytheape/chapter-${
@@ -780,39 +786,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 <Button buttonText="read book" buttonColor="bg-purple-200" />
               </a>
             </div>
-          </div>
-        </div>
-      </section>
-      <section className="px-2 md:px-16 h-fit md:h-72 bg-purple-400 w-full flex justify-around py-8 justify-between flex-col md:flex-row ">
-        <div className="flex flex-col w-fit">
-          <Link href="/" className="w-32 h-16 relative cursor-pointer" passHref>
-            <Image src="/images/anky-logo.png" fill />
-          </Link>
-          <div className="text-xl mt-4">© 2024</div>
-          <div className="text-xl mt-4">
-            <Link href="/terms-and-conditions">Privacy - Terms</Link>
-          </div>
-        </div>
-        <div className="flex flex-col w-fit">
-          <div className="text-xl mt-4">
-            <Link href="/product">Product</Link>
-          </div>
-        </div>
-        <div className="flex flex-col w-fit">
-          <div className="text-xl mt-4">
-            <Link href="/features">Features</Link>
-          </div>
-        </div>
-        <div className="flex flex-col w-fit">
-          <div className="text-xl mt-4">
-            <Link href="/newen">$newen</Link>
-          </div>
-        </div>
-        <div className="flex flex-col w-fit">
-          <div className="text-xl mt-4">
-            <a href="https://t.me/ankytheape" target="_blank">
-              telegram
-            </a>
           </div>
         </div>
       </section>

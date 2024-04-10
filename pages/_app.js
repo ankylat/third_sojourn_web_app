@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { initializeDB } from "../lib/idbHelper";
 import { Network, Alchemy } from "alchemy-sdk";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -183,6 +184,7 @@ function MyApp({ Component, pageProps }) {
                 show={show}
                 handleClose={handleClose}
               />
+              <Footer />
             </SettingsProvider>
           </UserProvider>
         </PrivyWagmiConnector>

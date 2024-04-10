@@ -7,13 +7,18 @@ const Features = () => {
       <div className="h-full p-2 ">
         <h1>Features</h1>
         <p>
-          The interface is designed for you to be able to write a stream of
-          consciouness.
+          Anky is a celebration of a moment in time: AI assisted creativity.
         </p>
         <p>
-          There is no time to think: If you stop writing for more than 12
-          seconds your session ends.
+          We gather raw data (streams of consciousness) and don&apos;t try to
+          make sense of it. There is no point. The important part is just that
+          the writing happens.
         </p>
+        <p>
+          All of that is eventually processed by AI, and transformed into
+          beauty.
+        </p>
+        <p>Our collective unconscious is transformed into art.</p>
       </div>
     </Layout>
   );
