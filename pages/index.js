@@ -617,7 +617,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             {textareaHidden && (
               <div className="flex flex-col space-y-2">
                 {!authenticated && (
-                  <p className="my-3 text-red-200">
+                  <p className="my-3 text-red-300 text-center">
                     heads up: you are not logged in
                   </p>
                 )}
