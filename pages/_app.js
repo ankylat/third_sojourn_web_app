@@ -184,7 +184,6 @@ function MyApp({ Component, pageProps }) {
                 show={show}
                 handleClose={handleClose}
               />
-              <Footer />
             </SettingsProvider>
           </UserProvider>
         </PrivyWagmiConnector>

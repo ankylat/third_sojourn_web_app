@@ -17,10 +17,11 @@ import { FaCopy } from "react-icons/fa";
 import Button from "../components/Button";
 import { useSettings } from "../context/SettingsContext";
 import TextStreamer from "../components/TextStreamer";
+import Footer from "../components/Footer";
 
-const secondsOfLife = 12;
-const totalSessionDuration = 480;
-const waitingTime = 30;
+const secondsOfLife = 4;
+const totalSessionDuration = 10;
+const waitingTime = 2;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
@@ -38,10 +39,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [time, setTime] = useState(0);
   const [lifeBarLength, setLifeBarLength] = useState(0);
   const [newenBarLength, setNewenBarLength] = useState(0);
+  const [copiedText, setCopiedText] = useState(false);
   const [moveText, setMoveText] = useState("");
+  const [notFixedAnymore, setNotFixedAnymore] = useState(true);
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
+
   const { userSettings } = useSettings();
   const [privyAuthToken, setPrivyAuthToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
@@ -138,7 +142,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     } else {
       const startingInterval = setInterval(() => {
         setLifeBarLength((x) => {
-          if (x >= 90) {
+          if (x >= 70) {
             setTextareaHidden(false);
             return clearInterval(startingInterval);
           }
@@ -146,14 +150,24 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         });
       }, 1000);
       setTimeout(() => {
-        if (authenticated) {
-          pingServerToStartWritingSession();
-        }
-        let now = new Date();
-        setLastKeystroke(now);
-        setStartTime(now);
-        setSessionStarted(true);
+        startWritingSession();
       }, waitingTime * 1000);
+    }
+  };
+
+  const startWritingSession = () => {
+    try {
+      if (authenticated) {
+        pingServerToStartWritingSession();
+      }
+      let now = new Date();
+      setTextareaHidden(false);
+      setLastKeystroke(now);
+      setStartTime(now);
+      setSessionStarted(true);
+      return clearInterval(startingInterval);
+    } catch (error) {
+      console.log("there was an error starting the session");
     }
   };
 
@@ -283,6 +297,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const handleSaveSession = async () => {
     try {
+      setNotFixedAnymore(false);
       setSavingSession(true);
       localStorage.setItem(
         `session - ${sessionRandomUUID}`,
@@ -320,7 +335,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("copied");
+      setCopiedText(true);
+      setTimeout(() => {
+        setCopiedText(false);
+      }, 444);
     } catch (error) {
       console.log("there was an error copying the text");
     }
@@ -390,26 +408,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   return (
     <div
       className={`${
-        (sessionStarted || isTextareaClicked) && "fixed"
-      } w-full flex flex-col items-center`}
+        notFixedAnymore && (sessionStarted || isTextareaClicked) && "fixed "
+      } ${finishedSession && "pt-24"} w-full flex flex-col items-center`}
     >
       <section className="h-screen w-full" id="hero-section">
-        <div className="h-4 w-full overflow-hidden">
-          <div
-            className="h-full opacity-80 newen-bar rounded-r-xl"
-            style={{
-              width: `${newenBarLength}%`,
-            }}
-          ></div>
-        </div>
-        <div className="h-1 w-full overflow-hidden">
-          <div
-            className="h-full opacity-80 life-bar rounded-r-xl"
-            style={{
-              width: `${lifeBarLength}%`,
-            }}
-          ></div>
-        </div>
+        {!finishedSession && (
+          <>
+            {" "}
+            <div className="h-4 w-full overflow-hidden">
+              <div
+                className="h-full opacity-80 newen-bar rounded-r-xl"
+                style={{
+                  width: `${newenBarLength}%`,
+                }}
+              ></div>
+            </div>
+            <div className="h-1 w-full overflow-hidden">
+              <div
+                className="h-full opacity-80 life-bar rounded-r-xl"
+                style={{
+                  width: `${lifeBarLength}%`,
+                }}
+              ></div>
+            </div>
+          </>
+        )}
+
         <ToastContainer />
         {finishedSession ? (
           <div
@@ -432,7 +456,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 <div className="flex mx-auto w-96 space-x-2">
                   <div className="w-fit mt-4 mx-auto" onClick={copyText}>
                     <button
-                      className={`${montserratAlternates.className} border-solid py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      className={`${montserratAlternates.className} ${
+                        copiedText && "bg-green-200"
+                      } border-solid py-4 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                     >
                       <FaCopy />
                     </button>
@@ -444,7 +470,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       setSessionStarted(false);
                       setTime(0);
                     }}
-                    className="w-36 mx-auto mt-4 border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
+                    className="w-36 mx-auto mt-4 flex justify-center items-center border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
                   >
                     retry
                   </div>
@@ -465,8 +491,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       <div>
                         <p className="wrap p-2 text-md text-center">
                           congratulations. the invitation is to remain in the
-                          awareness of this prompt, and your connection with
-                          your true self.
+                          awareness of this prompt today.
                         </p>
                       </div>
                     </div>
@@ -514,7 +539,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       <div className="flex">
                         <div className="w-fit mt-4 mx-auto" onClick={copyText}>
                           <button
-                            className={`${montserratAlternates.className} border-solid py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                            className={`${montserratAlternates.className} ${
+                              copiedText && "bg-green-200"
+                            }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                           >
                             <FaCopy />
                           </button>
@@ -531,12 +558,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                         </div>
                       </div>
 
-                      <p>
-                        if there was an error somehow, please copy your text and
-                        save it somewhere on your device. it is valuable, and a
-                        session that counts is one that happened. it is all an
-                        excuse.
-                      </p>
                       {errorUploadingToIrys && (
                         <div className="flex flex-col">
                           <p>
@@ -593,6 +614,16 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               </div>
             )}
 
+            {textareaHidden && (
+              <div className="w-fit mx-auto mt-4">
+                <Button
+                  buttonText="start writing"
+                  buttonAction={startWritingSession}
+                  buttonColor="bg-green-200"
+                />
+              </div>
+            )}
+
             {!textareaHidden && (
               <div
                 className={`${
@@ -601,7 +632,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               >
                 <textarea
                   onClick={() => {
-                    if (authenticated && !sessionStarted) {
+                    if (!sessionStarted) {
                       setAlreadyStartedOnce(true);
                       handleClick();
 
@@ -610,7 +641,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       }
                     }
                   }}
-                  disabled={!authenticated}
                   style={{ fontStyle: "italic" }}
                   onChange={handleTextChange}
                   className={`${
@@ -619,13 +649,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     !isTextareaClicked &&
                     "hover:shadow-xl hover:shadow-pink-200"
                   } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-                  placeholder={`${
-                    !ready
-                      ? "loading..."
-                      : !authenticated
-                      ? "log in to write..."
-                      : "start writing..."
-                  }`}
+                  placeholder={`${!ready ? "loading..." : "start writing..."}`}
                 />
               </div>
             )}
@@ -671,33 +695,37 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </p>
         </div>
       </section>
-      <section className="h-fit md:h-screen w-full py-12 flex justify-around items-center flex-col space-y-8 md:space-y-0 md:flex-row px:2 md:px-12">
-        <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col  items-center ">
-          <div className="w-48 h-48 relative">
-            <FiPenTool size={192} />
+      <section className="h-screen flex items-center">
+        <div className="flex  flex-wrap xl:flex-nowrap justify-around items-stretch w-full py-12 px-2 md:px-12">
+          <div className="p-2 max-w-72 border border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
+            <div className="w-48 h-48 relative">
+              <FiPenTool size={192} />
+            </div>
+            <p className="w-64 mt-4 h-fit">
+              The core practice is writing a stream of consciousness daily, for
+              8 minutes.
+            </p>
           </div>
-          <p className="w-64 mt-4 h-fit">
-            The core practice is writing a stream of consciousness daily, for 8
-            minutes.
-          </p>
-        </div>
-        <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col items-center ">
-          <div className="w-48 h-48 relative">
-            <FaBookOpen size={192} />
+          <div className="p-2 border  max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
+            {" "}
+            <div className="w-48 h-48 relative">
+              <FaBookOpen size={192} />
+            </div>
+            <p className="w-64 mt-4 h-fit">
+              All of the writings are used to train a custom AI model that will
+              write a book. Every day a new chapter is written.
+            </p>
           </div>
-          <p className="w-64 mt-4 h-fit">
-            All of the writings are used to train a custom AI model that will
-            write a book. Every day a new chapter is written.
-          </p>
-        </div>
-        <div className="p-2 border border-black rounded-xl bg-purple-400 h-fit w-fit flex flex-col items-center ">
-          <div className="w-48 h-48 relative">
-            <Image src="/images/newen.svg" fill />
+          <div className="p-2 border max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
+            {" "}
+            <div className="w-48 h-48 relative">
+              <Image src="/images/newen.svg" fill />
+            </div>
+            <p className="w-64 mt-4 h-fit">
+              Our writers are rewarded with $newen, which is a cryptocurrency
+              that exists on the blockchain.
+            </p>
           </div>
-          <p className="w-64 mt-4 h-fit">
-            Our writers are rewarded with $newen, which is a cryptocurrency that
-            exists on the blockchain.
-          </p>
         </div>
       </section>
       <section className="h-screen w-full flex justify-around flex-col md:flex-row ">
@@ -739,10 +767,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <Button
                 buttonText="write"
                 buttonAction={() => {
-                  if (authenticated) {
-                    setIsTextareaClicked(true);
-                  } else {
-                    alert("you need to login to write");
+                  if (!sessionStarted) {
+                    setAlreadyStartedOnce(true);
+                    handleClick();
+
+                    if (!alreadyStartedOnce) {
+                      setTextareaHidden(true);
+                    }
                   }
                 }}
                 buttonColor="bg-purple-200"
@@ -789,6 +820,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };
