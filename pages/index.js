@@ -19,9 +19,9 @@ import { useSettings } from "../context/SettingsContext";
 import TextStreamer from "../components/TextStreamer";
 import Footer from "../components/Footer";
 
-const secondsOfLife = 4;
-const totalSessionDuration = 10;
-const waitingTime = 2;
+const secondsOfLife = 8;
+const totalSessionDuration = 480;
+const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
