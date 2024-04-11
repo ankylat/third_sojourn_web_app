@@ -2,8 +2,6 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import { ToastContainer, toast } from "react-toastify";
-import { useTranslation } from "next-i18next";
-import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
