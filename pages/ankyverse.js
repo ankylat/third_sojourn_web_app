@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 const Ankyverse = () => {
   return (
     <Layout>
-      <div className="h-full p-2 ">
+      <div className="h-full p-2 pb-14">
         <h1>Ankyverse</h1>
         <p>
           What you are experiencing through this platform is a gamified approach
@@ -43,6 +43,8 @@ const Ankyverse = () => {
         <p>
           Each one of these resembles the energy that runs through your body.
         </p>
+        <p>Your only mission is to write, every day, for 8 minutes.</p>
+        <p>We will do the rest.</p>
       </div>
     </Layout>
   );

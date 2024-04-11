@@ -2,10 +2,13 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import { ToastContainer, toast } from "react-toastify";
+import { useTranslation } from "next-i18next";
+import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
 import { PiWarningCircle } from "react-icons/pi";
+import { MdCancel } from "react-icons/md";
 import { FiPenTool } from "react-icons/fi";
 import { FaBookOpen } from "react-icons/fa";
 import { WebIrys } from "@irys/sdk";
@@ -64,7 +67,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const { authenticated, getAccessToken, ready, user } = usePrivy();
   const thisUserWallet = wallets.at(0);
 
-  const textareaRef = useRef(null);
+  const { t } = useTranslation("common");
+
+  const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
 
@@ -92,7 +97,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             setIsTextareaClicked(false);
             setUserLost(false);
             clearInterval(intervalRef.current);
-            clearInterval(keystrokeIntervalRef.current);
             setFinishedSession(true);
             pingServerToEndWritingSession("won");
           }
@@ -131,6 +135,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
+
     setIsTextareaClicked(true);
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
@@ -142,11 +147,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       setStartTime(now);
       setSessionStarted(true);
     } else {
-      const startingInterval = setInterval(() => {
+      startingIntervalRef.current = setInterval(() => {
         setLifeBarLength((x) => {
           if (x >= 70) {
             setTextareaHidden(false);
-            return clearInterval(startingInterval);
+            return clearInterval(startingIntervalRef.current);
           }
           return x + 100 / waitingTime;
         });
@@ -410,7 +415,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   return (
     <div
       className={`${
-        notFixedAnymore && (sessionStarted || isTextareaClicked) && "fixed "
+        notFixedAnymore &&
+        (sessionStarted || isTextareaClicked) &&
+        "fixed top-0"
       } ${finishedSession && "pt-24"} w-full flex flex-col items-center`}
     >
       <section className="h-screen w-full" id="hero-section">
@@ -450,7 +457,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     <PiWarningCircle size={33} />{" "}
                   </span>
                   <span className="text-left text-black">
-                    You stopped writing for more than 12 seconds. This mechanism
+                    You stopped writing for more than 8 seconds. This mechanism
                     is intended for you to not think, just write. There is no
                     right or wrong here.
                   </span>
@@ -590,9 +597,31 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
                 } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 ${
                   textareaHidden ? "text-xl" : "text-sm"
-                } md:text-2xl shadow-lg`}
+                } md:text-2xl shadow-lg relative`}
               >
                 {ankyverseQuestion}
+                {!sessionStarted && (
+                  <span
+                    className="absolute text-red-600 hover:text-red-500 right-1 cursor-pointer top-1"
+                    onClick={() => {
+                      try {
+                        clearInterval(startingIntervalRef.current);
+                        clearInterval(intervalRef.current);
+                        clearInterval(keystrokeIntervalRef.current);
+                        setTextareaHidden(false);
+                        setAlreadyStartedOnce(false);
+                        setIsTextareaClicked(false);
+                        setSessionStarted(false);
+                        setNewenBarLength(0);
+                        setLifeBarLength(0);
+                      } catch (error) {
+                        console.log("there was an eeeerror", error);
+                      }
+                    }}
+                  >
+                    <MdCancel />
+                  </span>
+                )}
               </div>
             ) : (
               <div

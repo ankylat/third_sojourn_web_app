@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { Montserrat_Alternates } from "next/font/google";
+import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { FaRegUser } from "react-icons/fa";
 import { useSettings } from "../context/SettingsContext";
@@ -12,6 +13,7 @@ const montserratAlternates = Montserrat_Alternates({
 });
 
 const Navbar = ({ isTextareaClicked }) => {
+  const { i18n } = useTranslation();
   const { logout, login, authenticated } = usePrivy();
   const { userSettings, setUserSettings } = useSettings();
   return (
@@ -29,37 +31,37 @@ const Navbar = ({ isTextareaClicked }) => {
           <Image src="/images/anky-logo.png" fill />
         </Link>
       </div>
+      <div className="flex space-x-2">
+        <span
+          className={`mx-2 cursor-pointer hover:opacity-70 ${
+            userSettings.language == "en" ? "text-green-600" : "text-black"
+          }`}
+          onClick={() =>
+            setUserSettings((x) => {
+              i18n.changeLanguage("en");
+              return { ...x, language: "en" };
+            })
+          }
+        >
+          en
+        </span>{" "}
+        /{" "}
+        <span
+          className={`cursor-pointer hover:opacity-70 ${
+            userSettings.language == "es" ? "text-green-600" : "text-black"
+          }`}
+          onClick={() =>
+            setUserSettings((x) => {
+              i18n.changeLanguage("es");
+              return { ...x, language: "es" };
+            })
+          }
+        >
+          es
+        </span>
+      </div>
       {authenticated ? (
         <div className="flex space-x-4 items-center">
-          <div className="flex space-x-2">
-            <span
-              className={`mx-2 cursor-pointer hover:opacity-70 ${
-                userSettings.language == "en" ? "text-green-600" : "text-black"
-              }`}
-              onClick={() =>
-                setUserSettings((x) => {
-                  console.log("IN HERE", x);
-                  return { ...x, language: "en" };
-                })
-              }
-            >
-              en
-            </span>{" "}
-            /{" "}
-            <span
-              className={`cursor-pointer hover:opacity-70 ${
-                userSettings.language == "es" ? "text-green-600" : "text-black"
-              }`}
-              onClick={() =>
-                setUserSettings((x) => {
-                  console.log("IN HERE", x);
-                  return { ...x, language: "es" };
-                })
-              }
-            >
-              es
-            </span>
-          </div>
           <Link
             className="p-2 rounded-full border border-black hover:bg-purple-200 cursor-pointer"
             href="/dashboard"

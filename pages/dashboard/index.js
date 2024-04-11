@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
+import { useSettings } from "../../context/SettingsContext";
 import { usePrivy } from "@privy-io/react-auth";
+import { getAnkyverseQuestionForToday } from "../../lib/ankyverse";
 import Image from "next/image";
 import Button from "../../components/Button";
 import { FaCopy, FaShareFromSquare } from "react-icons/fa";
@@ -9,6 +11,7 @@ const DashboardIndex = () => {
   const { authenticated, login } = usePrivy();
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [textCopied, setTextCopied] = useState(false);
+  const [chosenAnkyverseDay, setChosenAnkyverseDay] = useState(null);
   const [totalNewenEarned, setTotalNewenEarned] = useState(0);
   const [userMentor, setUserMentor] = useState({
     imageUrl: "/images/darkoh.png",
@@ -16,6 +19,8 @@ const DashboardIndex = () => {
   });
   const [userActivity, setUserActivity] = useState({});
   const { allUserWritings } = useUser();
+  const { userSettings } = useSettings();
+
   const startTimestamp = 1711861200;
 
   // Run the check when component mounts or writings change
@@ -34,6 +39,8 @@ const DashboardIndex = () => {
   const currentAnkyverseDay = getCurrentAnkyverseDay();
 
   const getWritingByDay = (day) => {
+    console.log("the day is: ", day);
+    setChosenAnkyverseDay(day);
     const writing = allUserWritings.find((writing) => {
       const writingDay =
         Math.floor((writing.timestamp / 1000 - startTimestamp) / (24 * 3600)) +
@@ -76,7 +83,7 @@ const DashboardIndex = () => {
 
   if (!authenticated)
     return (
-      <div>
+      <div className="flex flex-col justify-center w-full items-center">
         <p>please login first</p>
         <div className="mt-4 w-fit">
           <Button
@@ -89,14 +96,14 @@ const DashboardIndex = () => {
     );
   return (
     <div className="h-full w-full flex flex-col items-center px-8 ">
-      <div className="flex w-full justify-center mx-auto w-fit">
+      <div className="flex w-full justify-center mx-auto flex-wrap w-fit">
         {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
           (day) => {
             return (
               <div
                 key={day}
                 onClick={() => getWritingByDay(day)}
-                className={`w-8 h-8 flex mx-2 hover:bg-purple-400 hover:cursor-pointer justify-center items-center rounded-full ${
+                className={`w-8 h-8 flex m-2 hover:bg-purple-400 hover:cursor-pointer justify-center flex-wrap items-center rounded-full ${
                   userActivity[day] ? "bg-green-500" : "bg-red-500"
                 }`}
               >
@@ -110,13 +117,19 @@ const DashboardIndex = () => {
         total $newen earned: {totalNewenEarned}
       </p>
 
-      <div className="h-full w-full flex flex-col justify-center items-center md:flex-row px-2 pb-4">
+      <div className="h-fit w-full flex flex-col justify-start bg-purple-300 border border-black mt-2 rounded-xl  pt-4 items-center md:flex-row px-2 pb-6">
+        <p className="mb-2 underline text-xl">
+          ankyverse day: {chosenAnkyverseDay}
+        </p>
+        <p className="mb-2 ">
+          {chosenAnkyverseDay &&
+            getAnkyverseQuestionForToday(chosenAnkyverseDay)[
+              userSettings.language
+            ]}
+        </p>
         {writingForDisplay && (
-          <div className="flex flex-col w-full items-center md:w-96">
-            <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 bg-purple-200 rounded-xl h-96 overflow-y-scroll">
-              <p className="">
-                ankyverse day: {writingForDisplay.ankyverseDay}
-              </p>
+          <div className="flex flex-col w-full bg-purple-200 rounded-xl items-center md:w-96">
+            <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 h-96 overflow-y-scroll">
               <hr className="my-2" />
               {writingForDisplay.text ? (
                 writingForDisplay.text.includes("\n") ? (

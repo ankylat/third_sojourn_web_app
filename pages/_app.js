@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Inter, Montserrat_Alternates } from "next/font/google";
 import axios from "axios";
+import { appWithTranslation } from "next-i18next";
+import nextI18NextConfig from "../next-i18next.config";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { MdMenuOpen } from "react-icons/md";
 import Link from "next/link";
@@ -192,4 +194,4 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default MyApp;
+export default appWithTranslation(MyApp, nextI18NextConfig);
