@@ -116,46 +116,46 @@ const DashboardIndex = () => {
       <p className="mt-3 text-center w-full">
         total $newen earned: {totalNewenEarned}
       </p>
-
-      <div className="h-fit w-full flex flex-col justify-start bg-purple-300 border border-black mt-2 rounded-xl  pt-4 items-center md:flex-row px-2 pb-6">
-        <p className="mb-2 underline text-xl">
-          ankyverse day: {chosenAnkyverseDay}
-        </p>
-        <p className="mb-2 ">
-          {chosenAnkyverseDay &&
-            getAnkyverseQuestionForToday(chosenAnkyverseDay)[
-              userSettings.language
-            ]}
-        </p>
-        {writingForDisplay && (
-          <div className="flex flex-col w-full bg-purple-200 rounded-xl items-center md:w-96">
-            <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 h-96 overflow-y-scroll">
-              <hr className="my-2" />
-              {writingForDisplay.text ? (
-                writingForDisplay.text.includes("\n") ? (
-                  writingForDisplay.text.split("\n").map((x, i) => (
-                    <p className="my-2" key={i}>
-                      {x}
-                    </p>
-                  ))
-                ) : (
-                  <p className="my-2">{writingForDisplay.text}</p>
-                )
-              ) : null}
+      {chosenAnkyverseDay && (
+        <div className="h-fit w-full md:w-96 mb-4 flex flex-col justify-start bg-purple-300 border border-black mt-2 rounded-xl  pt-4 items-center  px-2 pb-6">
+          <p className="mb-2 underline text-xl">
+            ankyverse day: {chosenAnkyverseDay}
+          </p>
+          <p className="mb-2 ">
+            {chosenAnkyverseDay &&
+              getAnkyverseQuestionForToday(chosenAnkyverseDay)[
+                userSettings.language
+              ]}
+          </p>
+          {writingForDisplay && (
+            <div className="flex flex-col w-full bg-purple-200 px-4 rounded-xl items-center ">
+              <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 h-96 overflow-y-scroll">
+                {writingForDisplay.text ? (
+                  writingForDisplay.text.includes("\n") ? (
+                    writingForDisplay.text.split("\n").map((x, i) => (
+                      <p className="my-2" key={i}>
+                        {x}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="my-2">{writingForDisplay.text}</p>
+                  )
+                ) : null}
+              </div>
+              <div className="flex mt-2 mb-2 active:translate-y-1">
+                <button
+                  onClick={copyText}
+                  className={`border-solid py-2 ${
+                    textCopied ? "bg-green-300" : "bg-purple-300"
+                  } 00 px-8  shadow-xl border rounded-full`}
+                >
+                  <FaCopy />
+                </button>
+              </div>
             </div>
-            <div className="flex mt-2">
-              <button
-                onClick={copyText}
-                className={`border-solid py-2 ${
-                  textCopied ? "bg-green-300" : "bg-purple-300"
-                } 00 px-8  shadow-xl border rounded-full`}
-              >
-                <FaCopy />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
