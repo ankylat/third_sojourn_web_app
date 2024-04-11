@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
       </section>
       <div className="bg-black text-white flex flex-col items-center justify-center py-8">
-        <p className="text-4xl">JUST WRITE</p>
+        <p className="text-xl md:text-4xl">JUST WRITE</p>
         <p>we will do the rest</p>
       </div>
     </div>
