@@ -192,4 +192,4 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default appWithTranslation(MyApp, nextI18NextConfig);
+export default MyApp;

@@ -2,7 +2,6 @@ import React from "react";
 import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
 import { Montserrat_Alternates } from "next/font/google";
-import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { FaRegUser } from "react-icons/fa";
 import { useSettings } from "../context/SettingsContext";
@@ -13,7 +12,6 @@ const montserratAlternates = Montserrat_Alternates({
 });
 
 const Navbar = ({ isTextareaClicked }) => {
-  const { i18n } = useTranslation();
   const { logout, login, authenticated } = usePrivy();
   const { userSettings, setUserSettings } = useSettings();
   return (
@@ -38,7 +36,6 @@ const Navbar = ({ isTextareaClicked }) => {
           }`}
           onClick={() =>
             setUserSettings((x) => {
-              i18n.changeLanguage("en");
               return { ...x, language: "en" };
             })
           }
@@ -52,7 +49,6 @@ const Navbar = ({ isTextareaClicked }) => {
           }`}
           onClick={() =>
             setUserSettings((x) => {
-              i18n.changeLanguage("es");
               return { ...x, language: "es" };
             })
           }

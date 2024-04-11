@@ -65,8 +65,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const { authenticated, getAccessToken, ready, user } = usePrivy();
   const thisUserWallet = wallets.at(0);
 
-  const { t } = useTranslation("common");
-
   const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
