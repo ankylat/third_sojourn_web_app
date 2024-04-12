@@ -775,7 +775,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               To participate on this collective experience you need a key. Your
               mentor is that key.
             </p>
-            <div className="mt-4 w-fit">
+            <div className="mt-4 mb-4 w-fit">
               <a
                 href={`https://opensea.io/collection/anky-mentors`}
                 target="_blank"

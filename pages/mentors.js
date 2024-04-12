@@ -3,7 +3,6 @@ import Image from "next/image";
 import mentors from "../lib/mentors";
 
 const AnkyMentorsPage = () => {
-  console.log("the mentors are: ", mentors);
   const [filteredMentors, setFilteredMentors] = useState(mentors);
   const [filter, setFilter] = useState("");
 
