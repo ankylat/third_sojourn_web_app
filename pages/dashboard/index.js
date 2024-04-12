@@ -47,7 +47,7 @@ const DashboardIndex = () => {
     if (!authenticated && ready) {
       loadWritings();
     }
-  }, []);
+  }, [ready, authenticated]);
 
   // Calculate the current Ankyverse day
   const getCurrentAnkyverseDay = () => {
