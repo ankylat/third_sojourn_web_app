@@ -14,6 +14,7 @@ import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
+import { getUsersMentor } from "../lib/mentors";
 import { FaCopy } from "react-icons/fa";
 import Button from "../components/Button";
 import { useSettings } from "../context/SettingsContext";
@@ -21,8 +22,8 @@ import TextStreamer from "../components/TextStreamer";
 import Footer from "../components/Footer";
 
 const secondsOfLife = 8;
-const totalSessionDuration = 15;
-const waitingTime = 3;
+const totalSessionDuration = 480;
+const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
@@ -63,6 +64,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
   const { authenticated, getAccessToken, ready, user } = usePrivy();
+  const [usersMentor, setUsersMentor] = useState({});
   const thisUserWallet = wallets.at(0);
 
   const startingIntervalRef = useRef(null);
@@ -71,6 +73,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   useEffect(() => {
     setAnkyverseQuestion(ankyverseDay.prompt[userSettings.language]);
+    const mentor = getUsersMentor(userDatabaseInformation.ankyMentorIndex);
+    console.log("in here, the mentor is :", mentor);
+    setUsersMentor(mentor);
   }, [userSettings.language]);
 
   useEffect(() => {
@@ -371,12 +376,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
-          <h2 className="text-xl md:text-3xl">
-            sojourn #3 · wink {ankyverseDay.wink} · {ankyverseDay.kingdom}
-          </h2>
-          <small className="text-lg text-orange-500">
-            {ankyverseDay.kingdom}
-          </small>
+          <Link passHref href="/ankyverse">
+            <h2 className={`${ankyverseDay.color} hover:opacity-60 text-xl`}>
+              sojourn #3 · wink {ankyverseDay.wink} ·{" "}
+              {ankyverseDay.kingdom.toLowerCase()}
+            </h2>
+          </Link>
+
           <p className="text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
@@ -438,6 +444,29 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           </>
         )}
+
+        {/* {usersMentor?.imageUrl && (
+          <div className="w-48 h-72 rounded-xl overflow-hidden absolute left-10">
+            <span className="w-full h-full opacity-50">
+              <Image src={usersMentor.imageUrl} fill />
+            </span>
+            {usersMentor?.description && (
+              <div className="text-black absolute h-full overflow-y-scroll top-0 p-3">
+                {usersMentor.description ? (
+                  usersMentor.description.includes("\n") ? (
+                    usersMentor.description.split("\n").map((x, i) => (
+                      <p className="my-2" key={i}>
+                        {x}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="my-2">{usersMentor.description}</p>
+                  )
+                ) : null}
+              </div>
+            )}
+          </div>
+        )} */}
 
         <ToastContainer />
         {finishedSession ? (
@@ -514,10 +543,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-left bg-white rounded-xl shadow-lg px-8 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center">
+                  <div className="text-left bg-white relative rounded-xl shadow-lg px-8 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center">
                     <span className="w-24 h-24 relative">
                       <Image src="/images/Icon_copy_2.svg" fill />
                     </span>
+
                     <div className="flex w-full  space-y-2 flex-col justify-between mt-8">
                       <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                         <div className="w-1/4 flex flex-col items-center">

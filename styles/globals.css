@@ -104,6 +104,8 @@ textarea {
 .main-content-layout {
   min-height: 100vh;
   width: 100%;
+  height: fit-content;
+  padding-bottom: 24px;
   max-width: 400px;
   margin: auto;
 }

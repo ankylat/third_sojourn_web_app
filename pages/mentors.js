@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import mentors from "../lib/mentors";
+import { mentors } from "../lib/mentors";
 
 const AnkyMentorsPage = () => {
   const [filteredMentors, setFilteredMentors] = useState(mentors);

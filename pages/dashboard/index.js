@@ -19,7 +19,7 @@ const DashboardIndex = () => {
     name: "Darkoh",
   });
   const [userActivity, setUserActivity] = useState({});
-  const { allUserWritings } = useUser();
+  const { allUserWritings, userDatabaseInformation } = useUser();
   const { userSettings } = useSettings();
 
   const startTimestamp = 1711861200;
@@ -27,6 +27,7 @@ const DashboardIndex = () => {
   // Run the check when component mounts or writings change
   useEffect(() => {
     checkUserActivity();
+    console.log("HERE", userDatabaseInformation);
   }, [allUserWritings]);
 
   useEffect(() => {
@@ -174,7 +175,7 @@ const DashboardIndex = () => {
           </p>
           {writingForDisplay && (
             <div className="flex flex-col w-full bg-purple-200 px-4 rounded-xl items-center ">
-              <div className="flex w-full mx-4 mt-2 flex-col px-4 py-2 h-96 overflow-y-scroll">
+              <div className="flex w-full mx-4 mt-2 flex-col px-2 py-2 h-96 overflow-y-scroll">
                 {writingForDisplay.text ? (
                   writingForDisplay.text.includes("\n") ? (
                     writingForDisplay.text.split("\n").map((x, i) => (
