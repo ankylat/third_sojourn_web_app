@@ -8,7 +8,8 @@ import Button from "../../components/Button";
 import { FaCopy, FaShareFromSquare } from "react-icons/fa";
 
 const DashboardIndex = () => {
-  const { authenticated, login } = usePrivy();
+  const { authenticated, login, ready } = usePrivy();
+  const [writings, setWritings] = useState([]);
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [textCopied, setTextCopied] = useState(false);
   const [chosenAnkyverseDay, setChosenAnkyverseDay] = useState(null);
@@ -27,6 +28,26 @@ const DashboardIndex = () => {
   useEffect(() => {
     checkUserActivity();
   }, [allUserWritings]);
+
+  useEffect(() => {
+    // Function to load writings from local storage
+    const loadWritings = () => {
+      let allWritings = [];
+      console.log("the local storage is: ", localStorage);
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("session - ")) {
+          // Ensure to only get writing sessions
+          const writingData = localStorage.getItem(key);
+          allWritings.push(JSON.parse(writingData));
+        }
+      }
+      setWritings(allWritings);
+    };
+    if (!authenticated && ready) {
+      loadWritings();
+    }
+  }, []);
 
   // Calculate the current Ankyverse day
   const getCurrentAnkyverseDay = () => {
@@ -81,16 +102,40 @@ const DashboardIndex = () => {
     }
   };
 
+  const copyJson = async (writing) => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(writing));
+      alert("copied, now send it as a DM to jp");
+    } catch (error) {}
+  };
+
   if (!authenticated)
     return (
-      <div className="flex flex-col justify-center w-full items-center">
-        <p>please login first</p>
-        <div className="mt-4 w-fit">
-          <Button
-            buttonAction={login}
-            buttonColor="bg-purple-300"
-            buttonText="login"
-          />
+      <div className="px-2 flex flex-col justify-center w-full items-center">
+        <p>these are all of your unauthenticated pieces of writing</p>
+        <div>
+          <h1>Saved Writings</h1>
+          <ul>
+            {writings.map((writing, index) => (
+              <li
+                className="bg-purple-200 p-2 rounded-xl border border-black my-2 w-5/6 mx-auto md:w-96"
+                key={index}
+              >
+                <p>Date: {new Date(writing.timestamp).toLocaleDateString()}</p>
+                <p>Text: {writing.text}</p>
+                <p>Duration: {writing.duration} seconds</p>
+                <div className="w-fit my-2">
+                  <Button
+                    buttonText="copy json"
+                    buttonColor="bg-green-200"
+                    buttonAction={() => {
+                      copyJson(writing);
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     );
