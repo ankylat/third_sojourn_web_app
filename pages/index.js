@@ -22,8 +22,8 @@ import TextStreamer from "../components/TextStreamer";
 import Footer from "../components/Footer";
 
 const secondsOfLife = 8;
-const totalSessionDuration = 480;
-const waitingTime = 30;
+const totalSessionDuration = 4;
+const waitingTime = 2;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
@@ -549,18 +549,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     </span>
 
                     <div className="flex w-full  space-y-2 flex-col justify-between mt-8">
-                      <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
-                        <div className="w-1/4 flex flex-col items-center">
-                          <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
-                          <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
-                          <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
-                          <div className="w-6 mb-1 h-1 rounded-full bg-gray-300"></div>
-                        </div>
-                        <div className="w-3/4 text-center">
-                          <span className="mx-2">{text.split(" ").length}</span>
-                          <span className="">words</span>
-                        </div>
-                      </div>
                       <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
                         <div className="w-1/4 aspect-square flex flex-col items-center relative">
                           <Image src="/images/newen.svg" fill />
