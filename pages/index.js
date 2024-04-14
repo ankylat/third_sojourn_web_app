@@ -22,8 +22,8 @@ import TextStreamer from "../components/TextStreamer";
 import Footer from "../components/Footer";
 
 const secondsOfLife = 8;
-const totalSessionDuration = 4;
-const waitingTime = 2;
+const totalSessionDuration = 480;
+const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
