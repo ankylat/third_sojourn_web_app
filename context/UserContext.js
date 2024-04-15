@@ -180,12 +180,7 @@ export const UserProvider = ({ children }) => {
               },
             }
           );
-          let todayWriting;
-          if (response?.data?.user?.todayCid) {
-            todayWriting = await fetchTextFromIrys(
-              response?.data?.user?.todayCid
-            );
-          }
+          let todayWriting = response?.data?.user?.textOfToday;
 
           setUserDatabaseInformation({
             ankyMentorIndex: response.data.mentor.mentorIndex || null,

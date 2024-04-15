@@ -95,6 +95,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     if (savedSession) {
       setTodaysSessionData(JSON.parse(savedSession));
       setSessionId(savedSession.sessionId);
+      console.log(
+        "the users database information is: ",
+        userDatabaseInformation
+      );
       if (savedSession?.text) {
         setWhatUserWrote(savedSession?.text);
       } else {
@@ -507,15 +511,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                grow overflow-y-scroll mt-3 hover:text-shadow-lg pb-8 hover:text-purple-800 cursor-pointer 
             } `}
           >
-            {todaysSessionData.text ? (
-              todaysSessionData.text.includes("\n") ? (
-                todaysSessionData.text.split("\n").map((x, i) => (
+            {userDatabaseInformation.todayWriting ? (
+              userDatabaseInformation.todayWriting.includes("\n") ? (
+                userDatabaseInformation.todayWriting.split("\n").map((x, i) => (
                   <p className="my-2" key={i}>
                     {x}
                   </p>
                 ))
               ) : (
-                <p className="my-2">{todaysSessionData.text}</p>
+                <p className="my-2">{userDatabaseInformation.todayWriting}</p>
               )
             ) : null}
             {moveText && <p className="text-red-600 mt-8">copied</p>}
@@ -592,8 +596,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   </div>
                 </div>
 
-                <div className="flex w-full justify-between">
-                  <div className="w-fit mt-4 mx-auto" onClick={copyText}>
+                <div className="flex w-full justify-center items-center">
+                  <div className="w-fit mx-auto" onClick={copyText}>
                     <button
                       className={`${montserratAlternates.className} ${
                         copiedText && "bg-green-200"
@@ -604,23 +608,18 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   </div>
                   {todaysSessionData?.saved ||
                   userDatabaseInformation.todayWriting ? (
-                    <div>
-                      <a
-                        href={`https://paragraph.xyz/@ankytheape/chapter-${
-                          ankyverseDay.wink - 2
-                        }`}
-                        target="_blank"
-                      >
-                        <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                          read chapter {ankyverseDay.wink - 2}
-                        </span>
-                      </a>
-                    </div>
-                  ) : (
-                    <div
-                      className="w-fit mt-4 mx-auto"
-                      onClick={handleSaveSession}
+                    <a
+                      href={`https://paragraph.xyz/@ankytheape/chapter-${
+                        ankyverseDay.wink - 2
+                      }`}
+                      target="_blank"
                     >
+                      <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
+                        read chapter {ankyverseDay.wink - 2}
+                      </span>
+                    </a>
+                  ) : (
+                    <div className="w-fit mx-auto" onClick={handleSaveSession}>
                       <button
                         className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                       >
