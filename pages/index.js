@@ -596,16 +596,18 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       <FaCopy />
                     </button>
                   </div>
-                  <div
-                    className="w-fit mt-4 mx-auto"
-                    onClick={handleSaveSession}
-                  >
-                    <button
-                      className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                  {!todaysSessionData?.saved && (
+                    <div
+                      className="w-fit mt-4 mx-auto"
+                      onClick={handleSaveSession}
                     >
-                      {savingSession ? "saving..." : "save session"}
-                    </button>
-                  </div>
+                      <button
+                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      >
+                        {savingSession ? "saving..." : "save session"}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {errorUploadingToIrys && (
