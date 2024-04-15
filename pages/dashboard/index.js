@@ -19,7 +19,7 @@ const DashboardIndex = () => {
     name: "Darkoh",
   });
   const [userActivity, setUserActivity] = useState({});
-  const { allUserWritings, userDatabaseInformation } = useUser();
+  const { allUserWritings } = useUser();
   const { userSettings } = useSettings();
 
   const startTimestamp = 1711861200;
@@ -27,7 +27,6 @@ const DashboardIndex = () => {
   // Run the check when component mounts or writings change
   useEffect(() => {
     checkUserActivity();
-    console.log("HERE", userDatabaseInformation);
   }, [allUserWritings]);
 
   useEffect(() => {
