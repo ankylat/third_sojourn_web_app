@@ -163,11 +163,27 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setIsTextareaClicked(true);
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
+      let now = new Date();
+      let response;
+
+      setTodaysSessionData((prev) => ({
+        ...prev,
+        started: true,
+        sessionId: sessionRandomUUID,
+        startingTimestamp: now.getTime(),
+      }));
+      localStorage.setItem(
+        `writingSession-${ankyverseDay.wink}`,
+        JSON.stringify({
+          ...todaysSessionData,
+          started: true,
+          sessionId: sessionRandomUUID,
+          startingTimestamp: now.getTime(),
+        })
+      );
       if (authenticated) {
-        console.log("right before pinging the server");
         pingServerToStartWritingSession();
       }
-      let now = new Date();
       setLastKeystroke(now);
       setStartTime(now);
       setSessionStarted(true);
@@ -207,6 +223,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           startingTimestamp: now.getTime(),
         })
       );
+
       if (authenticated) {
         pingServerToStartWritingSession();
       }
