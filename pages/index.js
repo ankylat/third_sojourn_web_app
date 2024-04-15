@@ -535,7 +535,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   if (
     todaysSessionData.timeWritten > 400 &&
     todaysSessionData.finished &&
-    (todaysSessionData.saved || !authenticated)
+    (todaysSessionData.saved || authenticated)
   )
     return (
       <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
