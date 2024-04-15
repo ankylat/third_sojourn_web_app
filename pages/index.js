@@ -282,12 +282,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       let now = new Date();
       let response;
       setTodaysSessionData((prev) => ({
-        ankyMentor: usersMentor.id,
+        ankyMentor: usersMentor?.id,
       }));
       localStorage.setItem(
         `writingSession-${ankyverseDay.wink}`,
         JSON.stringify({
-          ankyMentor: usersMentor.id,
+          ankyMentor: usersMentor?.id,
         })
       );
 
