@@ -535,7 +535,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   if (
     todaysSessionData.timeWritten > 400 &&
     todaysSessionData.finished &&
-    !todaysSessionData.saved &&
     authenticated
   )
     return (
