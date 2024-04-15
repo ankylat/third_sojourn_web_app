@@ -44,6 +44,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [copiedText, setCopiedText] = useState(false);
   const [moveText, setMoveText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [whatUserWrote, setWhatUserWrote] = useState("");
   const [notFixedAnymore, setNotFixedAnymore] = useState(true);
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -94,14 +95,20 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     if (savedSession) {
       setTodaysSessionData(JSON.parse(savedSession));
       setSessionId(savedSession.sessionId);
-    }
-    if (userDatabaseInformation?.todayWriting) {
-      setTodaysSessionData({
-        text: userDatabaseInformation.todayWriting,
-      });
+      if (savedSession?.text) {
+        setWhatUserWrote(savedSession?.text);
+      } else {
+        if (userDatabaseInformation?.todayWriting) {
+          setWhatUserWrote(userDatabaseInformation.todayWriting);
+        }
+      }
     }
     setLoading(false);
-  }, [userSettings.language, authenticated]);
+  }, [
+    userSettings.language,
+    authenticated,
+    userDatabaseInformation?.todayWriting,
+  ]);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -567,15 +574,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   </h2>
                 </Link>
                 <div className="p-2 w-full bg-purple-200 text-wrap rounded-xl border border-black">
-                  {todaysSessionData.text ? (
-                    todaysSessionData.text.includes("\n") ? (
-                      todaysSessionData.text.split("\n").map((x, i) => (
+                  {whatUserWrote ? (
+                    whatUserWrote.includes("\n") ? (
+                      whatUserWrote.split("\n").map((x, i) => (
                         <p className="my-2" key={i}>
                           {x}
                         </p>
                       ))
                     ) : (
-                      <p className="my-2">{todaysSessionData.text}</p>
+                      <p className="my-2">{whatUserWrote}</p>
                     )
                   ) : null}
                 </div>
