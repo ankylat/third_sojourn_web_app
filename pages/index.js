@@ -580,26 +580,17 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     )
                   ) : null}
                 </div>
-                <div className="p-2 w-64 px-4 h-20 rounded-xl py-4 border border-black flex items-center">
-                  <div className="w-1/4 aspect-square flex flex-col items-center relative">
-                    <Image src="/images/newen.svg" fill />
-                  </div>
-                  <div className="w-3/4 text-center">
-                    <span>{authenticated ? "+7025" : "0"} </span>
-                    <span>$newen</span>
-                  </div>
-                </div>
 
                 <div className="flex w-full justify-center items-center">
-                  <div className="w-fit mx-auto" onClick={copyText}>
-                    <button
-                      className={`${montserratAlternates.className} ${
-                        copiedText && "bg-green-200"
-                      }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                    >
-                      <FaCopy />
-                    </button>
-                  </div>
+                  <button
+                    onClick={copyText}
+                    className={`${montserratAlternates.className} ${
+                      copiedText && "bg-green-200"
+                    }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                  >
+                    <FaCopy />
+                  </button>
+
                   {todaysSessionData?.saved ||
                   userDatabaseInformation.writingOfToday.status ==
                     "completed" ? (

@@ -181,7 +181,6 @@ export const UserProvider = ({ children }) => {
             }
           );
           let writingOfToday = response?.data?.writingOfToday;
-          console.log("IN HEREEEEE", response);
           setUserDatabaseInformation({
             ankyMentorIndex: response.data.mentor.mentorIndex || null,
             streak: response.data.user.streak || 0,
