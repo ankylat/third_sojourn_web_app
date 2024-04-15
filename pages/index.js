@@ -37,6 +37,8 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
+  const { userDatabaseInformation, appLoading } = useUser();
+
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
   const [lifeBarLength, setLifeBarLength] = useState(0);
@@ -92,19 +94,16 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const savedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
+    console.log("the users database information is: ", userDatabaseInformation);
+    if (userDatabaseInformation && userDatabaseInformation.writingOfToday) {
+      setWhatUserWrote(userDatabaseInformation.writingOfToday.text);
+    }
     if (savedSession) {
       setTodaysSessionData(JSON.parse(savedSession));
       setSessionId(savedSession.sessionId);
-      console.log(
-        "the users database information is: ",
-        userDatabaseInformation
-      );
-      if (savedSession?.text) {
+
+      if (!userDatabaseInformation?.writingOfToday && savedSession?.text) {
         setWhatUserWrote(savedSession?.text);
-      } else {
-        if (userDatabaseInformation?.todayWriting) {
-          setWhatUserWrote(userDatabaseInformation.todayWriting);
-        }
       }
     }
     setLoading(false);
@@ -157,8 +156,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
     return () => clearInterval(keystrokeIntervalRef.current);
   }, [sessionStarted, lastKeystroke]);
-
-  const { userDatabaseInformation, appLoading } = useUser();
 
   const handleClick = async () => {
     if (authenticated) {
@@ -511,15 +508,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                grow overflow-y-scroll mt-3 hover:text-shadow-lg pb-8 hover:text-purple-800 cursor-pointer 
             } `}
           >
-            {userDatabaseInformation.todayWriting ? (
-              userDatabaseInformation.todayWriting.includes("\n") ? (
-                userDatabaseInformation.todayWriting.split("\n").map((x, i) => (
+            {whatUserWrote ? (
+              whatUserWrote.includes("\n") ? (
+                whatUserWrote.split("\n").map((x, i) => (
                   <p className="my-2" key={i}>
                     {x}
                   </p>
                 ))
               ) : (
-                <p className="my-2">{userDatabaseInformation.todayWriting}</p>
+                <p className="my-2">{whatUserWrote}</p>
               )
             ) : null}
             {moveText && <p className="text-red-600 mt-8">copied</p>}
@@ -542,12 +539,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     );
   }
 
-  if (
-    (todaysSessionData.timeWritten > 400 &&
-      todaysSessionData.finished &&
-      authenticated) ||
-    userDatabaseInformation.todayWriting
-  )
+  if (whatUserWrote)
     return (
       <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
         {authenticated ? (
@@ -607,7 +599,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     </button>
                   </div>
                   {todaysSessionData?.saved ||
-                  userDatabaseInformation.todayWriting ? (
+                  userDatabaseInformation.writingOfToday.status ==
+                    "completed" ? (
                     <a
                       href={`https://paragraph.xyz/@ankytheape/chapter-${
                         ankyverseDay.wink - 2

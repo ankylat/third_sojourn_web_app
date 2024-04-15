@@ -180,7 +180,7 @@ export const UserProvider = ({ children }) => {
               },
             }
           );
-          let todayWriting = response?.data?.user?.textOfToday;
+          let writingOfToday = response?.data?.writingOfToday;
 
           setUserDatabaseInformation({
             ankyMentorIndex: response.data.mentor.mentorIndex || null,
@@ -188,7 +188,7 @@ export const UserProvider = ({ children }) => {
             manaBalance: response.data.user.manaBalance || 0,
             wroteToday: response?.data?.user?.wroteToday || false,
             todayCid: response?.data?.user?.todayCid || "",
-            todayWriting: todayWriting || "",
+            writingOfToday: writingOfToday || {},
           });
           setAppLoading(false);
         }
