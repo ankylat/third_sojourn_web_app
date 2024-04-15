@@ -158,7 +158,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
-
+    const newRandomUUID = uuidv4();
+    setSessionRandomUUID(newRandomUUID);
     setIsTextareaClicked(true);
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
@@ -171,8 +172,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       setStartTime(now);
       setSessionStarted(true);
     } else {
-      const newRandomUUID = uuidv4();
-      setSessionRandomUUID(newRandomUUID);
       startingIntervalRef.current = setInterval(() => {
         setLifeBarLength((x) => {
           if (x >= 90) {
@@ -278,7 +277,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   async function pingServerToStartWritingSession() {
     try {
-      if (sessionRandomUUID) return;
       let now = new Date();
       let response;
       setTodaysSessionData((prev) => ({
@@ -297,7 +295,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
           {
-            randomUUID: newRandomUUID,
+            randomUUID: sessionRandomUUID,
             timestamp: now,
             userPrivyId: user.id.replace("did:privy:", ""),
             wallet: user.wallet.address,
