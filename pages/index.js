@@ -609,7 +609,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             {todaysSessionData?.ankyMentor ? (
               <div>
                 <p>you already wrote your session of today</p>
-                <p>but it hasn't been saved</p>
+                <p>but it hasn&apos;t been saved</p>
                 <p>please login to do so:</p>
                 <div className="w-96 my-2">
                   <Button
