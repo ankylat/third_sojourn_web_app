@@ -94,7 +94,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const savedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    console.log("the users database information is: ", userDatabaseInformation);
     if (userDatabaseInformation && userDatabaseInformation.writingOfToday) {
       setWhatUserWrote(userDatabaseInformation.writingOfToday.text);
     }
