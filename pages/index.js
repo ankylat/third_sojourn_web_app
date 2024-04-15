@@ -455,7 +455,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   if (loading) return <p>loading...</p>;
 
   if (
-    todaysSessionData.timeWritten > totalSessionDuration &&
+    todaysSessionData.timeWritten > 400 &&
     !authenticated &&
     todaysSessionData.saved
   ) {
@@ -514,8 +514,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }
 
   if (
-    todaysSessionData.timeWritten > totalSessionDuration &&
-    todaysSessionData.started &&
+    todaysSessionData.timeWritten > 400 &&
     todaysSessionData.finished &&
     (todaysSessionData.saved || !authenticated)
   )
