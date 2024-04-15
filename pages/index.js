@@ -87,15 +87,18 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   useEffect(() => {
     setAnkyverseQuestion(ankyverseDay.prompt[userSettings.language]);
     const mentor = getUsersMentor(userDatabaseInformation.ankyMentorIndex);
-    console.log("in here, the mentor is :", mentor);
     setUsersMentor(mentor);
     const savedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    console.log("the saved session is: ", savedSession);
     if (savedSession) {
       setTodaysSessionData(JSON.parse(savedSession));
       setSessionId(savedSession.sessionId);
+    }
+    if (userDatabaseInformation?.todayWriting) {
+      setTodaysSessionData({
+        text: userDatabaseInformation.todayWriting,
+      });
     }
     setLoading(false);
   }, [userSettings.language, authenticated]);
@@ -533,9 +536,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }
 
   if (
-    todaysSessionData.timeWritten > 400 &&
-    todaysSessionData.finished &&
-    authenticated
+    (todaysSessionData.timeWritten > 400 &&
+      todaysSessionData.finished &&
+      authenticated) ||
+    userDatabaseInformation.todayWriting
   )
     return (
       <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
