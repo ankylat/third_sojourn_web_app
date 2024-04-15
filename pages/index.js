@@ -456,7 +456,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   if (loading) return <p>loading...</p>;
 
-  if (!authenticated && todaysSessionData.saved) {
+  if (
+    todaysSessionData.timeWritten > totalSessionDuration &&
+    !authenticated &&
+    todaysSessionData.saved
+  ) {
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
@@ -512,6 +516,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }
 
   if (
+    todaysSessionData.timeWritten > totalSessionDuration &&
     todaysSessionData.started &&
     todaysSessionData.finished &&
     (todaysSessionData.saved || !authenticated)
