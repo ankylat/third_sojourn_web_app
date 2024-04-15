@@ -94,9 +94,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const savedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    if (userDatabaseInformation && userDatabaseInformation.writingOfToday) {
-      setWhatUserWrote(userDatabaseInformation.writingOfToday.text);
-    }
+    setTimeout(() => {
+      if (userDatabaseInformation && userDatabaseInformation.writingOfToday) {
+        setWhatUserWrote(userDatabaseInformation.writingOfToday.text);
+      }
+    }, 222);
+
     if (savedSession) {
       setTodaysSessionData(JSON.parse(savedSession));
       setSessionId(savedSession.sessionId);
@@ -106,7 +109,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       }
     }
     setLoading(false);
-  }, [userSettings.language, authenticated]);
+  }, [userSettings.language, authenticated, ready]);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
