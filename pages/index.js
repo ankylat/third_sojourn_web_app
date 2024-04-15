@@ -562,7 +562,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     {ankyverseDay.kingdom.toLowerCase()}
                   </h2>
                 </Link>
-                <div className="p-2 w-full bg-purple-200 rounded-xl border border-black">
+                <div className="p-2 w-full bg-purple-200 text-wrap rounded-xl border border-black">
                   {todaysSessionData.text ? (
                     todaysSessionData.text.includes("\n") ? (
                       todaysSessionData.text.split("\n").map((x, i) => (
