@@ -43,6 +43,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [newenBarLength, setNewenBarLength] = useState(0);
   const [copiedText, setCopiedText] = useState(false);
   const [moveText, setMoveText] = useState("");
+  const [loading, setLoading] = useState(true);
   const [notFixedAnymore, setNotFixedAnymore] = useState(true);
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -52,6 +53,18 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [privyAuthToken, setPrivyAuthToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [textareaHidden, setTextareaHidden] = useState(false);
+  const [todaysSessionData, setTodaysSessionData] = useState({
+    text: "",
+    started: false,
+    finished: false,
+    saved: false,
+    sessionId: null,
+    timeWritten: 0,
+    cid: "",
+    startingTimestamp: null,
+    endingTimestamp: null,
+    ankyMentor: null,
+  });
   const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
   const [copyWritingText, setCopyWritingText] = useState("copy text");
   const [userStreak, setUserStreak] = useState(1);
@@ -63,7 +76,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [userLost, setUserLost] = useState(true);
   const [finishedSession, setFinishedSession] = useState(false);
   const { wallets } = useWallets();
-  const { authenticated, getAccessToken, ready, user } = usePrivy();
+  const { authenticated, getAccessToken, ready, user, login } = usePrivy();
   const [usersMentor, setUsersMentor] = useState({});
   const thisUserWallet = wallets.at(0);
 
@@ -76,7 +89,16 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const mentor = getUsersMentor(userDatabaseInformation.ankyMentorIndex);
     console.log("in here, the mentor is :", mentor);
     setUsersMentor(mentor);
-  }, [userSettings.language]);
+    const savedSession = localStorage.getItem(
+      `writingSession-${ankyverseDay.wink}`
+    );
+    console.log("the saved session is: ", savedSession);
+    if (savedSession) {
+      setTodaysSessionData(JSON.parse(savedSession));
+      setSessionId(savedSession.sessionId);
+    }
+    setLoading(false);
+  }, [userSettings.language, authenticated]);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
@@ -141,6 +163,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     if (alreadyStartedOnce) {
       setLifeBarLength(100);
       if (authenticated) {
+        console.log("right before pinging the server");
         pingServerToStartWritingSession();
       }
       let now = new Date();
@@ -148,6 +171,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       setStartTime(now);
       setSessionStarted(true);
     } else {
+      const newRandomUUID = uuidv4();
+      setSessionRandomUUID(newRandomUUID);
       startingIntervalRef.current = setInterval(() => {
         setLifeBarLength((x) => {
           if (x >= 90) {
@@ -165,17 +190,34 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const startWritingSession = () => {
     try {
+      let now = new Date();
+      let response;
+
+      setTodaysSessionData((prev) => ({
+        ...prev,
+        started: true,
+        sessionId: sessionRandomUUID,
+        startingTimestamp: now.getTime(),
+      }));
+      localStorage.setItem(
+        `writingSession-${ankyverseDay.wink}`,
+        JSON.stringify({
+          ...todaysSessionData,
+          started: true,
+          sessionId: sessionRandomUUID,
+          startingTimestamp: now.getTime(),
+        })
+      );
       if (authenticated) {
         pingServerToStartWritingSession();
       }
-      let now = new Date();
       setTextareaHidden(false);
       setLastKeystroke(now);
       setStartTime(now);
       setSessionStarted(true);
-      return clearInterval(startingInterval);
+      return clearInterval(startingIntervalRef.current);
     } catch (error) {
-      console.log("there was an error starting the session");
+      console.log("there was an error starting the session", error);
     }
   };
 
@@ -239,8 +281,16 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       if (sessionRandomUUID) return;
       let now = new Date();
       let response;
-      const newRandomUUID = uuidv4();
-      setSessionRandomUUID(newRandomUUID);
+      setTodaysSessionData((prev) => ({
+        ankyMentor: usersMentor.id,
+      }));
+      localStorage.setItem(
+        `writingSession-${ankyverseDay.wink}`,
+        JSON.stringify({
+          ankyMentor: usersMentor.id,
+        })
+      );
+
       if (authenticated) {
         const authToken = await getAccessToken();
         setPrivyAuthToken(authToken);
@@ -269,12 +319,27 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   async function pingServerToEndWritingSession(result) {
     try {
+      const now = new Date().getTime();
+      const frontendWrittenTime = Math.floor(Math.abs(startTime - now) / 1000);
+      setTodaysSessionData((prev) => ({
+        ...prev,
+        finished: true,
+        endingTimestamp: now,
+        timeWritten: frontendWrittenTime,
+        text: text,
+      }));
+      localStorage.setItem(
+        `writingSession-${ankyverseDay.wink}`,
+        JSON.stringify({
+          ...todaysSessionData,
+          finished: true,
+          endingTimestamp: now,
+          timeWritten: frontendWrittenTime,
+          text: text,
+        })
+      );
       let response;
       if (authenticated) {
-        const now = new Date().getTime();
-        const frontendWrittenTime = Math.floor(
-          Math.abs(startTime - now) / 1000
-        );
         response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_ROUTE}/end-session`,
           {
@@ -307,33 +372,50 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     try {
       setNotFixedAnymore(false);
       setSavingSession(true);
-      localStorage.setItem(
-        `session - ${sessionRandomUUID}`,
-        JSON.stringify({
-          timestamp: new Date().getTime(),
-          text: text,
-          duration: time,
-        })
-      );
 
       if (authenticated) {
         const receipt = await sendTextToIrys();
-        let response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
-          {
+        if (receipt) {
+          setTodaysSessionData((prev) => ({
+            ...prev,
+            saved: true,
             cid: receipt,
-            sessionId: sessionId || "",
-            user: user.id.replace("did:privy:", ""),
-            userWallet: user.wallet.address,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${privyAuthToken}`,
+          }));
+          localStorage.setItem(
+            `writingSession-${ankyverseDay.wink}`,
+            JSON.stringify({ ...todaysSessionData, saved: true, cid: receipt })
+          );
+
+          let response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
+            {
+              cid: receipt,
+              sessionId: sessionId || "",
+              user: user.id.replace("did:privy:", ""),
+              userWallet: user.wallet.address,
             },
-          }
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${privyAuthToken}`,
+              },
+            }
+          );
+        }
+      } else {
+        console.log("saving the session");
+        setTodaysSessionData((prev) => ({
+          ...prev,
+          saved: true,
+        }));
+        localStorage.setItem(
+          `writingSession-${ankyverseDay.wink}`,
+          JSON.stringify({ ...todaysSessionData, saved: true })
         );
+        console.log("alsao");
       }
+      setSavingSession(false);
+      setSessionSaved(true);
     } catch (error) {
       console.log("there is an error here", error);
     }
@@ -372,7 +454,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
   };
 
-  if (userDatabaseInformation.wroteToday) {
+  if (loading) return <p>loading...</p>;
+
+  if (!authenticated && todaysSessionData.saved) {
     return (
       <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
         <div className="w-full h-full md:w-1/2 p-2">
@@ -383,7 +467,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </h2>
           </Link>
 
-          <p className="text-purple-600">{ankyverseQuestion}</p>
+          <p className="my-2 text-purple-600">{ankyverseQuestion}</p>
           <div
             onClick={() => {
               setMoveText(true);
@@ -396,23 +480,187 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                grow overflow-y-scroll mt-3 hover:text-shadow-lg pb-8 hover:text-purple-800 cursor-pointer 
             } `}
           >
-            {userDatabaseInformation.todayWriting ? (
-              userDatabaseInformation.todayWriting.includes("\n") ? (
-                userDatabaseInformation.todayWriting.split("\n").map((x, i) => (
+            {todaysSessionData.text ? (
+              todaysSessionData.text.includes("\n") ? (
+                todaysSessionData.text.split("\n").map((x, i) => (
                   <p className="my-2" key={i}>
                     {x}
                   </p>
                 ))
               ) : (
-                <p className="my-2">{userDatabaseInformation.todayWriting}</p>
+                <p className="my-2">{todaysSessionData.text}</p>
               )
             ) : null}
             {moveText && <p className="text-red-600 mt-8">copied</p>}
+
+            <div className="mt-4">
+              <a
+                href={`https://paragraph.xyz/@ankytheape/chapter-${
+                  ankyverseDay.wink - 2
+                }`}
+                target="_blank"
+              >
+                <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
+                  read chapter {ankyverseDay.wink - 2}
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     );
   }
+
+  if (
+    todaysSessionData.started &&
+    todaysSessionData.finished &&
+    (todaysSessionData.saved || !authenticated)
+  )
+    return (
+      <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
+        {authenticated ? (
+          <div className="flex h-full  w-full flex-col items-center justif-center md:flex-row">
+            <div className="h-fit md:h-full w-full md:w-1/2">
+              <div className="mx-auto my-4 relative w-72 h-96">
+                <Image src={usersMentor?.imageUrl} fill alt="users mentor" />
+              </div>
+              <p className="text-center text-md md:text-3xl">
+                congratulations, you made it.
+              </p>
+              <p className="text-center text-md md:text-3xl">
+                one day at a time.
+              </p>
+            </div>
+            <div className="h-96 md:h-full w-full md:w-1/2">
+              <div className="flex w-full mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
+                <Link passHref href="/ankyverse">
+                  <h2
+                    className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
+                  >
+                    sojourn #3 · wink {ankyverseDay.wink} ·{" "}
+                    {ankyverseDay.kingdom.toLowerCase()}
+                  </h2>
+                </Link>
+                <div className="p-2 w-full bg-purple-200 rounded-xl border border-black">
+                  {todaysSessionData.text ? (
+                    todaysSessionData.text.includes("\n") ? (
+                      todaysSessionData.text.split("\n").map((x, i) => (
+                        <p className="my-2" key={i}>
+                          {x}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="my-2">{todaysSessionData.text}</p>
+                    )
+                  ) : null}
+                </div>
+                <div className="p-2 w-64 px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                  <div className="w-1/4 aspect-square flex flex-col items-center relative">
+                    <Image src="/images/newen.svg" fill />
+                  </div>
+                  <div className="w-3/4 text-center">
+                    <span>{authenticated ? "+7025" : "0"} </span>
+                    <span>$newen</span>
+                  </div>
+                </div>
+
+                <div className="flex w-full justify-between">
+                  <div className="w-fit mt-4 mx-auto" onClick={copyText}>
+                    <button
+                      className={`${montserratAlternates.className} ${
+                        copiedText && "bg-green-200"
+                      }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                  <div
+                    className="w-fit mt-4 mx-auto"
+                    onClick={handleSaveSession}
+                  >
+                    <button
+                      className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    >
+                      {savingSession ? "saving..." : "save session"}
+                    </button>
+                  </div>
+                </div>
+
+                {errorUploadingToIrys && (
+                  <div className="flex flex-col">
+                    <p>
+                      there was an error uploading your session. please let jp
+                      know asap in order to fix it.
+                    </p>
+                    <a
+                      className="text-gray-400 hover:text-gray-500"
+                      href="https://t.me/jpfraneto"
+                      target="_blank"
+                    >
+                      message on telegram
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-96 h-fit p-2 ">
+            {todaysSessionData?.ankyMentor ? (
+              <div>
+                <p>you already wrote your session of today</p>
+                <p>but it hasn't been saved</p>
+                <p>please login to do so:</p>
+                <div className="w-96 my-2">
+                  <Button
+                    buttonAction={login}
+                    buttonText="login"
+                    buttonColor="bg-purple-200"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                {todaysSessionData.saved ? (
+                  <div>
+                    <p>this is your session of today:</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="mb-2">
+                      congratulations, you finished your session.
+                    </p>
+                    <p className="mb-2">
+                      if you own an anky mentor, you can log in.
+                    </p>
+                    <p className="mb-2">
+                      if you write your 8 minutes while being logged in, you
+                      will participate on the writing of the first collaborative
+                      book in the history of humanity.
+                    </p>
+                    <p className="mb-2">we need you</p>
+                    <p className="mb-2">
+                      for now, your writing will be saved locally on your
+                      browser.
+                    </p>
+                    <div
+                      className="w-fit mt-4 mx-auto"
+                      onClick={handleSaveSession}
+                    >
+                      <button
+                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      >
+                        {savingSession ? "saving..." : "save session"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}{" "}
+      </div>
+    );
 
   return (
     <div
@@ -473,7 +721,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           <div
             className={`${
               isTextareaClicked ? "" : ""
-            } w-full grow pt-4 flex flex-col`}
+            } w-full h-full pt-4 flex flex-col`}
           >
             {userLost ? (
               <div className="">
@@ -511,7 +759,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 </div>
               </div>
             ) : (
-              <div>
+              <div className="h-full w-full">
                 {sessionSaved ? (
                   <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
                     <span className="w-24 h-24 relative">
@@ -543,32 +791,95 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-left bg-white relative rounded-xl shadow-lg px-8 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between items-center">
-                    <span className="w-24 h-24 relative">
-                      <Image src="/images/Icon_copy_2.svg" fill />
-                    </span>
-
-                    <div className="flex w-full  space-y-2 flex-col justify-between mt-8">
-                      <div className="p-2 w-full px-4 h-20 rounded-xl py-4 border border-black flex items-center">
-                        <div className="w-1/4 aspect-square flex flex-col items-center relative">
-                          <Image src="/images/newen.svg" fill />
+                  <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
+                    {authenticated ? (
+                      <div className="flex h-full  w-full flex-col items-center justif-center md:flex-row">
+                        <div className="h-fit md:h-full w-full md:w-1/2">
+                          <div className="mx-auto my-4 relative w-72 h-96">
+                            <Image
+                              src={usersMentor?.imageUrl}
+                              fill
+                              alt="users mentor"
+                            />
+                          </div>
+                          <p className="text-center text-md md:text-3xl">
+                            congratulations, you made it.
+                          </p>
+                          <p className="text-center text-md md:text-3xl">
+                            one day at a time.
+                          </p>
                         </div>
-                        <div className="w-3/4 text-center">
-                          <span>{authenticated ? "+7025" : "0"} </span>
-                          <span>$newen</span>
+                        <div className="h-96 md:h-full w-full md:w-1/2">
+                          <div className="flex w-72 mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
+                            <div className="p-2 w-64 px-4 h-20 rounded-xl py-4 border border-black flex items-center">
+                              <div className="w-1/4 aspect-square flex flex-col items-center relative">
+                                <Image src="/images/newen.svg" fill />
+                              </div>
+                              <div className="w-3/4 text-center">
+                                <span>{authenticated ? "+7025" : "0"} </span>
+                                <span>$newen</span>
+                              </div>
+                            </div>
+
+                            <div className="flex w-full justify-between">
+                              <div
+                                className="w-fit mt-4 mx-auto"
+                                onClick={copyText}
+                              >
+                                <button
+                                  className={`${
+                                    montserratAlternates.className
+                                  } ${
+                                    copiedText && "bg-green-200"
+                                  }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                                >
+                                  <FaCopy />
+                                </button>
+                              </div>
+                              <div
+                                className="w-fit mt-4 mx-auto"
+                                onClick={handleSaveSession}
+                              >
+                                <button
+                                  className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                                >
+                                  {savingSession ? "saving..." : "save session"}
+                                </button>
+                              </div>
+                            </div>
+
+                            {errorUploadingToIrys && (
+                              <div className="flex flex-col">
+                                <p>
+                                  there was an error uploading your session.
+                                  please let jp know asap in order to fix it.
+                                </p>
+                                <a
+                                  className="text-gray-400 hover:text-gray-500"
+                                  href="https://t.me/jpfraneto"
+                                  target="_blank"
+                                >
+                                  message on telegram
+                                </a>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-
-                      <div className="flex">
-                        <div className="w-fit mt-4 mx-auto" onClick={copyText}>
-                          <button
-                            className={`${montserratAlternates.className} ${
-                              copiedText && "bg-green-200"
-                            }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                          >
-                            <FaCopy />
-                          </button>
-                        </div>
+                    ) : (
+                      <div className="w-96 h-fit p-2 ">
+                        <p>congratulations, you finished your session.</p>
+                        <p>if you own an anky mentor, you can log in.</p>
+                        <p>
+                          if you write your 8 minutes while being logged in, you
+                          will participate on the writing of the first
+                          collaborative book in the history of humanity.
+                        </p>
+                        <p>we need you</p>
+                        <p>
+                          for now, your writing will be saved locally on your
+                          browser.
+                        </p>
                         <div
                           className="w-fit mt-4 mx-auto"
                           onClick={handleSaveSession}
@@ -580,23 +891,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                           </button>
                         </div>
                       </div>
-
-                      {errorUploadingToIrys && (
-                        <div className="flex flex-col">
-                          <p>
-                            there was an error uploading your session. please
-                            let jp know asap in order to fix it.
-                          </p>
-                          <a
-                            className="text-gray-400 hover:text-gray-500"
-                            href="https://t.me/jpfraneto"
-                            target="_blank"
-                          >
-                            message on telegram
-                          </a>
-                        </div>
-                      )}
-                    </div>
+                    )}{" "}
                   </div>
                 )}
               </div>
