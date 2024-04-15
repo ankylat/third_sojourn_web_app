@@ -46,9 +46,6 @@ function MyApp({ Component, pageProps }) {
 
   const handleLogin = async (user) => {
     try {
-      const authToken = await getAccessToken();
-      const thisUserPrivyId = user.id.replace("did:privy:", "");
-
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`,
         {
