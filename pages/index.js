@@ -109,7 +109,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       }
     }
     setLoading(false);
-  }, [userSettings.language, authenticated, ready]);
+  }, [userSettings.language, authenticated, ready, userDatabaseInformation]);
 
   useEffect(() => {
     if (sessionStarted && !finishedSession) {
