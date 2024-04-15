@@ -602,7 +602,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       <FaCopy />
                     </button>
                   </div>
-                  {todaysSessionData?.saved ? (
+                  {todaysSessionData?.saved ||
+                  userDatabaseInformation.todayWriting ? (
                     <div>
                       <a
                         href={`https://paragraph.xyz/@ankytheape/chapter-${
