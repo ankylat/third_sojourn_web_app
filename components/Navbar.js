@@ -12,7 +12,7 @@ const montserratAlternates = Montserrat_Alternates({
 });
 
 const Navbar = ({ isTextareaClicked }) => {
-  const { logout, login, authenticated } = usePrivy();
+  const { logout, login, authenticated, ready } = usePrivy();
   const { userSettings, setUserSettings } = useSettings();
   return (
     <nav
@@ -56,30 +56,37 @@ const Navbar = ({ isTextareaClicked }) => {
           es
         </span>
       </div>
-      {authenticated ? (
-        <div className="flex space-x-4 items-center">
-          <Link
-            className="p-2 rounded-full border border-black hover:bg-purple-200 cursor-pointer"
-            href="/dashboard"
-            passHref
-          >
-            <FaRegUser size={22} />
-          </Link>
+      {ready ? (
+        <>
+          {" "}
+          {authenticated ? (
+            <div className="flex space-x-4 items-center">
+              <Link
+                className="p-2 rounded-full border border-black hover:bg-purple-200 cursor-pointer"
+                href="/dashboard"
+                passHref
+              >
+                <FaRegUser size={22} />
+              </Link>
 
-          <button
-            className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100  shadow-xl border-black border rounded`}
-            onClick={logout}
-          >
-            LOGOUT
-          </button>
-        </div>
+              <button
+                className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100  shadow-xl border-black border rounded`}
+                onClick={logout}
+              >
+                LOGOUT
+              </button>
+            </div>
+          ) : (
+            <button
+              className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100 shadow-xl border-black border rounded`}
+              onClick={login}
+            >
+              LOG IN
+            </button>
+          )}
+        </>
       ) : (
-        <button
-          className={`${montserratAlternates.className} px-4 py-2 hover:bg-gray-100 shadow-xl border-black border rounded`}
-          onClick={login}
-        >
-          LOG IN
-        </button>
+        <p>loading...</p>
       )}
     </nav>
   );

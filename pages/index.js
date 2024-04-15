@@ -447,7 +447,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   };
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text || whatUserWrote);
       setCopiedText(true);
       setTimeout(() => {
         setCopiedText(false);
@@ -459,7 +459,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const copyTodaysText = async () => {
     try {
-      await navigator.clipboard.writeText(userDatabaseInformation.todayWriting);
+      await navigator.clipboard.writeText(whatUserWrote);
       setCopyWritingText("copied");
       setTimeout(() => {
         setCopyWritingText("copy text");

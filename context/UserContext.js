@@ -133,7 +133,7 @@ export const UserProvider = ({ children }) => {
     }
 
     handleInitialization();
-  }, [authenticated]);
+  }, [authenticated, ready]);
 
   // Load the user's library when setup is ready
   useEffect(() => {
@@ -200,7 +200,7 @@ export const UserProvider = ({ children }) => {
       }
     };
     loadUserDatabaseInformation();
-  }, [authenticated]);
+  }, [authenticated, ready]);
 
   async function fetchUsersAnky() {
     if (!wallet || !wallet.address) return;
