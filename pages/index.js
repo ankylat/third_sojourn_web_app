@@ -355,7 +355,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         text: text,
       }));
       localStorage.setItem(
-        `writingSession-${ankyverseDay.wink}`,
+        `writingSession-${ankyverseDay?.wink}`,
         JSON.stringify({
           ...todaysSessionData,
           finished: true,
@@ -370,9 +370,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           `${process.env.NEXT_PUBLIC_API_ROUTE}/end-session`,
           {
             timestamp: now,
-            user: user.id.replace("did:privy:", ""),
+            user: user?.id?.replace("did:privy:", ""),
             frontendWrittenTime,
-            userWallet: user.wallet.address,
+            userWallet: user?.wallet?.address,
             text: text,
             result: result,
           },
@@ -417,8 +417,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             {
               cid: receipt,
               sessionId: sessionId || "",
-              user: user.id.replace("did:privy:", ""),
-              userWallet: user.wallet.address,
+              user: user?.id?.replace("did:privy:", ""),
+              userWallet: user?.wallet?.address,
             },
             {
               headers: {
