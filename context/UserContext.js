@@ -28,12 +28,12 @@ export const UserProvider = ({ children }) => {
         if (ready && authenticated) {
           await changeChainToBase();
           const authToken = await getAccessToken();
-          const thisUserPrivyId = user.id.replace("did:privy:", "");
+          const thisUserPrivyId = user?.id.replace("did:privy:", "");
 
           if (!authToken) return;
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_ROUTE}/user/${thisUserPrivyId}`,
-            { walletAddress: user.wallet.address },
+            { walletAddress: user?.wallet.address },
             {
               headers: {
                 "Content-Type": "application/json",
@@ -45,8 +45,8 @@ export const UserProvider = ({ children }) => {
           if (response?.data?.writingOfToday?.id) {
             let writingOfToday = response.data.writingOfToday;
             formattedWriting = {
-              sessionBrowserId: writingOfToday.randomUUID,
-              sessionDatabaseId: writingOfToday.id,
+              sessionBrowserId: writingOfToday?.randomUUID || "",
+              sessionDatabaseId: writingOfToday?.id || "",
               started: true,
               finished: true,
               won: true,
