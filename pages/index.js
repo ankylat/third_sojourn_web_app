@@ -370,23 +370,22 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       const frontendWrittenTime = Math.floor(
         Math.abs(currentSessionStartingTime - now) / 1000
       );
-      if (sessionOutcome == "won") {
-        setTodaysSessionData((prev) => {
-          const newData = {
-            ...prev,
-            finished: true,
-            won: true,
-            endingTimestamp: now,
-            timeWritten: frontendWrittenTime,
-            text: text,
-          };
-          localStorage.setItem(
-            `writingSession-${ankyverseDay.wink}`,
-            JSON.stringify(newData)
-          );
-          return newData;
-        });
-      }
+      setTodaysSessionData((prev) => {
+        const newData = {
+          ...prev,
+          finished: true,
+          won: sessionOutcome == "won" ? true : false,
+          endingTimestamp: now,
+          timeWritten: frontendWrittenTime,
+          text: text,
+        };
+        localStorage.setItem(
+          `writingSession-${ankyverseDay.wink}`,
+          JSON.stringify(newData)
+        );
+        return newData;
+      });
+
       let response;
       if (authenticated) {
         response = await axios.post(
@@ -411,10 +410,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           response
         );
       }
-      setFinishedSession(true);
     } catch (error) {
       console.log("there was an error pinging the server here.", error);
     }
+    setFinishedSession(true);
   }
 
   const handleSaveSession = async () => {
@@ -669,10 +668,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                       </button>
                     </div>
                   </div>
-                )}{" "}
+                )}
               </div>
             )}
-            <div></div>
           </div>
         ) : (
           <div className="w-full grow">
