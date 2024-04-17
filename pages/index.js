@@ -124,12 +124,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    if (locallySavedSession) {
+    if (userSessionInformation?.formattedWriting.result == "won") {
+      setTodaysSessionData(userSessionInformation?.formattedWriting);
+    } else if (locallySavedSession) {
       setTodaysSessionData(JSON.parse(locallySavedSession));
-    } else {
-      if (userSessionInformation?.formattedWriting) {
-        setTodaysSessionData(userSessionInformation?.formattedWriting);
-      }
     }
   }, [appLoading]);
 
