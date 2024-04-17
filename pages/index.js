@@ -245,7 +245,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       setCurrentSessionStartingTime(now);
       setSessionStarted(true);
       setAlreadyStartedOnce(true);
-      return clearInterval(startingIntervalRef.current);
+      clearInterval(startingIntervalRef.current);
       let databaseSessionId;
       if (authenticated) {
         databaseSessionId = await pingServerToStartWritingSession();
