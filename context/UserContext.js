@@ -44,7 +44,7 @@ export const UserProvider = ({ children }) => {
           );
           console.log("the response is: ", response);
           let formattedWriting = {};
-          if (response.data.writingOfToday) {
+          if (response.data.writingOfToday.id) {
             let writingOfToday = response.data.writingOfToday;
             formattedWriting = {
               sessionBrowserId: writingOfToday.randomUUID,
@@ -59,8 +59,10 @@ export const UserProvider = ({ children }) => {
               cid: writingOfToday.writingCID,
               timeWritten: writingOfToday.sessionDuration,
               ankyMentor: writingOfToday.mentorIndex,
+              result: writingOfToday.result,
             };
           }
+          console.log("the formatted writing is: ", formattedWriting);
 
           setUserSessionInformation({
             ankyMentorIndex: response.data.mentor.mentorIndex || null,
