@@ -351,6 +351,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           },
         }
       );
+      console.log(
+        "the response from pinging the server to start the session is: ",
+        response
+      );
 
       return response.data.id;
     } catch (error) {
