@@ -1,12 +1,8 @@
 import "../styles/globals.css";
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Inter, Montserrat_Alternates } from "next/font/google";
+import { Montserrat_Alternates } from "next/font/google";
 import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
-import { MdMenuOpen } from "react-icons/md";
-import Link from "next/link";
-import Offcanvas from "react-bootstrap/Offcanvas";
 import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { base } from "@wagmi/chains";
 import { configureChains, createConfig } from "wagmi";
@@ -14,11 +10,9 @@ import { publicProvider } from "wagmi/providers/public";
 import Head from "next/head";
 import { SettingsProvider } from "../context/SettingsContext";
 import { UserProvider } from "../context/UserContext";
-import { useRouter } from "next/router";
-import { initializeDB } from "../lib/idbHelper";
-import { Network, Alchemy } from "alchemy-sdk";
+
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -27,32 +21,18 @@ const montserratAlternates = Montserrat_Alternates({
 
 const configureChainsConfig = configureChains([base], [publicProvider()]);
 
-const settings = {
-  apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  network: Network.BASE_MAINNET,
-};
-
 function MyApp({ Component, pageProps }) {
-  const [loginResponse, setLoginResponse] = useState(null);
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
   const [show, setShow] = useState(false);
+  const [globalText, setGlobalText] = useState("");
 
   const handleClose = () => setShow(false);
 
-  const [displayWritingGameLanding, setDisplayWritingGameLanding] =
-    useState(false);
-
-  const router = useRouter();
-
   const handleLogin = async (user) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`,
-        {
-          privyId: user.id.split("did:privy:")[1],
-        }
-      );
-      setLoginResponse(response.data);
+      await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`, {
+        privyId: user.id.split("did:privy:")[1],
+      });
     } catch (error) {
       console.log("the error is: ", error);
     }
@@ -170,22 +150,24 @@ function MyApp({ Component, pageProps }) {
         }}
       >
         <PrivyWagmiConnector wagmiChainsConfig={configureChainsConfig}>
-          <UserProvider>
-            <SettingsProvider>
-              <Navbar
-                isTextareaClicked={isTextareaClicked}
-                setIsTextareaClicked={setIsTextareaClicked}
-                setShow={setShow}
-              />
-              <Component
-                {...pageProps}
-                isTextareaClicked={isTextareaClicked}
-                setIsTextareaClicked={setIsTextareaClicked}
-                show={show}
-                handleClose={handleClose}
-              />
-            </SettingsProvider>
-          </UserProvider>
+          <ErrorBoundary>
+            <UserProvider>
+              <SettingsProvider>
+                <Navbar
+                  isTextareaClicked={isTextareaClicked}
+                  setIsTextareaClicked={setIsTextareaClicked}
+                  setShow={setShow}
+                />
+                <Component
+                  {...pageProps}
+                  isTextareaClicked={isTextareaClicked}
+                  setIsTextareaClicked={setIsTextareaClicked}
+                  show={show}
+                  handleClose={handleClose}
+                />
+              </SettingsProvider>
+            </UserProvider>
+          </ErrorBoundary>
         </PrivyWagmiConnector>
       </PrivyProvider>
     </main>

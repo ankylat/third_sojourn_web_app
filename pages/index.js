@@ -1,25 +1,44 @@
-import { usePrivy, useWallets } from "@privy-io/react-auth";
-import React, { useState, useEffect, useRef } from "react";
-import { useUser } from "../context/UserContext";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+// React Imports
+import React, { useState, useEffect, useRef } from "react";
+
+// Third Party Libraries
+import axios from "axios";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { v4 as uuidv4 } from "uuid";
-import { getAnkyverseDay, getAnkyverseQuestion } from "../lib/ankyverse";
-import { PiWarningCircle } from "react-icons/pi";
+import { ToastContainer, toast } from "react-toastify";
+import { FaCopy } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { FiPenTool } from "react-icons/fi";
-import { FaBookOpen } from "react-icons/fa";
+import { PiWarningCircle } from "react-icons/pi";
 import { WebIrys } from "@irys/sdk";
+
+// Next Imports
 import { IBM_Plex_Sans, Montserrat_Alternates } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import axios from "axios";
-import { getUsersMentor } from "../lib/mentors";
-import { FaCopy } from "react-icons/fa";
+
+// Components
 import Button from "../components/Button";
+import Spinner from "../components/Spinner";
+
+// App Contexts
+import { useUser } from "../context/UserContext";
 import { useSettings } from "../context/SettingsContext";
-import TextStreamer from "../components/TextStreamer";
+
+// Structural Components
 import Footer from "../components/Footer";
+import Instructions from "../components/sections/Instructions";
+import InformationCards from "../components/sections/InformationCards";
+import Welcome from "../components/sections/Welcome";
+
+// Function imports
+import { getUsersMentor } from "../lib/mentors";
+import { getAnkyverseDay } from "../lib/ankyverse";
+
+// ********************************************************************
+
+// State Variables
 
 const secondsOfLife = 8;
 const totalSessionDuration = 480;
@@ -36,82 +55,88 @@ const ibmPlexSans = IBM_Plex_Sans({
   weight: ["400", "500"],
 });
 
-const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
-  const { userDatabaseInformation, appLoading } = useUser();
+// Component
 
+const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
+  const { userSettings } = useSettings();
+  const { userSessionInformation, appLoading } = useUser();
+  const { authenticated, ready, user, login } = usePrivy();
+  const { wallets } = useWallets();
+  const thisUserWallet = wallets.at(0);
+
+  // User States
+  const [usersMentor, setUsersMentor] = useState({});
+
+  // Writing Session Management
+  const [ankyverseQuestionToday, setAnkyverseQuestionToday] = useState("");
+  const [todaysSessionData, setTodaysSessionData] = useState({
+    sessionBrowserId: null,
+    sessionDatabaseId: null,
+    started: false,
+    finished: false,
+    won: false,
+    savedOnIrys: false,
+    startingTimestamp: null,
+    endingTimestamp: null,
+    text: "",
+    cid: "",
+    timeWritten: 0,
+    ankyMentor: null,
+  });
+  const [whatUserWrote, setWhatUserWrote] = useState("");
+
+  // Writing session states
+  const [sessionRandomUUID, setSessionRandomUUID] = useState("");
+  const [currentSessionStartingTime, setCurrentSessionStartingTime] =
+    useState(null);
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
   const [lifeBarLength, setLifeBarLength] = useState(0);
   const [newenBarLength, setNewenBarLength] = useState(0);
-  const [copiedText, setCopiedText] = useState(false);
-  const [moveText, setMoveText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [whatUserWrote, setWhatUserWrote] = useState("");
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [lastKeystroke, setLastKeystroke] = useState();
+
+  // Layout State Management
+  const [textareaHidden, setTextareaHidden] = useState(false);
+  const [finishedSession, setFinishedSession] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
+  const [sessionSaved, setSessionSaved] = useState(false);
   const [notFixedAnymore, setNotFixedAnymore] = useState(true);
   const [alreadyStartedOnce, setAlreadyStartedOnce] = useState(false);
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [sessionRandomUUID, setSessionRandomUUID] = useState("");
-
-  const { userSettings } = useSettings();
-  const [privyAuthToken, setPrivyAuthToken] = useState(null);
-  const [startTime, setStartTime] = useState(null);
-  const [textareaHidden, setTextareaHidden] = useState(false);
-  const [todaysSessionData, setTodaysSessionData] = useState({
-    text: "",
-    started: false,
-    finished: false,
-    saved: false,
-    sessionId: null,
-    timeWritten: 0,
-    cid: "",
-    startingTimestamp: null,
-    endingTimestamp: null,
-    ankyMentor: null,
-  });
-  const [errorUploadingToIrys, setErrorUploadingToIrys] = useState(false);
-  const [copyWritingText, setCopyWritingText] = useState("copy text");
-  const [userStreak, setUserStreak] = useState(1);
-  const [ankyverseQuestion, setAnkyverseQuestion] = useState("");
-  const [savingSession, setSavingSession] = useState(false);
-  const [sessionId, setSessionId] = useState("");
-  const [sessionSaved, setSessionSaved] = useState(false);
-  const [lastKeystroke, setLastKeystroke] = useState();
+  const [copiedText, setCopiedText] = useState(false);
+  const [moveText, setMoveText] = useState("");
   const [userLost, setUserLost] = useState(true);
-  const [finishedSession, setFinishedSession] = useState(false);
-  const { wallets } = useWallets();
-  const { authenticated, getAccessToken, ready, user, login } = usePrivy();
-  const [usersMentor, setUsersMentor] = useState({});
-  const thisUserWallet = wallets.at(0);
+
+  // useRef's
 
   const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
+  const startingTimeoutRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
 
+  // Initial App Setup
   useEffect(() => {
-    setAnkyverseQuestion(ankyverseDay.prompt[userSettings.language]);
-    const mentor = getUsersMentor(userDatabaseInformation.ankyMentorIndex);
-    setUsersMentor(mentor);
-    const savedSession = localStorage.getItem(
+    if (appLoading) return;
+
+    setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
+    setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
+
+    const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    setTimeout(() => {
-      if (userDatabaseInformation && userDatabaseInformation.writingOfToday) {
-        setWhatUserWrote(userDatabaseInformation.writingOfToday.text);
-      }
-    }, 222);
-
-    if (savedSession) {
-      setTodaysSessionData(JSON.parse(savedSession));
-      setSessionId(savedSession.sessionId);
-
-      if (!userDatabaseInformation?.writingOfToday && savedSession?.text) {
-        setWhatUserWrote(savedSession?.text);
+    if (userSessionInformation?.formattedWriting) {
+      setTodaysSessionData(userSessionInformation?.formattedWriting);
+    } else {
+      if (locallySavedSession) {
+        setTodaysSessionData(JSON.parse(locallySavedSession));
       }
     }
-    setLoading(false);
-  }, [userSettings.language, authenticated, ready, userDatabaseInformation]);
+  }, [appLoading]);
+
+  // Writing App Functionality
 
   useEffect(() => {
+    // state management for the 8 minute timer
     if (sessionStarted && !finishedSession) {
       intervalRef.current = setInterval(() => {
         setTime((time) => {
@@ -127,10 +152,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             toast("10 seconds left!");
           }
           if (totalSessionDuration - newTime == 0) {
-            clearInterval(keystrokeIntervalRef.current);
-            setIsTextareaClicked(false);
             setUserLost(false);
-            clearInterval(intervalRef.current);
+            clearInterval(intervalRef?.current);
+            clearInterval(keystrokeIntervalRef?.current);
+            setIsTextareaClicked(false);
             setFinishedSession(true);
             pingServerToEndWritingSession("won");
           }
@@ -143,21 +168,43 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }, [sessionStarted, time]);
 
   useEffect(() => {
+    // state management for the 8 second timer trigger
     if (sessionStarted && !finishedSession) {
       keystrokeIntervalRef.current = setInterval(() => {
-        const elapsedTime = Date.now() - lastKeystroke;
-        if (elapsedTime > secondsOfLife * 1000) {
+        const now = new Date().getTime();
+        const elapsedTimeBetweenKeystrokes = Date.now() - lastKeystroke;
+        if (elapsedTimeBetweenKeystrokes > secondsOfLife * 1000) {
           pingServerToEndWritingSession("lost");
           clearInterval(keystrokeIntervalRef.current);
           setFinishedSession(true);
+          const frontendWrittenTime = Math.floor(
+            Math.abs(currentSessionStartingTime - now) / 1000
+          );
+          setTodaysSessionData((prev) => {
+            const newData = {
+              ...prev,
+              endingTimestamp: now,
+              timeWritten: frontendWrittenTime,
+              text: text,
+              finished: true,
+            };
+            localStorage.setItem(
+              `writingSession-${ankyverseDay.wink}`,
+              JSON.stringify(newData)
+            );
+            return newData;
+          });
         } else {
-          const newLifeBarLength = 100 - elapsedTime / (10 * secondsOfLife);
-          setLifeBarLength(Math.max(newLifeBarLength, 0)); // do not allow negative values
+          const newLifeBarLength =
+            100 - elapsedTimeBetweenKeystrokes / (10 * secondsOfLife);
+          setLifeBarLength(Math.max(newLifeBarLength, 0));
         }
-      }, 88);
+      }, 100);
     }
     return () => clearInterval(keystrokeIntervalRef.current);
   }, [sessionStarted, lastKeystroke]);
+
+  // For starting the session
 
   const handleClick = async () => {
     if (authenticated) {
@@ -167,35 +214,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
+    let now = new Date();
     const newRandomUUID = uuidv4();
     setSessionRandomUUID(newRandomUUID);
     setIsTextareaClicked(true);
-    if (alreadyStartedOnce) {
-      setLifeBarLength(100);
-      let now = new Date();
-      let response;
 
-      setTodaysSessionData((prev) => ({
-        ...prev,
-        started: true,
-        sessionId: sessionRandomUUID,
-        startingTimestamp: now.getTime(),
-      }));
-      localStorage.setItem(
-        `writingSession-${ankyverseDay.wink}`,
-        JSON.stringify({
-          ...todaysSessionData,
-          started: true,
-          sessionId: sessionRandomUUID,
-          startingTimestamp: now.getTime(),
-        })
-      );
-      if (authenticated) {
-        pingServerToStartWritingSession();
-      }
-      setLastKeystroke(now);
-      setStartTime(now);
-      setSessionStarted(true);
+    if (alreadyStartedOnce) {
+      startWritingSession(newRandomUUID);
     } else {
       startingIntervalRef.current = setInterval(() => {
         setLifeBarLength((x) => {
@@ -206,41 +231,45 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           return x + 100 / waitingTime;
         });
       }, 1000);
-      setTimeout(() => {
-        startWritingSession();
+      startingTimeoutRef.current = setTimeout(() => {
+        startWritingSession(newRandomUUID);
       }, waitingTime * 1000);
     }
   };
 
-  const startWritingSession = () => {
+  const startWritingSession = async (thisNewRandomUUID) => {
     try {
       let now = new Date();
-      let response;
-
-      setTodaysSessionData((prev) => ({
-        ...prev,
-        started: true,
-        sessionId: sessionRandomUUID,
-        startingTimestamp: now.getTime(),
-      }));
-      localStorage.setItem(
-        `writingSession-${ankyverseDay.wink}`,
-        JSON.stringify({
-          ...todaysSessionData,
-          started: true,
-          sessionId: sessionRandomUUID,
-          startingTimestamp: now.getTime(),
-        })
-      );
-
-      if (authenticated) {
-        pingServerToStartWritingSession();
-      }
       setTextareaHidden(false);
       setLastKeystroke(now);
-      setStartTime(now);
+      setCurrentSessionStartingTime(now);
       setSessionStarted(true);
+      setAlreadyStartedOnce(true);
       return clearInterval(startingIntervalRef.current);
+      let databaseSessionId;
+      if (authenticated) {
+        databaseSessionId = await pingServerToStartWritingSession();
+      }
+
+      setTodaysSessionData((prev) => {
+        const newData = {
+          ...prev,
+          started: true,
+          finished: false,
+          savedOnIrys: false,
+          sessionBrowserId: thisNewRandomUUID,
+          startingTimestamp: now.getTime(),
+          sessionDatabaseId: databaseSessionId,
+          endingTimestamp: null,
+          timeWritten: 0,
+          text: "",
+        };
+        localStorage.setItem(
+          `writingSession-${ankyverseDay.wink}`,
+          JSON.stringify(newData)
+        );
+        return newData;
+      });
     } catch (error) {
       console.log("there was an error starting the session", error);
     }
@@ -264,14 +293,14 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     return webIrys;
   };
 
-  async function sendTextToIrys() {
+  async function saveSessionToIrys(writingSession) {
     try {
       const tags = [
         { name: "Content-Type", value: "text/plain" },
         { name: "application-id", value: "Anky Third Sojourn - v0" },
         {
           name: "mentor-index",
-          value: userDatabaseInformation?.ankyMentorIndex?.toString() || null,
+          value: userSessionInformation?.ankyMentorIndex?.toString() || null,
         },
         {
           name: "sojourn",
@@ -281,19 +310,21 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           name: "day",
           value: ankyverseDay.wink.toString(),
         },
-        { name: "time-user-wrote", value: time?.toString() },
+        {
+          name: "time-user-wrote",
+          value: writingSession.timeWritten?.toString(),
+        },
         {
           name: "uuid",
-          value: sessionRandomUUID || "",
+          value: writingSession.sessionBrowserId || "",
         },
       ];
       const webIrys = await getWebIrys();
       try {
-        const receipt = await webIrys.upload(text, { tags });
+        const receipt = await webIrys.upload(writingSession.text, { tags });
 
         return receipt.id;
       } catch (e) {
-        // setErrorUploadingToIrys(true);
         console.log("Error uploading data ", e);
       }
     } catch (error) {
@@ -305,65 +336,53 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     try {
       let now = new Date();
       let response;
-      setTodaysSessionData((prev) => ({
-        ...todaysSessionData,
-        ankyMentor: userDatabaseInformation?.ankyMentorIndex || null,
-      }));
-      localStorage.setItem(
-        `writingSession-${ankyverseDay.wink}`,
-        JSON.stringify({
-          ...todaysSessionData,
-          ankyMentor: userDatabaseInformation?.ankyMentorIndex || null,
-        })
+      response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
+        {
+          randomUUID: sessionRandomUUID,
+          timestamp: now,
+          userPrivyId: user.id.replace("did:privy:", ""),
+          wallet: user.wallet.address,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
+          },
+        }
       );
 
-      if (authenticated) {
-        const authToken = await getAccessToken();
-        setPrivyAuthToken(authToken);
-        response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_ROUTE}/start-session`,
-          {
-            randomUUID: sessionRandomUUID,
-            timestamp: now,
-            userPrivyId: user.id.replace("did:privy:", ""),
-            wallet: user.wallet.address,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-        setSessionId(response.data.id);
-        setSessionStarted(true);
-      }
+      return response.data.id;
     } catch (error) {
       console.log("there was an error requesting to ping the serve", error);
     }
+    // start it even if the server was not pinged (for resiliency measurements)
+    setSessionStarted(true);
   }
 
-  async function pingServerToEndWritingSession(result) {
+  async function pingServerToEndWritingSession(sessionOutcome) {
     try {
       const now = new Date().getTime();
-      const frontendWrittenTime = Math.floor(Math.abs(startTime - now) / 1000);
-      setTodaysSessionData((prev) => ({
-        ...prev,
-        finished: true,
-        endingTimestamp: now,
-        timeWritten: frontendWrittenTime,
-        text: text,
-      }));
-      localStorage.setItem(
-        `writingSession-${ankyverseDay?.wink}`,
-        JSON.stringify({
-          ...todaysSessionData,
-          finished: true,
-          endingTimestamp: now,
-          timeWritten: frontendWrittenTime,
-          text: text,
-        })
+      const frontendWrittenTime = Math.floor(
+        Math.abs(currentSessionStartingTime - now) / 1000
       );
+      if (sessionOutcome == "won") {
+        setTodaysSessionData((prev) => {
+          const newData = {
+            ...prev,
+            finished: true,
+            won: true,
+            endingTimestamp: now,
+            timeWritten: frontendWrittenTime,
+            text: text,
+          };
+          localStorage.setItem(
+            `writingSession-${ankyverseDay.wink}`,
+            JSON.stringify(newData)
+          );
+          return newData;
+        });
+      }
       let response;
       if (authenticated) {
         response = await axios.post(
@@ -374,21 +393,17 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             frontendWrittenTime,
             userWallet: user?.wallet?.address,
             text: text,
-            result: result,
+            result: sessionOutcome,
           },
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${privyAuthToken}`,
+              Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
             },
           }
         );
       }
       setFinishedSession(true);
-      return {
-        manaBalance: response?.data?.data?.manaBalance || 0,
-        streak: response?.data?.data?.activeStreak || userStreak,
-      };
     } catch (error) {
       console.log("there was an error pinging the server here.", error);
     }
@@ -400,53 +415,39 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       setSavingSession(true);
 
       if (authenticated) {
-        const receipt = await sendTextToIrys();
+        const receipt = await saveSessionToIrys(todaysSessionData);
         if (receipt) {
-          setTodaysSessionData((prev) => ({
-            ...prev,
-            saved: true,
-            cid: receipt,
-          }));
-          localStorage.setItem(
-            `writingSession-${ankyverseDay.wink}`,
-            JSON.stringify({ ...todaysSessionData, saved: true, cid: receipt })
-          );
+          setTodaysSessionData((prev) => {
+            const newData = { ...prev, savedOnIrys: true, cid: receipt };
+            localStorage.setItem(
+              `writingSession-${ankyverseDay.wink}`,
+              JSON.stringify(newData)
+            );
+            return newData;
+          });
 
           let response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
             {
               cid: receipt,
-              sessionId: sessionId || "",
+              sessionId: todaysSessionData.sessionDatabaseId || "",
               user: user?.id?.replace("did:privy:", ""),
               userWallet: user?.wallet?.address,
             },
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${privyAuthToken}`,
+                Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
               },
             }
           );
         }
-      } else {
-        console.log("saving the session");
-        setTodaysSessionData((prev) => ({
-          ...prev,
-          saved: true,
-        }));
-        localStorage.setItem(
-          `writingSession-${ankyverseDay.wink}`,
-          JSON.stringify({ ...todaysSessionData, saved: true })
-        );
-        console.log("alsao");
       }
       setSavingSession(false);
       setSessionSaved(true);
     } catch (error) {
       console.log("there is an error here", error);
     }
-    setSavingSession(false);
-    setSessionSaved(true);
   };
   const copyText = async () => {
     try {
@@ -460,16 +461,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
   };
 
-  const copyTodaysText = async () => {
-    try {
-      await navigator.clipboard.writeText(whatUserWrote);
-      setCopyWritingText("copied");
-      setTimeout(() => {
-        setCopyWritingText("copy text");
-      }, 2222);
-    } catch (error) {}
-  };
-
   const handleTextChange = (e) => {
     try {
       setText(e.target.value);
@@ -480,216 +471,95 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
   };
 
-  if (loading) return <p>loading...</p>;
+  const startAllOverAgain = async () => {
+    clearInterval(startingIntervalRef.current);
+    clearInterval(intervalRef.current);
+    clearInterval(keystrokeIntervalRef.current);
+    setTextareaHidden(false);
+    setAlreadyStartedOnce(false);
+    setIsTextareaClicked(false);
+    setSessionStarted(false);
+    setNewenBarLength(0);
+    setLifeBarLength(0);
+    setTime(0);
+    setFinishedSession(false);
+  };
 
-  if (
-    todaysSessionData.timeWritten > 400 &&
-    !authenticated &&
-    todaysSessionData.saved
-  ) {
+  if (appLoading)
     return (
-      <div className="w-full h-screen flex flex-col items-center pt-4 text-left">
-        <div className="w-full h-full md:w-1/2 p-2">
-          <Link passHref href="/ankyverse">
-            <h2 className={`${ankyverseDay.color} hover:opacity-60 text-xl`}>
-              sojourn #3 · wink {ankyverseDay.wink} ·{" "}
-              {ankyverseDay.kingdom.toLowerCase()}
-            </h2>
-          </Link>
-
-          <p className="my-2 text-purple-600">{ankyverseQuestion}</p>
-          <div
-            onClick={() => {
-              setMoveText(true);
-              setTimeout(() => {
-                setMoveText(false);
-              }, 888);
-              copyTodaysText();
-            }}
-            className={`${moveText && " translate-x-2 tranlate-y-2"}
-               grow overflow-y-scroll mt-3 hover:text-shadow-lg pb-8 hover:text-purple-800 cursor-pointer 
-            } `}
-          >
-            {whatUserWrote ? (
-              whatUserWrote.includes("\n") ? (
-                whatUserWrote.split("\n").map((x, i) => (
-                  <p className="my-2" key={i}>
-                    {x}
-                  </p>
-                ))
-              ) : (
-                <p className="my-2">{whatUserWrote}</p>
-              )
-            ) : null}
-            {moveText && <p className="text-red-600 mt-8">copied</p>}
-
-            <div className="mt-4">
-              <a
-                href={`https://paragraph.xyz/@ankytheape/chapter-${
-                  ankyverseDay.wink - 2
-                }`}
-                target="_blank"
-              >
-                <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                  read chapter {ankyverseDay.wink - 2}
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
+      <div className="h-full w-full flex items-center justify-center">
+        <Spinner />
       </div>
     );
-  }
 
-  if (whatUserWrote)
+  if (
+    authenticated &&
+    todaysSessionData.started &&
+    todaysSessionData.finished &&
+    todaysSessionData.won
+  ) {
     return (
-      <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
-        {authenticated ? (
-          <div className="flex h-full  w-full flex-col items-center justif-center md:flex-row">
-            <div className="h-fit md:h-full w-full md:w-1/2">
-              <div className="mx-auto my-4 relative w-72 h-96">
-                <Image src={usersMentor?.imageUrl} fill alt="users mentor" />
+      <div className="flex h-full  w-full flex-col items-center justif-center md:flex-row">
+        <div className="h-fit md:h-full w-full md:w-1/2">
+          <div className="mx-auto my-4 relative w-72 h-96">
+            <Image src={usersMentor?.imageUrl} fill alt="users mentor" />
+          </div>
+          <p className="text-center text-md md:text-3xl">
+            congratulations, you made it.
+          </p>
+          <p className="text-center text-md md:text-3xl">one day at a time.</p>
+        </div>
+        <div className="h-96 md:h-full w-full md:w-1/2">
+          <div className="flex w-96 mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
+            {todaysSessionData.savedOnIrys ? (
+              <div className="flex flex-col justify-center items-center">
+                <h2
+                  className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
+                >
+                  sojourn #3 · wink {ankyverseDay.wink} ·{" "}
+                  {ankyverseDay.kingdom.toLowerCase()}
+                </h2>
+                <p>your session was saved, with this id:</p>
+                <p className="text-center w-full mb-5 text-xs text-purple-600">
+                  {todaysSessionData.cid}
+                </p>{" "}
+                <a
+                  href={`https://paragraph.xyz/@ankytheape/chapter-${
+                    ankyverseDay.wink - 2
+                  }`}
+                  target="_blank"
+                  className=""
+                >
+                  <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
+                    read chapter {ankyverseDay.wink - 2}
+                  </span>
+                </a>
               </div>
-              <p className="text-center text-md md:text-3xl">
-                congratulations, you made it.
-              </p>
-              <p className="text-center text-md md:text-3xl">
-                one day at a time.
-              </p>
-            </div>
-            <div className="h-96 md:h-full w-full md:w-1/2">
-              <div className="flex w-full mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-                <Link passHref href="/ankyverse">
-                  <h2
-                    className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
-                  >
-                    sojourn #3 · wink {ankyverseDay.wink} ·{" "}
-                    {ankyverseDay.kingdom.toLowerCase()}
-                  </h2>
-                </Link>
-                <div className="p-2 w-full bg-purple-200 text-wrap rounded-xl border border-black">
-                  {whatUserWrote ? (
-                    whatUserWrote.includes("\n") ? (
-                      whatUserWrote.split("\n").map((x, i) => (
-                        <p className="my-2" key={i}>
-                          {x}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="my-2">{whatUserWrote}</p>
-                    )
-                  ) : null}
-                </div>
-
-                <div className="flex w-full justify-center items-center">
+            ) : (
+              <div className="flex w-full justify-between">
+                <div className="w-fit mt-4 mx-auto" onClick={copyText}>
                   <button
-                    onClick={copyText}
                     className={`${montserratAlternates.className} ${
                       copiedText && "bg-green-200"
                     }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                   >
                     <FaCopy />
                   </button>
-
-                  {todaysSessionData?.saved ||
-                  userDatabaseInformation.writingOfToday.status ==
-                    "completed" ? (
-                    <a
-                      href={`https://paragraph.xyz/@ankytheape/chapter-${
-                        ankyverseDay.wink - 2
-                      }`}
-                      target="_blank"
-                    >
-                      <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                        read chapter {ankyverseDay.wink - 2}
-                      </span>
-                    </a>
-                  ) : (
-                    <div className="w-fit mx-auto" onClick={handleSaveSession}>
-                      <button
-                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                      >
-                        {savingSession ? "saving..." : "save session"}
-                      </button>
-                    </div>
-                  )}
                 </div>
-
-                {errorUploadingToIrys && (
-                  <div className="flex flex-col">
-                    <p>
-                      there was an error uploading your session. please let jp
-                      know asap in order to fix it.
-                    </p>
-                    <a
-                      className="text-gray-400 hover:text-gray-500"
-                      href="https://t.me/jpfraneto"
-                      target="_blank"
-                    >
-                      message on telegram
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="w-96 h-fit p-2 ">
-            {todaysSessionData?.ankyMentor ? (
-              <div>
-                <p>you already wrote your session of today</p>
-                <p>but it hasn&apos;t been saved</p>
-                <p>please login to do so:</p>
-                <div className="w-96 my-2">
-                  <Button
-                    buttonAction={login}
-                    buttonText="login"
-                    buttonColor="bg-purple-200"
-                  />
+                <div className="w-fit mt-4 mx-auto" onClick={handleSaveSession}>
+                  <button
+                    className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                  >
+                    {savingSession ? "saving..." : "save session"}
+                  </button>
                 </div>
-              </div>
-            ) : (
-              <div>
-                {todaysSessionData.saved ? (
-                  <div>
-                    <p>this is your session of today:</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="mb-2">
-                      congratulations, you finished your session.
-                    </p>
-                    <p className="mb-2">
-                      if you own an anky mentor, you can log in.
-                    </p>
-                    <p className="mb-2">
-                      if you write your 8 minutes while being logged in, you
-                      will participate on the writing of the first collaborative
-                      book in the history of humanity.
-                    </p>
-                    <p className="mb-2">we need you</p>
-                    <p className="mb-2">
-                      for now, your writing will be saved locally on your
-                      browser.
-                    </p>
-                    <div
-                      className="w-fit mt-4 mx-auto"
-                      onClick={handleSaveSession}
-                    >
-                      <button
-                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                      >
-                        {savingSession ? "saving..." : "save session"}
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
-        )}{" "}
+        </div>
       </div>
     );
+  }
 
   return (
     <div
@@ -721,29 +591,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           </>
         )}
-
-        {/* {usersMentor?.imageUrl && (
-          <div className="w-48 h-72 rounded-xl overflow-hidden absolute left-10">
-            <span className="w-full h-full opacity-50">
-              <Image src={usersMentor.imageUrl} fill />
-            </span>
-            {usersMentor?.description && (
-              <div className="text-black absolute h-full overflow-y-scroll top-0 p-3">
-                {usersMentor.description ? (
-                  usersMentor.description.includes("\n") ? (
-                    usersMentor.description.split("\n").map((x, i) => (
-                      <p className="my-2" key={i}>
-                        {x}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="my-2">{usersMentor.description}</p>
-                  )
-                ) : null}
-              </div>
-            )}
-          </div>
-        )} */}
 
         <ToastContainer />
         {finishedSession ? (
@@ -789,140 +636,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               </div>
             ) : (
               <div className="h-full w-full">
-                {sessionSaved ? (
-                  <div className="text-left bg-white rounded-xl shadow-lg px-3 py-8 w-80 rounded-xl h-fit mx-auto flex flex-col justify-between  items-center">
-                    <span className="w-24 h-24 relative">
-                      <Image src="/images/Icon_copy_2.svg" fill />
-                    </span>
-                    <div className="py-2 w-full px-4 h-20 rounded-xl py-4 shadow-xl my-4 flex justify-center items-center">
-                      <span className="mx-2">day {ankyverseDay.wink}</span>
-                      <span className="">ready</span>
-                    </div>
-                    <div className="flex flex-col mb-4 rounded-xl py-2  border border-black">
-                      <div>
-                        <p className="wrap p-2 text-md text-center">
-                          congratulations. the invitation is to remain in the
-                          awareness of this prompt today.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex justify-center w-full ">
-                      <a
-                        href={`https://paragraph.xyz/@ankytheape/chapter-${
-                          ankyverseDay.wink - 2
-                        }`}
-                        target="_blank"
+                {!authenticated && (
+                  <div className="w-96 h-fit p-2 ">
+                    <p>congratulations, you finished your session.</p>
+                    <p>if you own an anky mentor, you can log in.</p>
+                    <p>
+                      if you write your 8 minutes while being logged in, you
+                      will participate on the writing of the first collaborative
+                      book in the history of humanity.
+                    </p>
+                    <p>we need you</p>
+                    <p>
+                      for now, your writing will be saved locally on your
+                      browser.
+                    </p>
+                    <div
+                      className="w-fit mt-4 mx-auto"
+                      onClick={handleSaveSession}
+                    >
+                      <button
+                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                       >
-                        <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                          read chapter {ankyverseDay.wink - 2}
-                        </span>
-                      </a>
+                        {savingSession ? "saving..." : "save session"}
+                      </button>
                     </div>
                   </div>
-                ) : (
-                  <div className="text-left w-full h-full relative rounded-xl shadow-lg p-2 w-80 rounded-xl mx-auto flex flex-col justify-between items-center">
-                    {authenticated ? (
-                      <div className="flex h-full  w-full flex-col items-center justif-center md:flex-row">
-                        <div className="h-fit md:h-full w-full md:w-1/2">
-                          <div className="mx-auto my-4 relative w-72 h-96">
-                            <Image
-                              src={usersMentor?.imageUrl}
-                              fill
-                              alt="users mentor"
-                            />
-                          </div>
-                          <p className="text-center text-md md:text-3xl">
-                            congratulations, you made it.
-                          </p>
-                          <p className="text-center text-md md:text-3xl">
-                            one day at a time.
-                          </p>
-                        </div>
-                        <div className="h-96 md:h-full w-full md:w-1/2">
-                          <div className="flex w-72 mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-                            <div className="p-2 w-64 px-4 h-20 rounded-xl py-4 border border-black flex items-center">
-                              <div className="w-1/4 aspect-square flex flex-col items-center relative">
-                                <Image src="/images/newen.svg" fill />
-                              </div>
-                              <div className="w-3/4 text-center">
-                                <span>{authenticated ? "+7025" : "0"} </span>
-                                <span>$newen</span>
-                              </div>
-                            </div>
-
-                            <div className="flex w-full justify-between">
-                              <div
-                                className="w-fit mt-4 mx-auto"
-                                onClick={copyText}
-                              >
-                                <button
-                                  className={`${
-                                    montserratAlternates.className
-                                  } ${
-                                    copiedText && "bg-green-200"
-                                  }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                                >
-                                  <FaCopy />
-                                </button>
-                              </div>
-                              <div
-                                className="w-fit mt-4 mx-auto"
-                                onClick={handleSaveSession}
-                              >
-                                <button
-                                  className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                                >
-                                  {savingSession ? "saving..." : "save session"}
-                                </button>
-                              </div>
-                            </div>
-
-                            {errorUploadingToIrys && (
-                              <div className="flex flex-col">
-                                <p>
-                                  there was an error uploading your session.
-                                  please let jp know asap in order to fix it.
-                                </p>
-                                <a
-                                  className="text-gray-400 hover:text-gray-500"
-                                  href="https://t.me/jpfraneto"
-                                  target="_blank"
-                                >
-                                  message on telegram
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-96 h-fit p-2 ">
-                        <p>congratulations, you finished your session.</p>
-                        <p>if you own an anky mentor, you can log in.</p>
-                        <p>
-                          if you write your 8 minutes while being logged in, you
-                          will participate on the writing of the first
-                          collaborative book in the history of humanity.
-                        </p>
-                        <p>we need you</p>
-                        <p>
-                          for now, your writing will be saved locally on your
-                          browser.
-                        </p>
-                        <div
-                          className="w-fit mt-4 mx-auto"
-                          onClick={handleSaveSession}
-                        >
-                          <button
-                            className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                          >
-                            {savingSession ? "saving..." : "save session"}
-                          </button>
-                        </div>
-                      </div>
-                    )}{" "}
-                  </div>
-                )}
+                )}{" "}
               </div>
             )}
             <div></div>
@@ -937,21 +676,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   textareaHidden ? "text-xl" : "text-sm"
                 } md:text-2xl shadow-lg relative`}
               >
-                {ankyverseQuestion}
+                {ankyverseQuestionToday}
                 {!sessionStarted && (
                   <span
                     className="absolute text-red-600 hover:text-red-500 right-1 cursor-pointer top-1"
                     onClick={() => {
                       try {
-                        clearInterval(startingIntervalRef.current);
-                        clearInterval(intervalRef.current);
-                        clearInterval(keystrokeIntervalRef.current);
-                        setTextareaHidden(false);
-                        setAlreadyStartedOnce(false);
-                        setIsTextareaClicked(false);
-                        setSessionStarted(false);
-                        setNewenBarLength(0);
-                        setLifeBarLength(0);
+                        startAllOverAgain();
                       } catch (error) {
                         console.log("there was an eeeerror", error);
                       }
@@ -986,14 +717,17 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             {textareaHidden && (
               <div className="flex flex-col space-y-2">
                 {!authenticated && (
-                  <p className="my-3 text-red-300 text-center">
+                  <p className="my-3 text-2xl text-red-500 text-center">
                     heads up: you are not logged in
                   </p>
                 )}
                 <div className="w-fit mx-auto mt-4">
                   <Button
                     buttonText="start writing"
-                    buttonAction={startWritingSession}
+                    buttonAction={() => {
+                      clearTimeout(startingTimeoutRef.current);
+                      startWritingSession(sessionRandomUUID);
+                    }}
                     buttonColor="bg-green-200"
                   />
                 </div>
@@ -1011,7 +745,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     if (!sessionStarted) {
                       setAlreadyStartedOnce(true);
                       handleClick();
-
                       if (!alreadyStartedOnce) {
                         setTextareaHidden(true);
                       }
@@ -1052,150 +785,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </div>
         )}
       </section>
-      <section
-        className="h-screen py-8 md:py-0 bg-gray-200 md:h-screen w-full flex flex-col justify-around items-center  md:flex-row px-8 md:px-12"
-        id="welcome"
-      >
-        <div className="w-full md:w-1/2 md:h-1/3 mb-4 md:mb-0 h-48 relative">
-          <Image src="/images/logo.svg" fill />
-        </div>
-        <div className="w-full md:w-1/3">
-          <h2 className="text-3xl">Welcome</h2>
-          <p className="mt-4">
-            Anky is a frame of reference to gamify what is fundamentally hard to
-            do: Get to know yourself.
-          </p>
-          <p className="mt-4">
-            We use different tools in order to develop a core capacity: being
-            able to write, every day, for 8 minutes.
-          </p>
-        </div>
-      </section>
-      <section className="h-fit md:h-screen flex  items-center">
-        <div className="flex h-fit flex-wrap xl:flex-nowrap justify-around items-stretch w-full py-12 px-2 md:px-12">
-          <div className="p-2 max-w-72 border border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
-            <div className="w-48 h-48 relative">
-              <FiPenTool size={192} />
-            </div>
-            <p className="w-64 mt-4 h-fit">
-              The core practice is writing a stream of consciousness daily, for
-              8 minutes.
-            </p>
-          </div>
-          <div className="p-2 border  max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
-            {" "}
-            <div className="w-48 h-48 relative">
-              <FaBookOpen size={192} />
-            </div>
-            <p className="w-64 mt-4 h-fit">
-              All of the writings are used to train a custom AI model that will
-              write a book. Every day a new chapter is written.
-            </p>
-          </div>
-          <div className="p-2 border max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
-            {" "}
-            <div className="w-48 h-48 relative">
-              <Image src="/images/newen.svg" fill />
-            </div>
-            <p className="w-64 mt-4 h-fit">
-              Our writers are rewarded with $newen, which is a cryptocurrency
-              that exists on the blockchain.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="h-screen w-full flex justify-around flex-col md:flex-row ">
-        <div className="w-full md:w-1/2 bg-black h-full flex items-center justify-center">
-          <div className="relative">
-            <Image src="/images/darkoh.png" width={333} height={555} />
-          </div>
-        </div>
-        <div className="w-full md:w-1/2 h-full py-8 px-4 md:px-0 md:py-0 flex flex-col items-center justify-center">
-          <div className="w-96">
-            <h2 className="text-3xl mb-8">1. Own an Anky Mentor</h2>
-            <p>
-              To participate on this collective experience you need a key. Your
-              mentor is that key.
-            </p>
-            <div className="mt-4 mb-4 w-fit">
-              <a
-                href={`https://opensea.io/collection/anky-mentors`}
-                target="_blank"
-              >
-                <Button
-                  buttonText="explore mentors"
-                  buttonColor="bg-purple-200"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className="h-screen w-full flex justify-around flex-col-reverse  md:flex-row ">
-        <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
-          <div className="w-96">
-            <h2 className="text-3xl mb-8">2. Come and write every day</h2>
-            <p>
-              Your mission is 8 minutes of an unfiltered stream of
-              consciousness, answering the prompt of the day.
-            </p>
-            <div className="mt-4 w-fit">
-              <Button
-                buttonText="write"
-                buttonAction={() => {
-                  if (!sessionStarted) {
-                    setAlreadyStartedOnce(true);
-                    handleClick();
-
-                    if (!alreadyStartedOnce) {
-                      setTextareaHidden(true);
-                    }
-                  }
-                }}
-                buttonColor="bg-purple-200"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="w-full md:w-1/2 bg-black flex-col  py-8  md:py-0 h-full flex items-center justify-center">
-          <p className="text-purple-400 mb-4">prompt of today:</p>
-          <div className="relative w-full px-4 md:w-2/3">
-            <TextStreamer text={ankyverseDay.prompt["en"]} />
-          </div>
-        </div>
-      </section>{" "}
-      <section className="h-screen w-full flex justify-around flex-col md:flex-row ">
-        <div className="w-full md:w-1/2 bg-black h-full flex items-center justify-center">
-          <div className="relative rounded-xl border-white border-2 overflow-hidden">
-            <Image src="/images/librarian.png" width={666} height={333} />
-          </div>
-        </div>
-        <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
-          <div className="w-96">
-            <h2 className="text-3xl mb-8">
-              3. Read the chapter generated the previous day
-            </h2>
-            <p>
-              Our custom trained AI model processes all of what is written on a
-              given day into the chapter of that day.
-            </p>
-            <p>
-              We are writing, together, the first AI assisted collaborative
-              story of humanity.
-            </p>
-            <div className="mt-4 w-fit">
-              <a
-                href={`https://paragraph.xyz/@ankytheape/chapter-${
-                  ankyverseDay.wink - 2
-                }`}
-                target="_blank"
-              >
-                <Button buttonText="read book" buttonColor="bg-purple-200" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Welcome />
+      <InformationCards />
+      <Instructions ankyverseDay={ankyverseDay} />
       <Footer />
     </div>
   );
