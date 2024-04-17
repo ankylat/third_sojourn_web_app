@@ -43,21 +43,24 @@ export const UserProvider = ({ children }) => {
             }
           );
           console.log("the response is: ", response);
-          const writingOfToday = response.data.writingOfToday;
-          const formattedWriting = {
-            sessionBrowserId: writingOfToday.randomUUID,
-            sessionDatabaseId: writingOfToday.id,
-            started: true,
-            finished: true,
-            won: true,
-            savedOnIrys: writingOfToday.writingCID && true,
-            startingTimestamp: writingOfToday.startTime,
-            endingTimestamp: null,
-            text: writingOfToday.text,
-            cid: writingOfToday.writingCID,
-            timeWritten: writingOfToday.sessionDuration,
-            ankyMentor: writingOfToday.mentorIndex,
-          };
+          let formattedWriting = {};
+          if (response.data.writingOfToday) {
+            let writingOfToday = response.data.writingOfToday;
+            formattedWriting = {
+              sessionBrowserId: writingOfToday.randomUUID,
+              sessionDatabaseId: writingOfToday.id,
+              started: true,
+              finished: true,
+              won: true,
+              savedOnIrys: writingOfToday.writingCID && true,
+              startingTimestamp: writingOfToday.startTime,
+              endingTimestamp: null,
+              text: writingOfToday.text,
+              cid: writingOfToday.writingCID,
+              timeWritten: writingOfToday.sessionDuration,
+              ankyMentor: writingOfToday.mentorIndex,
+            };
+          }
 
           setUserSessionInformation({
             ankyMentorIndex: response.data.mentor.mentorIndex || null,
