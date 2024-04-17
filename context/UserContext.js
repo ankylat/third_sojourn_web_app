@@ -26,7 +26,6 @@ export const UserProvider = ({ children }) => {
       try {
         if (!ready) return;
         if (ready && authenticated) {
-          console.log("INSIDE HERE");
           await changeChainToBase();
           const authToken = await getAccessToken();
           const thisUserPrivyId = user.id.replace("did:privy:", "");
@@ -42,9 +41,8 @@ export const UserProvider = ({ children }) => {
               },
             }
           );
-          console.log("the response is: ", response);
           let formattedWriting = {};
-          if (response.data.writingOfToday.id) {
+          if (response?.data?.writingOfToday?.id) {
             let writingOfToday = response.data.writingOfToday;
             formattedWriting = {
               sessionBrowserId: writingOfToday.randomUUID,
@@ -77,6 +75,7 @@ export const UserProvider = ({ children }) => {
         }
       } catch (error) {
         console.log("there was an errror here0, ", error);
+        setAppLoading(false);
       }
     };
     initialAppSetup();
