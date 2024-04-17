@@ -124,11 +124,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    if (userSessionInformation?.formattedWriting) {
-      setTodaysSessionData(userSessionInformation?.formattedWriting);
+    if (locallySavedSession) {
+      setTodaysSessionData(JSON.parse(locallySavedSession));
     } else {
-      if (locallySavedSession) {
-        setTodaysSessionData(JSON.parse(locallySavedSession));
+      if (userSessionInformation?.formattedWriting) {
+        setTodaysSessionData(userSessionInformation?.formattedWriting);
       }
     }
   }, [appLoading]);
@@ -405,6 +405,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
             },
           }
+        );
+        console.log(
+          "the response from calling the server to upload the session after it ending is: ",
+          response
         );
       }
       setFinishedSession(true);
