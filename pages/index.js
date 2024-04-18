@@ -34,15 +34,15 @@ import Welcome from "../components/sections/Welcome";
 
 // Function imports
 import { getUsersMentor } from "../lib/mentors";
-import { getAnkyverseDay } from "../lib/ankyverse";
+import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 
 // ********************************************************************
 
 // State Variables
 
 const secondsOfLife = 8;
-const totalSessionDuration = 480;
-const waitingTime = 30;
+const totalSessionDuration = 10;
+const waitingTime = 3;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
@@ -106,6 +106,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [copiedText, setCopiedText] = useState(false);
   const [moveText, setMoveText] = useState("");
   const [userLost, setUserLost] = useState(true);
+  const [decodeAnkyverseCharacters, setDecodeAnkyverseCharacters] =
+    useState(false);
 
   // useRef's
 
@@ -516,8 +518,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           </p>
           <p className="text-center text-md md:text-3xl">one day at a time.</p>
         </div>
-        <div className="h-96 md:h-full w-full md:w-1/2">
-          <div className="flex w-96 mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
+        <div className="h-96 md:h-full w-full md:w-1/2 px-8">
+          <div className="flex w-full mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
             {todaysSessionData.savedOnIrys ? (
               <div className="flex flex-col justify-center items-center">
                 <h2
@@ -527,9 +529,21 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   {ankyverseDay.kingdom.toLowerCase()}
                 </h2>
                 <p>your session was saved, with this id:</p>
-                <p className="text-center w-full mb-5 text-xs text-purple-600">
-                  {todaysSessionData.cid}
-                </p>{" "}
+                <a
+                  href={`https://explorer.irys.xyz/transactions/${todaysSessionData.cid}`}
+                  target="_blank"
+                  onMouseEnter={() => {
+                    setDecodeAnkyverseCharacters(true);
+                  }}
+                  onMouseLeave={() => {
+                    setDecodeAnkyverseCharacters(false);
+                  }}
+                  className={`text-center w-full px-2 mb-5 text-xs text-purple-600 hover:text-md cursor-pointer hover:text-red-500`}
+                >
+                  {decodeAnkyverseCharacters
+                    ? todaysSessionData.cid
+                    : encodeToAnkyverseLanguage(todaysSessionData.cid)}
+                </a>{" "}
                 <a
                   href={`https://paragraph.xyz/@ankytheape/chapter-${
                     ankyverseDay.wink - 2
@@ -543,22 +557,28 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 </a>
               </div>
             ) : (
-              <div className="flex w-full justify-between">
-                <div className="w-fit mt-4 mx-auto" onClick={copyText}>
-                  <button
-                    className={`${montserratAlternates.className} ${
-                      copiedText && "bg-green-200"
-                    }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+              <div className="flex flex-col items-center p-2 w-full">
+                <p>congratulations, you finished your session</p>
+                <div className="flex w-full  justify-between">
+                  <div className="w-fit mt-4 mx-auto" onClick={copyText}>
+                    <button
+                      className={`${montserratAlternates.className} ${
+                        copiedText && "bg-green-200"
+                      }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    >
+                      <FaCopy />
+                    </button>
+                  </div>
+                  <div
+                    className="w-fit mt-4 mx-auto"
+                    onClick={handleSaveSession}
                   >
-                    <FaCopy />
-                  </button>
-                </div>
-                <div className="w-fit mt-4 mx-auto" onClick={handleSaveSession}>
-                  <button
-                    className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                  >
-                    {savingSession ? "saving..." : "save session"}
-                  </button>
+                    <button
+                      className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    >
+                      {savingSession ? "saving..." : "save session"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
