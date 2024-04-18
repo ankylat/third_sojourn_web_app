@@ -122,16 +122,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   // Initial App Setup
   useEffect(() => {
     if (appLoading) return;
-    console.log("the user settings are:", userSettings);
-    try {
-      setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
-    } catch (error) {
-      console.log("the users mentor is not available");
-    }
+    setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
+
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
-    if (userSessionInformation?.formattedWriting?.timeWritten > 333) {
+    if (userSessionInformation?.formattedWriting) {
       setTodaysSessionData(userSessionInformation?.formattedWriting);
     } else if (locallySavedSession) {
       setTodaysSessionData(JSON.parse(locallySavedSession));
@@ -524,7 +520,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         </div>
         <div className="h-96 md:h-full w-full md:w-1/2 px-8">
           <div className="flex w-full mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-            {todaysSessionData.savedOnIrys ? (
+            {todaysSessionData.savedOnIrys && todaysSessionData.cid ? (
               <div className="flex flex-col justify-center items-center">
                 <h2
                   className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
