@@ -41,8 +41,8 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 // State Variables
 
 const secondsOfLife = 8;
-const totalSessionDuration = 10;
-const waitingTime = 3;
+const totalSessionDuration = 480;
+const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
