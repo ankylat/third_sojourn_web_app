@@ -128,16 +128,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     } catch (error) {
       console.log("the users mentor is not available");
     }
-
+    const locallySavedSession = localStorage.getItem(
+      `writingSession-${ankyverseDay.wink}`
+    );
     if (userSessionInformation?.formattedWriting?.timeWritten > 333) {
       setTodaysSessionData(userSessionInformation?.formattedWriting);
     } else if (locallySavedSession) {
-      try {
-        const locallySavedSession = localStorage.getItem(
-          `writingSession-${ankyverseDay.wink}`
-        );
-        setTodaysSessionData(JSON.parse(locallySavedSession));
-      } catch (error) {}
+      setTodaysSessionData(JSON.parse(locallySavedSession));
     }
   }, [appLoading]);
 
