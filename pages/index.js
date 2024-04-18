@@ -123,14 +123,21 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   useEffect(() => {
     if (appLoading) return;
     console.log("the user settings are:", userSettings);
-    setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
-    const locallySavedSession = localStorage.getItem(
-      `writingSession-${ankyverseDay.wink}`
-    );
-    if (userSessionInformation?.formattedWriting?.result == "won") {
+    try {
+      setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
+    } catch (error) {
+      console.log("the users mentor is not available");
+    }
+
+    if (userSessionInformation?.formattedWriting?.timeWritten > 333) {
       setTodaysSessionData(userSessionInformation?.formattedWriting);
     } else if (locallySavedSession) {
-      setTodaysSessionData(JSON.parse(locallySavedSession));
+      try {
+        const locallySavedSession = localStorage.getItem(
+          `writingSession-${ankyverseDay.wink}`
+        );
+        setTodaysSessionData(JSON.parse(locallySavedSession));
+      } catch (error) {}
     }
   }, [appLoading]);
 
@@ -543,7 +550,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   {decodeAnkyverseCharacters
                     ? todaysSessionData.cid
                     : encodeToAnkyverseLanguage(todaysSessionData.cid)}
-                </a>{" "}
+                </a>
                 <a
                   href={`https://paragraph.xyz/@ankytheape/chapter-${
                     ankyverseDay.wink - 2
