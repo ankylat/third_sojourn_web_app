@@ -49,6 +49,7 @@ const Navbar = ({ isTextareaClicked }) => {
           }`}
           onClick={() =>
             setUserSettings((x) => {
+              console.log("aloja");
               return { ...x, language: "es" };
             })
           }

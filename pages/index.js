@@ -114,13 +114,14 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const startingTimeoutRef = useRef(null);
   const keystrokeIntervalRef = useRef(null);
 
+  useEffect(() => {
+    setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
+  }, [userSettings]);
   // Initial App Setup
   useEffect(() => {
     if (appLoading) return;
-
-    setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
+    console.log("the user settings are:", userSettings);
     setUsersMentor(getUsersMentor(userSessionInformation?.ankyMentorIndex));
-
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
     );
@@ -212,6 +213,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
+    setAlreadyStartedOnce(true);
     let now = new Date();
     const newRandomUUID = uuidv4();
     setSessionRandomUUID(newRandomUUID);
@@ -747,7 +749,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 <textarea
                   onClick={() => {
                     if (!sessionStarted) {
-                      setAlreadyStartedOnce(true);
                       handleClick();
                       if (!alreadyStartedOnce) {
                         setTextareaHidden(true);
