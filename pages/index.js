@@ -146,6 +146,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             (newTime / totalSessionDuration) *
             100
           ).toFixed(2);
+          if (totalSessionDuration - newTime == 360) {
+            toast("6 minutes left");
+          }
+          if (totalSessionDuration - newTime == 240) {
+            toast("4 minutes left");
+          }
+          if (totalSessionDuration - newTime == 120) {
+            toast("2 minutes left");
+          }
           if (totalSessionDuration - newTime == 30) {
             toast("30 seconds left!");
           }
