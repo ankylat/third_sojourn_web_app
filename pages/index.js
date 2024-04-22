@@ -553,7 +553,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     ? todaysSessionData.cid
                     : encodeToAnkyverseLanguage(todaysSessionData.cid)}
                 </a>
-                <a
+                {/* <a
                   href={`https://paragraph.xyz/@ankytheape/chapter-${
                     ankyverseDay.wink - 2
                   }`}
@@ -563,7 +563,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
                     read chapter {ankyverseDay.wink - 2}
                   </span>
-                </a>
+                </a> */}
               </div>
             ) : (
               <div className="flex flex-col items-center p-2 w-full">
