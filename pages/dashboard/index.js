@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import { useSettings } from "../../context/SettingsContext";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { getAnkyverseQuestionForToday } from "../../lib/ankyverse";
 import Image from "next/image";
 import Button from "../../components/Button";
-import { FaCopy, FaShareFromSquare } from "react-icons/fa";
+import { getThisUserWritings } from "../../lib/irys";
+import { FaCopy } from "react-icons/fa";
 
 const DashboardIndex = () => {
   const { authenticated, login, ready } = usePrivy();
+  const { allUserWritings, setAllUserWritings } = useUser();
   const [writings, setWritings] = useState([]);
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [textCopied, setTextCopied] = useState(false);
@@ -19,15 +21,18 @@ const DashboardIndex = () => {
     name: "Darkoh",
   });
   const [userActivity, setUserActivity] = useState({});
-  const { allUserWritings } = useUser();
   const { userSettings } = useSettings();
+  const { wallets } = useWallets();
+  const thisUserWallet = wallets.at(0);
 
   const startTimestamp = 1711861200;
 
   // Run the check when component mounts or writings change
   useEffect(() => {
-    checkUserActivity();
-  }, [allUserWritings]);
+    if (authenticated && ready) {
+      checkUserActivity();
+    }
+  }, [authenticated, ready]);
 
   useEffect(() => {
     // Function to load writings from local storage
@@ -60,7 +65,6 @@ const DashboardIndex = () => {
   const currentAnkyverseDay = getCurrentAnkyverseDay();
 
   const getWritingByDay = (day) => {
-    console.log("the day is: ", day);
     setChosenAnkyverseDay(day);
     const writing = allUserWritings.find((writing) => {
       const writingDay =
@@ -71,7 +75,12 @@ const DashboardIndex = () => {
     setWritingForDisplay(writing);
   };
 
-  const checkUserActivity = () => {
+  const checkUserActivity = async () => {
+    if (!thisUserWallet.address) return;
+    const allUserWritingsResponse = await getThisUserWritings(
+      thisUserWallet.address
+    );
+    setAllUserWritings(allUserWritingsResponse);
     const activity = {};
     const activeDaysSet = new Set();
     // Loop through each Ankyverse day up to the current day
@@ -112,31 +121,7 @@ const DashboardIndex = () => {
   if (!authenticated)
     return (
       <div className="px-2 flex flex-col justify-center w-full items-center">
-        <p>these are all of your unauthenticated pieces of writing</p>
-        <div>
-          <h1>Saved Writings</h1>
-          <ul>
-            {writings.map((writing, index) => (
-              <li
-                className="bg-purple-200 p-2 rounded-xl border border-black my-2 w-5/6 mx-auto md:w-96"
-                key={index}
-              >
-                <p>Date: {new Date(writing.timestamp).toLocaleDateString()}</p>
-                <p>Text: {writing.text}</p>
-                <p>Duration: {writing.duration} seconds</p>
-                <div className="w-fit my-2">
-                  <Button
-                    buttonText="copy json"
-                    buttonColor="bg-green-200"
-                    buttonAction={() => {
-                      copyJson(writing);
-                    }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p>login please</p>
       </div>
     );
   return (

@@ -28,15 +28,7 @@ function MyApp({ Component, pageProps }) {
 
   const handleClose = () => setShow(false);
 
-  const handleLogin = async (user) => {
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_ROUTE}/check-user`, {
-        privyId: user.id.split("did:privy:")[1],
-      });
-    } catch (error) {
-      console.log("the error is: ", error);
-    }
-  };
+  const handleLogin = async (user) => {};
 
   return (
     <main

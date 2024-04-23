@@ -6,7 +6,7 @@ import { getThisUserWritings } from "../lib/irys";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const { authenticated, loading, ready, user } = usePrivy();
+  const { authenticated, loading, getAccessToken, ready, user } = usePrivy();
 
   const [userSessionInformation, setUserSessionInformation] = useState({});
   const [appLoading, setAppLoading] = useState(true);
@@ -27,7 +27,6 @@ export const UserProvider = ({ children }) => {
         if (!ready) return;
         if (ready && authenticated) {
           await changeChainToBase();
-          console.log("inside the initial app setup");
           setAppLoading(false);
         } else {
           setAppLoading(false);
@@ -42,16 +41,16 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function getAllUserWritings() {
-      console.log("inside the get all user writings");
       if (!wallet) return;
       if (!authenticated) return;
       const writings = await getThisUserWritings(wallet.address);
       const sortedWritings = writings.sort(sortWritings);
+
       setAllUserWritings(sortedWritings);
     }
 
     getAllUserWritings();
-  }, [authenticated]);
+  }, [wallet]);
 
   const changeChainToBase = async () => {
     if (authenticated && wallet) {
