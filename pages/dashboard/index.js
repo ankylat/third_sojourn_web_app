@@ -126,6 +126,19 @@ const DashboardIndex = () => {
     );
   return (
     <div className="h-full w-full flex flex-col items-center px-8 ">
+      <div className="w-96 mx-auto">
+        <p className="mb-2">
+          if the information you see here is different than what you expect...
+          just let go of that expectation
+        </p>
+        <p className="mb-2">
+          there may be many errors, and that is part of the learning process of
+          how to build this thing
+        </p>
+        <p className="mb-2">but don&apos;t forget to write</p>
+        <p className="mb-2">that is the whole point. thank you.</p>
+      </div>
+
       <div className="flex w-full justify-center mx-auto flex-wrap w-fit">
         {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
           (day) => {
