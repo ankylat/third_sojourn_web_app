@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { FaCopy } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { PiWarningCircle } from "react-icons/pi";
+import { FaShareSquare } from "react-icons/fa";
 import { WebIrys } from "@irys/sdk";
 
 // Next Imports
@@ -40,10 +41,12 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 
 // State Variables
 
-const secondsOfLife = 8;
-const totalSessionDuration = 480;
-const waitingTime = 481;
+const secondsOfLife = 481;
+const totalSessionDuration = 5;
+const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
+const startingTimestamp = 1711861200; // UNIX timestamp in seconds
+const oneDayInSeconds = 86400; // 24 hours in seconds
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -96,6 +99,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [lastKeystroke, setLastKeystroke] = useState();
 
   // Layout State Management
+  const [clockTime, setClockTime] = useState("00:00:00");
   const [textareaHidden, setTextareaHidden] = useState(false);
   const [finishedSession, setFinishedSession] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
@@ -117,6 +121,30 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   useEffect(() => {
     setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
   }, [userSettings]);
+
+  useEffect(() => {
+    const updateClock = () => {
+      const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+      const elapsedTime = currentTime - startingTimestamp;
+      const daysSinceStart = Math.floor(elapsedTime / oneDayInSeconds);
+      const secondsToday = elapsedTime % oneDayInSeconds;
+      const hours = Math.floor(secondsToday / 3600);
+      const minutes = Math.floor((secondsToday % 3600) / 60);
+      const seconds = secondsToday % 60;
+
+      // Format time string as HH:MM:SS
+      const timeString = `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      setClockTime(`${timeString}`);
+    };
+
+    // Update the clock every second
+    const intervalId = setInterval(updateClock, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
   // Initial App Setup
   useEffect(() => {
     const locallySavedSession = localStorage.getItem(
@@ -169,9 +197,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           if (totalSessionDuration - newTime == 0) {
             setUserLost(false);
             clearInterval(intervalRef?.current);
-            setIsTextareaClicked(false);
+            setTextareaHidden(false);
             setFinishedSession(true);
-            finishThisSession();
+            saveThisSession();
           }
           setNewenBarLength(Math.max(0, Math.max(0, newenBarLength)));
           return newTime;
@@ -183,7 +211,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   // For starting the session
 
-  async function finishThisSession() {
+  async function saveThisSession() {
     try {
       const now = new Date().getTime();
       const frontendWrittenTime = Math.floor(
@@ -363,7 +391,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   };
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(text || whatUserWrote);
+      await navigator.clipboard.writeText(text || todaysSessionData.text);
       setCopiedText(true);
       setTimeout(() => {
         setCopiedText(false);
@@ -372,6 +400,30 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       console.log("there was an error copying the text");
     }
   };
+
+  async function handleShareSession() {
+    try {
+      if (!todaysSessionData?.cid)
+        return toast.error(
+          "you havent saved your session with your wallet yet"
+        );
+      console.log("in here");
+      await navigator.clipboard.writeText(
+        `https://www.anky.lat/r/${todaysSessionData.cid}`
+      );
+      toast.success("link copied", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log("there was an error copying the text");
+    }
+  }
 
   const handleTextChange = (e) => {
     try {
@@ -396,6 +448,34 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setFinishedSession(false);
   };
 
+  const handleUserDistraction = () => {
+    toast.warn("hey! come back. it is time to write.", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
+  useEffect(() => {
+    // Detect when the tab visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleUserDistraction();
+      }
+    };
+
+    // Event listener for tab visibility change
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Clean up event listener
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
   if (
     authenticated &&
     todaysSessionData.started &&
@@ -404,85 +484,50 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   ) {
     return (
       <div className="flex h-full  w-full flex-col items-center justify-center md:flex-row">
-        {/* <div className="h-fit md:h-full w-full md:w-1/2">
-          <div className="mx-auto my-4 relative w-72 h-96">
-            <Image src={usersMentor?.imageUrl} fill alt="users mentor" />
-          </div>
-          <p className="text-center text-md md:text-3xl">
-            congratulations, you made it.
-          </p>
-          <p className="text-center text-md md:text-3xl">one day at a time.</p>
-        </div> */}
+        <ToastContainer />
         <div className="h-96 md:h-full w-full md:w-fit px-8">
-          <div className="flex w-full mx-auto border border-black bg-white py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-            {todaysSessionData.savedOnIrys && todaysSessionData.cid ? (
-              <div className="flex flex-col justify-center items-center">
-                <h2
-                  className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
-                >
-                  sojourn #3 · wink {ankyverseDay.wink} ·{" "}
-                  {ankyverseDay.kingdom.toLowerCase()}
-                </h2>
-                <p>your session of today was saved, with this id:</p>
-                <a
-                  href={`https://explorer.irys.xyz/transactions/${todaysSessionData.cid}`}
-                  target="_blank"
-                  onMouseEnter={() => {
-                    setDecodeAnkyverseCharacters(true);
-                  }}
-                  onMouseLeave={() => {
-                    setDecodeAnkyverseCharacters(false);
-                  }}
-                  className={`text-center md:text-xl w-full px-2 mb-5 text-xs text-purple-600 hover:text-md cursor-pointer hover:text-red-500`}
-                >
-                  {decodeAnkyverseCharacters
-                    ? todaysSessionData.cid
-                    : encodeToAnkyverseLanguage(todaysSessionData.cid)}
-                </a>
-                {/* <a
-                  href={`https://paragraph.xyz/@ankytheape/chapter-${
-                    ankyverseDay.wink - 2
-                  }`}
-                  target="_blank"
-                  className=""
-                >
-                  <span className="border-solid  py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full">
-                    read chapter {ankyverseDay.wink - 2}
-                  </span>
-                </a> */}
+          <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
+            <div className="flex flex-col items-center p-2 w-96">
+              <h2
+                className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
+              >
+                day {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()} ·{" "}
+                {clockTime}
+              </h2>
+              <div
+                className={`${
+                  copiedText && "bg-green-200"
+                } rounded-xl w-full h-72 overflow-y-scroll mb-2`}
+              >
+                {todaysSessionData.text}
               </div>
-            ) : (
-              <div className="flex flex-col items-center p-2 w-full">
-                <p>congratulations, you finished your session</p>
-                <p>
-                  for now, it is saved locally on your device, please SAVE it by
-                  clicking the button below and signing the transaction with
-                  your wallet.
-                </p>
-                <p>you need to do this for it to be stored.</p>
-                <div className="flex w-full  justify-between">
-                  <div className="w-fit mt-4 mx-auto" onClick={copyText}>
-                    <button
-                      className={`${montserratAlternates.className} ${
-                        copiedText && "bg-green-200"
-                      }  border-solid py-3 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+              {todaysSessionData.savedOnIrys && todaysSessionData.cid ? (
+                <div>
+                  <div className="flex w-full justify-between">
+                    <div
+                      className="w-fit  mx-auto"
+                      onClick={handleShareSession}
                     >
-                      <FaCopy />
-                    </button>
+                      <button
+                        className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      >
+                        <FaShareSquare />
+                      </button>
+                    </div>
                   </div>
-                  <div
-                    className="w-fit mt-4 mx-auto"
-                    onClick={handleSaveSession}
-                  >
+                </div>
+              ) : (
+                <div className="flex w-full  justify-between">
+                  <div className="w-fit  mx-auto" onClick={handleSaveSession}>
                     <button
                       className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                     >
-                      {savingSession ? "saving..." : "save"}
+                      {savingSession ? "sending..." : "send to the ankyverse"}
                     </button>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -508,6 +553,14 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 }}
               ></div>
             </div>
+            <div className="h-1 w-full overflow-hidden">
+              <div
+                className="h-full opacity-80 life-bar rounded-r-xl"
+                style={{
+                  width: `${lifeBarLength}%`,
+                }}
+              ></div>
+            </div>
           </>
         )}
 
@@ -518,70 +571,30 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               isTextareaClicked ? "" : ""
             } w-full h-full pt-4 flex flex-col`}
           >
-            {userLost ? (
-              <div className="">
-                <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mx-auto flex items-center">
-                  <span className="mr-8">
-                    <PiWarningCircle size={33} />{" "}
-                  </span>
-                  <span className="text-left text-black">
-                    You stopped writing for more than 8 seconds. This mechanism
-                    is intended for you to not think, just write. There is no
-                    right or wrong here.
-                  </span>
-                </div>
-                <div className="flex mx-auto w-96 space-x-2">
-                  <div className="w-fit mt-4 mx-auto" onClick={copyText}>
-                    <button
-                      className={`${montserratAlternates.className} ${
-                        copiedText && "bg-green-200"
-                      } border-solid py-4 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                    >
-                      <FaCopy />
-                    </button>
-                  </div>
-                  <div
-                    onClick={() => {
-                      setFinishedSession(false);
-                      setNewenBarLength(0);
-                      setSessionStarted(false);
-                      setTime(0);
-                    }}
-                    className="w-36 mx-auto mt-4 flex justify-center items-center border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
-                  >
-                    retry
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full w-full">
-                {!authenticated && (
-                  <div className="w-96 h-fit mx-auto p-2">
-                    <p>congratulations, you finished your session.</p>
-                    <p>
-                      if you own an anky mentor, you can log in, and save it.
-                    </p>
-                    <p>
-                      by doing this, you will participate on the writing of the
-                      first collaborative book in the history of humanity.
-                    </p>
-                    <p>we need you</p>
-                    <p>
-                      for now, your writing will be saved locally on your
-                      browser.
-                    </p>
+            <div className="h-full w-full">
+              {!authenticated && (
+                <div className="w-96 h-fit mx-auto p-2">
+                  <p>congratulations, you finished your session.</p>
+                  <p>if you own an anky mentor, you can log in, and save it.</p>
+                  <p>
+                    by doing this, you will participate on the writing of the
+                    first collaborative book in the history of humanity.
+                  </p>
+                  <p>we need you</p>
+                  <p>
+                    for now, your writing will be saved locally on your browser.
+                  </p>
 
-                    <div className="w-fit mt-4 mx-auto">
-                      <Button
-                        buttonAction={login}
-                        buttonText="login"
-                        buttonColor="bg-green-300"
-                      />
-                    </div>
+                  <div className="w-fit mt-4 mx-auto">
+                    <Button
+                      buttonAction={login}
+                      buttonText="login"
+                      buttonColor="bg-green-300"
+                    />
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="w-full grow">
@@ -624,8 +637,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   <h2
                     className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
                   >
-                    sojourn #3 · wink {ankyverseDay.wink} ·{" "}
-                    {ankyverseDay.kingdom.toLowerCase()}
+                    day {ankyverseDay.wink} ·{" "}
+                    {ankyverseDay.kingdom.toLowerCase()} · {clockTime}
                   </h2>
                 </Link>
               </div>
@@ -643,6 +656,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     buttonText="start writing"
                     buttonAction={() => {
                       clearTimeout(startingTimeoutRef.current);
+                      setLifeBarLength(100);
                       startWritingSession(sessionRandomUUID);
                     }}
                     buttonColor="bg-green-200"
@@ -665,6 +679,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                         setTextareaHidden(true);
                       }
                     }
+                  }}
+                  onBlur={() => {
+                    handleUserDistraction();
                   }}
                   style={{ fontStyle: "italic" }}
                   onChange={handleTextChange}

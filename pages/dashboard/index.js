@@ -1,7 +1,10 @@
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import { useSettings } from "../../context/SettingsContext";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { FaShareSquare } from "react-icons/fa";
 import { getAnkyverseQuestionForToday } from "../../lib/ankyverse";
 import Image from "next/image";
 import Button from "../../components/Button";
@@ -118,6 +121,26 @@ const DashboardIndex = () => {
     } catch (error) {}
   };
 
+  async function handleShareSession() {
+    try {
+      console.log("the writing for display is: ", writingForDisplay);
+      await navigator.clipboard.writeText(
+        `https://www.anky.lat/r/${writingForDisplay.cid}`
+      );
+      toast.success("link copied", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log("there was an error copying the text", error);
+    }
+  }
+
   if (!authenticated)
     return (
       <div className="px-2 flex flex-col justify-center w-full items-center">
@@ -126,6 +149,7 @@ const DashboardIndex = () => {
     );
   return (
     <div className="h-full w-full flex flex-col items-center px-8 ">
+      <ToastContainer />
       <div className="w-96 mx-auto">
         <p className="mb-2">
           if the information you see here is different than what you expect...
@@ -185,15 +209,16 @@ const DashboardIndex = () => {
                   )
                 ) : null}
               </div>
-              <div className="flex mt-2 mb-2 active:translate-y-1">
-                <button
-                  onClick={copyText}
-                  className={`border-solid py-2 ${
-                    textCopied ? "bg-green-300" : "bg-purple-300"
-                  } 00 px-8  shadow-xl border rounded-full`}
-                >
-                  <FaCopy />
-                </button>
+              <div>
+                <div className="flex w-full justify-between">
+                  <div className="w-fit  mx-auto" onClick={handleShareSession}>
+                    <button
+                      className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                    >
+                      <FaShareSquare />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
