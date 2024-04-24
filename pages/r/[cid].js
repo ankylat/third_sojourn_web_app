@@ -32,7 +32,7 @@ const WritingSessionByCid = ({ writingSession, ankyverseDay }) => {
   }
 
   return (
-    <div className="flex h-full  w-full flex-col  justify-center md:flex-row">
+    <div className="flex h-full  w-full flex-col justify-start pt-4 md:justify-center md:flex-row">
       <div className="h-96 md:h-full w-full md:w-fit px-8">
         <ToastContainer />
         <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
