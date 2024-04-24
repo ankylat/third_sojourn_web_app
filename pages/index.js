@@ -42,7 +42,7 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 // State Variables
 
 const secondsOfLife = 481;
-const totalSessionDuration = 5;
+const totalSessionDuration = 480;
 const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 const startingTimestamp = 1711861200; // UNIX timestamp in seconds
