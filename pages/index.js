@@ -42,7 +42,7 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 
 const secondsOfLife = 8;
 const totalSessionDuration = 480;
-const waitingTime = 30;
+const waitingTime = 481;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 
 const montserratAlternates = Montserrat_Alternates({
@@ -113,7 +113,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
   const startingTimeoutRef = useRef(null);
-  const keystrokeIntervalRef = useRef(null);
 
   useEffect(() => {
     setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
@@ -170,7 +169,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           if (totalSessionDuration - newTime == 0) {
             setUserLost(false);
             clearInterval(intervalRef?.current);
-            clearInterval(keystrokeIntervalRef?.current);
             setIsTextareaClicked(false);
             setFinishedSession(true);
             finishThisSession();
@@ -182,42 +180,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     }
     return () => clearInterval(intervalRef.current);
   }, [sessionStarted, time]);
-
-  useEffect(() => {
-    // state management for the 8 second timer trigger
-    if (sessionStarted && !finishedSession) {
-      keystrokeIntervalRef.current = setInterval(() => {
-        const now = new Date().getTime();
-        const elapsedTimeBetweenKeystrokes = Date.now() - lastKeystroke;
-        if (elapsedTimeBetweenKeystrokes > secondsOfLife * 1000) {
-          clearInterval(keystrokeIntervalRef.current);
-          setFinishedSession(true);
-          const frontendWrittenTime = Math.floor(
-            Math.abs(currentSessionStartingTime - now) / 1000
-          );
-          setTodaysSessionData((prev) => {
-            const newData = {
-              ...prev,
-              endingTimestamp: now,
-              timeWritten: frontendWrittenTime,
-              text: text,
-              finished: true,
-            };
-            localStorage.setItem(
-              `writingSession-${ankyverseDay.wink}`,
-              JSON.stringify(newData)
-            );
-            return newData;
-          });
-        } else {
-          const newLifeBarLength =
-            100 - elapsedTimeBetweenKeystrokes / (10 * secondsOfLife);
-          setLifeBarLength(Math.max(newLifeBarLength, 0));
-        }
-      }, 100);
-    }
-    return () => clearInterval(keystrokeIntervalRef.current);
-  }, [sessionStarted, lastKeystroke]);
 
   // For starting the session
 
@@ -424,7 +386,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const startAllOverAgain = async () => {
     clearInterval(startingIntervalRef.current);
     clearInterval(intervalRef.current);
-    clearInterval(keystrokeIntervalRef.current);
     setTextareaHidden(false);
     setAlreadyStartedOnce(false);
     setIsTextareaClicked(false);
@@ -544,14 +505,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 className="h-full opacity-80 newen-bar rounded-r-xl"
                 style={{
                   width: `${newenBarLength}%`,
-                }}
-              ></div>
-            </div>
-            <div className="h-1 w-full overflow-hidden">
-              <div
-                className="h-full opacity-80 life-bar rounded-r-xl"
-                style={{
-                  width: `${lifeBarLength}%`,
                 }}
               ></div>
             </div>
