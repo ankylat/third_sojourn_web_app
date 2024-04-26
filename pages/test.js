@@ -295,12 +295,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     startWritingSession(sessionRandomUUID, "writing");
   };
 
+  const checkAndStartSession = async () => {
+    try {
+      // Request microphone access
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // If permission is granted, proceed to start the session
+      setIsTextareaClicked(true);
+      setAudioModeOn(true);
+      const newRandomUUID = uuidv4();
+      setSessionRandomUUID(newRandomUUID);
+      startWritingSession(newRandomUUID, "audio");
+      startListening();
+    } catch (error) {
+      // Handle the case where the user denies microphone access
+      console.error("Microphone access was denied", error);
+      toast.error("Microphone access is needed to start audio session.");
+    }
+  };
+
   const startWritingSession = async (thisNewRandomUUID, mode) => {
     try {
       let now = new Date();
       if (mode == "writing") {
         setTextareaHidden(false);
         setLastKeystroke(now);
+      } else {
+        setIsListening(true);
       }
       setCurrentSessionStartingTime(now);
       setSessionStarted(true);
@@ -598,7 +618,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   <div
                     className={`${
                       copiedText && "bg-green-200"
-                    } rounded-xl w-full h-72 overflow-y-scroll mb-2`}
+                    } rounded-xl w-full text-2xl h-72 overflow-y-scroll mb-2`}
                   >
                     {text}
                   </div>
@@ -666,7 +686,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             )}
 
             {sessionStarted && audioModeOn && (
-              <div className="p-2 text-xl h-96 overflow-y-scroll">
+              <div className="py-2 px-4 text-2xl h-96 overflow-y-scroll">
                 {text.includes("\n") ? (
                   text.split("\n").map((x, i) => (
                     <p className="my-2" key={i}>
@@ -707,12 +727,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   {!audioModeOn && (
                     <button
                       className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
-                      onClick={() => {
-                        setIsTextareaClicked(true);
-                        setAudioModeOn(true);
-                        startWritingSession(sessionRandomUUID, "audio");
-                        startListening();
-                      }}
+                      onClick={checkAndStartSession}
                     >
                       <FaMicrophone size={90} />
                     </button>
