@@ -10,8 +10,11 @@ import { v4 as uuidv4 } from "uuid";
 import { ToastContainer, toast } from "react-toastify";
 import { FaCopy } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+import { AudioRecorder, useAudioRecorder } from "react-audio-voice-recorder";
 import { PiWarningCircle } from "react-icons/pi";
-import { FaShareSquare } from "react-icons/fa";
+import { FaShareSquare, FaMicrophone } from "react-icons/fa";
+import { FaPencil } from "react-icons/fa6";
+
 import { WebIrys } from "@irys/sdk";
 
 // Next Imports
@@ -43,7 +46,6 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 
 const secondsOfLife = 481;
 const totalSessionDuration = 480;
-const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 const startingTimestamp = 1711861200; // UNIX timestamp in seconds
 const oneDayInSeconds = 86400; // 24 hours in seconds
@@ -93,10 +95,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     useState(null);
   const [text, setText] = useState("");
   const [time, setTime] = useState(0);
-  const [lifeBarLength, setLifeBarLength] = useState(0);
+  const [lifeBarLength, setLifeBarLength] = useState(100);
   const [newenBarLength, setNewenBarLength] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [lastKeystroke, setLastKeystroke] = useState();
+  const [isListening, setIsListening] = useState(false);
+  const [audioModeOn, setAudioModeOn] = useState(false);
 
   // Layout State Management
   const [clockTime, setClockTime] = useState("00:00:00");
@@ -116,7 +120,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
-  const startingTimeoutRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
@@ -146,6 +150,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     return () => clearInterval(intervalId);
   }, []);
   // Initial App Setup
+
+  useEffect(() => {
+    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang =
+        userSettings.language == "en" ? "en-US" : "es-ES";
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0].transcript)
+          .join("");
+        setText(transcript);
+      };
+
+      recognitionRef.current.onend = () => {
+        if (isListening) recognitionRef.current.start();
+      };
+    } else {
+      toast.error("Your browser does not support Speech Recognition.");
+    }
+  }, [isListening]);
+
   useEffect(() => {
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
@@ -197,8 +227,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           if (totalSessionDuration - newTime == 0) {
             setUserLost(false);
             clearInterval(intervalRef?.current);
+            if (audioModeOn) {
+              recognitionRef.current.stop();
+              setIsListening(false);
+            }
             setTextareaHidden(false);
-            setFinishedSession(true);
             saveThisSession();
           }
           setNewenBarLength(Math.max(0, Math.max(0, newenBarLength)));
@@ -210,6 +243,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }, [sessionStarted, time]);
 
   // For starting the session
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      console.log("the recognition ref is:", recognitionRef);
+      recognitionRef.current.start();
+      console.log("this is listening");
+      setIsListening(true);
+    }
+  };
 
   async function saveThisSession() {
     try {
@@ -232,6 +274,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         );
         return newData;
       });
+      setFinishedSession(true);
     } catch (error) {
       console.log("there was an error finishing this session");
     }
@@ -245,35 +288,40 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
-    setAlreadyStartedOnce(true);
     let now = new Date();
     const newRandomUUID = uuidv4();
     setSessionRandomUUID(newRandomUUID);
     setIsTextareaClicked(true);
+    startWritingSession(sessionRandomUUID, "writing");
+  };
 
-    if (alreadyStartedOnce) {
-      startWritingSession(newRandomUUID);
-    } else {
-      startingIntervalRef.current = setInterval(() => {
-        setLifeBarLength((x) => {
-          if (x >= 90) {
-            setTextareaHidden(false);
-            return clearInterval(startingIntervalRef.current);
-          }
-          return x + 100 / waitingTime;
-        });
-      }, 1000);
-      startingTimeoutRef.current = setTimeout(() => {
-        startWritingSession(newRandomUUID);
-      }, waitingTime * 1000);
+  const checkAndStartSession = async () => {
+    try {
+      // Request microphone access
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // If permission is granted, proceed to start the session
+      setIsTextareaClicked(true);
+      setAudioModeOn(true);
+      const newRandomUUID = uuidv4();
+      setSessionRandomUUID(newRandomUUID);
+      startWritingSession(newRandomUUID, "audio");
+      startListening();
+    } catch (error) {
+      // Handle the case where the user denies microphone access
+      console.error("Microphone access was denied", error);
+      toast.error("Microphone access is needed to start audio session.");
     }
   };
 
-  const startWritingSession = async (thisNewRandomUUID) => {
+  const startWritingSession = async (thisNewRandomUUID, mode) => {
     try {
       let now = new Date();
-      setTextareaHidden(false);
-      setLastKeystroke(now);
+      if (mode == "writing") {
+        setTextareaHidden(false);
+        setLastKeystroke(now);
+      } else {
+        setIsListening(true);
+      }
       setCurrentSessionStartingTime(now);
       setSessionStarted(true);
       setAlreadyStartedOnce(true);
@@ -376,7 +424,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               JSON.stringify(newData)
             );
             setAllUserWritings((prev) => {
-              console.log("all the user writings ar HERe: ", prev);
               return [...prev, newData];
             });
             return newData;
@@ -407,7 +454,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         return toast.error(
           "you havent saved your session with your wallet yet"
         );
-      console.log("in here");
+
       await navigator.clipboard.writeText(
         `https://www.anky.lat/r/${todaysSessionData.cid}`
       );
@@ -436,6 +483,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   };
 
   const startAllOverAgain = async () => {
+    setAudioModeOn(false);
     clearInterval(startingIntervalRef.current);
     clearInterval(intervalRef.current);
     setTextareaHidden(false);
@@ -444,6 +492,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setSessionStarted(false);
     setNewenBarLength(0);
     setLifeBarLength(0);
+    setText("");
     setTime(0);
     setFinishedSession(false);
   };
@@ -491,7 +540,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <h2
                 className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
               >
-                dia {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()} ·{" "}
+                day {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()} ·{" "}
                 {clockTime}
               </h2>
               <div
@@ -520,9 +569,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 <div className="flex w-full  justify-between">
                   <div className="w-fit  mx-auto" onClick={handleSaveSession}>
                     <button
-                      className={`${montserratAlternates.className} border-solid shadow-xl shadow-yellow-500 py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                     >
-                      {savingSession ? "guardando..." : "guardar"}
+                      {savingSession ? "sending..." : "send to the ankyverse"}
                     </button>
                   </div>
                 </div>
@@ -553,14 +602,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 }}
               ></div>
             </div>
-            <div className="h-1 w-full overflow-hidden">
-              <div
-                className="h-full opacity-80 life-bar rounded-r-xl"
-                style={{
-                  width: `${lifeBarLength}%`,
-                }}
-              ></div>
-            </div>
           </>
         )}
 
@@ -574,11 +615,24 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <div className="h-full w-full">
               {!authenticated && (
                 <div className="w-96 h-fit mx-auto p-2">
-                  <div className="w-fit mt-4 mx-auto">
+                  <div
+                    className={`${
+                      copiedText && "bg-green-200"
+                    } rounded-xl w-full text-2xl h-72 overflow-y-scroll mb-2`}
+                  >
+                    {text}
+                  </div>
+
+                  <div className="w-fit mt-4 flex space-x-2 mx-auto">
                     <Button
                       buttonAction={login}
                       buttonText="login"
                       buttonColor="bg-green-300"
+                    />
+                    <Button
+                      buttonAction={startAllOverAgain}
+                      buttonText="go back"
+                      buttonColor="bg-purple-300"
                     />
                   </div>
                 </div>
@@ -592,7 +646,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 className={`${ibmPlexSans.className} ${
                   isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
                 } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 ${
-                  textareaHidden ? "text-xl" : "text-sm"
+                  textareaHidden ? "text-xl" : "text-4xl"
                 } md:text-2xl shadow-lg relative`}
               >
                 {ankyverseQuestionToday}
@@ -615,55 +669,46 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <div
                 className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}
               >
-                <h2 className="text-xl write-text mt-4">escribe 8 minutos.</h2>
-
+                <h2 className="text-xl write-text mt-4">
+                  {userSettings.deviceType == "mobile" ? "speak" : "write"} for
+                  8 minutes
+                </h2>
                 <Link passHref href="/ankyverse">
                   <h2
                     className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
                   >
-                    dia {ankyverseDay.wink} ·{" "}
+                    day {ankyverseDay.wink} ·{" "}
                     {ankyverseDay.kingdom.toLowerCase()} · {clockTime}
                   </h2>
                 </Link>
+                <p className="mt-2">{ankyverseQuestionToday}</p>
               </div>
             )}
 
-            {textareaHidden && (
-              <div className="flex flex-col space-y-2">
-                {!authenticated && (
-                  <p className="my-3 text-2xl text-red-500 text-center">
-                    (no hiciste log in)
-                  </p>
+            {sessionStarted && audioModeOn && (
+              <div className="py-2 px-4 text-2xl h-96 overflow-y-scroll">
+                {text.includes("\n") ? (
+                  text.split("\n").map((x, i) => (
+                    <p className="my-2" key={i}>
+                      {x}
+                    </p>
+                  ))
+                ) : (
+                  <p className="my-2">{text}</p>
                 )}
-                <div className="w-fit mx-auto mt-4">
-                  <Button
-                    buttonText="empezar a escribir"
-                    buttonAction={() => {
-                      clearTimeout(startingTimeoutRef.current);
-                      setLifeBarLength(100);
-                      startWritingSession(sessionRandomUUID);
-                    }}
-                    buttonColor="bg-green-200"
-                  />
-                </div>
               </div>
             )}
 
-            {!textareaHidden && (
-              <div
-                className={`${
-                  isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
-                } mx-auto mt-4`}
-              >
+            <div
+              className={`${
+                isTextareaClicked
+                  ? "w-7/8 lg:w-8/12 "
+                  : "w-full flex justify-center grow md:mt-4 mt-24 lg:w-3/5"
+              } mx-auto mt-4`}
+            >
+              {userSettings.deviceType != "mobile" ? (
                 <textarea
-                  onClick={() => {
-                    if (!sessionStarted) {
-                      handleClick();
-                      if (!alreadyStartedOnce) {
-                        setTextareaHidden(true);
-                      }
-                    }
-                  }}
+                  onClick={handleClick}
                   onBlur={() => {
                     handleUserDistraction();
                   }}
@@ -674,21 +719,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   }  w-full md:h-96 h-48 bg-white shadow-md ${
                     !isTextareaClicked &&
                     "hover:shadow-xl hover:shadow-pink-200"
-                  } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-                  placeholder={`${!ready ? "loading..." : "escribe..."}`}
+                  } mx-auto placeholder:italic italic opacity-80 text-purple-400 italic border border-white p-3 cursor-pointer`}
+                  placeholder={`${!ready ? "loading..." : "start writing..."}`}
                 />
-              </div>
-            )}
+              ) : (
+                <div>
+                  {!audioModeOn && (
+                    <button
+                      className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
+                      onClick={checkAndStartSession}
+                    >
+                      <FaMicrophone size={90} />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
 
             {!isTextareaClicked && (
               <div
-                className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-center flex mt-8 `}
+                className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-center flex mt-48 md:mt-8  `}
               >
                 <Link
                   className="text-gray-400 hover:text-gray-500"
                   href="/terms-and-conditions"
                 >
-                  términos & condiciones
+                  terms & conditions
                 </Link>
                 <a
                   className="text-gray-400 hover:text-gray-500"
