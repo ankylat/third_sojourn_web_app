@@ -4,8 +4,33 @@ const SettingsContext = createContext();
 export const SettingsProvider = ({ children }) => {
   const [userSettings, setUserSettings] = useState({
     secondsBetweenKeystrokes: 8,
-    language: "en",
+    language: "es",
+    deviceType: "mobile",
   });
+
+  useEffect(() => {
+    const detectDeviceType = () => {
+      const ua = navigator.userAgent;
+      if (
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          ua
+        )
+      ) {
+        setUserSettings((prevSettings) => ({
+          ...prevSettings,
+          deviceType: "mobile",
+        }));
+      } else {
+        setUserSettings((prevSettings) => ({
+          ...prevSettings,
+          deviceType: "desktop",
+        }));
+      }
+    };
+
+    // Run the detection function when the component mounts
+    detectDeviceType();
+  }, []);
   return (
     <SettingsContext.Provider
       value={{

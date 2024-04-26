@@ -11,10 +11,7 @@ const InformationCards = () => {
           <div className="w-48 h-48 relative">
             <FiPenTool size={192} />
           </div>
-          <p className="w-64 mt-4 h-fit">
-            The core practice is writing a stream of consciousness daily, for 8
-            minutes.
-          </p>
+          <p className="w-64 mt-4 h-fit">Escribe 8 minutos, todos los días.</p>
         </div>
         <div className="p-2 border  max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
           {" "}
@@ -22,8 +19,9 @@ const InformationCards = () => {
             <FaBookOpen size={192} />
           </div>
           <p className="w-64 mt-4 h-fit">
-            All of the writings are used to train a custom AI model that will
-            write a book. Every day a new chapter is written.
+            Todas las piezas de escritura se usan para entrenar un modelo de IA
+            que va a escribir un libro. Todos los días un nuevo capítulo es
+            escrito.
           </p>
         </div>
         <div className="p-2 border max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
@@ -32,8 +30,8 @@ const InformationCards = () => {
             <Image src="/images/newen.svg" fill />
           </div>
           <p className="w-64 mt-4 h-fit">
-            Our writers are rewarded with $newen, which is a cryptocurrency that
-            exists on the blockchain.
+            Nuestr@s escritor@s obtienen como recompensa $newen, una
+            criptomoneda muy especial.
           </p>
         </div>
       </div>

@@ -14,10 +14,10 @@ const Instructions = ({ ankyverseDay }) => {
         </div>
         <div className="w-full md:w-1/2 h-full py-8 px-4 md:px-0 md:py-0 flex flex-col items-center justify-center">
           <div className="w-96">
-            <h2 className="text-3xl mb-8">1. Own an Anky Mentor</h2>
+            <h2 className="text-3xl mb-8">1. Obtén un Anky Mentor</h2>
             <p>
-              To participate on this collective experience you need a key. Your
-              mentor is that key.
+              Para participar en esta experiencia colectiva necesitas una llave.
+              Tu mentor es esa llave.
             </p>
             <div className="mt-4 mb-4 w-fit">
               <a
@@ -25,7 +25,7 @@ const Instructions = ({ ankyverseDay }) => {
                 target="_blank"
               >
                 <Button
-                  buttonText="explore mentors"
+                  buttonText="explorar mentores"
                   buttonColor="bg-purple-200"
                 />
               </a>
@@ -36,14 +36,14 @@ const Instructions = ({ ankyverseDay }) => {
       <section className="h-screen w-full flex justify-around flex-col-reverse  md:flex-row ">
         <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
           <div className="w-96">
-            <h2 className="text-3xl mb-8">2. Come and write every day</h2>
+            <h2 className="text-3xl mb-8">2. Ven a escribir todos los días</h2>
             <p>
-              Your mission is 8 minutes of an unfiltered stream of
-              consciousness, answering the prompt of the day.
+              Tu misión es escribir 8 minutos. Si quieres puedes explorar el
+              tema del día.
             </p>
             <div className="mt-4 w-fit">
               <Button
-                buttonText="write"
+                buttonText="escribe"
                 buttonAction={() => {
                   if (!sessionStarted) {
                     setAlreadyStartedOnce(true);
@@ -60,7 +60,7 @@ const Instructions = ({ ankyverseDay }) => {
           </div>
         </div>
         <div className="w-full md:w-1/2 bg-black flex-col  py-8  md:py-0 h-full flex items-center justify-center">
-          <p className="text-purple-400 mb-4">prompt of today:</p>
+          <p className="text-purple-400 mb-4">tema de hoy:</p>
           <div className="relative w-full px-4 md:w-2/3">
             <TextStreamer text={ankyverseDay.prompt["en"]} />
           </div>
@@ -75,16 +75,13 @@ const Instructions = ({ ankyverseDay }) => {
         <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center">
           <div className="w-96">
             <h2 className="text-3xl mb-8">
-              3. Read the chapter generated the previous day
+              3. lee el capítulo del día anterior
             </h2>
             <p>
-              Our custom trained AI model processes all of what is written on a
-              given day into the chapter of that day.
+              Nuesto modelo de IA procesa todo lo que se escribe en un
+              determinado día y con eso escribe el capítulo de ese día.
             </p>
-            <p>
-              We are writing, together, the first AI assisted collaborative
-              story of humanity.
-            </p>
+            <p>Estamos haciendo historia juntos.</p>
             <div className="mt-4 w-fit">
               <a
                 href={`https://paragraph.xyz/@ankytheape/chapter-${

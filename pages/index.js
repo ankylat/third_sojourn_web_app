@@ -491,7 +491,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <h2
                 className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
               >
-                day {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()} ·{" "}
+                dia {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()} ·{" "}
                 {clockTime}
               </h2>
               <div
@@ -520,9 +520,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 <div className="flex w-full  justify-between">
                   <div className="w-fit  mx-auto" onClick={handleSaveSession}>
                     <button
-                      className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                      className={`${montserratAlternates.className} border-solid shadow-xl shadow-yellow-500 py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                     >
-                      {savingSession ? "sending..." : "send to the ankyverse"}
+                      {savingSession ? "guardando..." : "guardar"}
                     </button>
                   </div>
                 </div>
@@ -574,17 +574,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <div className="h-full w-full">
               {!authenticated && (
                 <div className="w-96 h-fit mx-auto p-2">
-                  <p>congratulations, you finished your session.</p>
-                  <p>if you own an anky mentor, you can log in, and save it.</p>
-                  <p>
-                    by doing this, you will participate on the writing of the
-                    first collaborative book in the history of humanity.
-                  </p>
-                  <p>we need you</p>
-                  <p>
-                    for now, your writing will be saved locally on your browser.
-                  </p>
-
                   <div className="w-fit mt-4 mx-auto">
                     <Button
                       buttonAction={login}
@@ -626,18 +615,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <div
                 className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}
               >
-                <h2 className="text-xl write-text mt-4">
-                  Write for 8 minutes.
-                </h2>
-                <p className={`${montserratAlternates.className} cta `}>
-                  This app is in BETA, and there may be errors. Hang on, we are
-                  working to fix everything.
-                </p>
+                <h2 className="text-xl write-text mt-4">escribe 8 minutos.</h2>
+
                 <Link passHref href="/ankyverse">
                   <h2
                     className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
                   >
-                    day {ankyverseDay.wink} ·{" "}
+                    dia {ankyverseDay.wink} ·{" "}
                     {ankyverseDay.kingdom.toLowerCase()} · {clockTime}
                   </h2>
                 </Link>
@@ -648,12 +632,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <div className="flex flex-col space-y-2">
                 {!authenticated && (
                   <p className="my-3 text-2xl text-red-500 text-center">
-                    heads up: you are not logged in
+                    (no hiciste log in)
                   </p>
                 )}
                 <div className="w-fit mx-auto mt-4">
                   <Button
-                    buttonText="start writing"
+                    buttonText="empezar a escribir"
                     buttonAction={() => {
                       clearTimeout(startingTimeoutRef.current);
                       setLifeBarLength(100);
@@ -691,7 +675,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     !isTextareaClicked &&
                     "hover:shadow-xl hover:shadow-pink-200"
                   } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
-                  placeholder={`${!ready ? "loading..." : "start writing..."}`}
+                  placeholder={`${!ready ? "loading..." : "escribe..."}`}
                 />
               </div>
             )}
@@ -704,7 +688,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   className="text-gray-400 hover:text-gray-500"
                   href="/terms-and-conditions"
                 >
-                  terms & conditions
+                  términos & condiciones
                 </Link>
                 <a
                   className="text-gray-400 hover:text-gray-500"

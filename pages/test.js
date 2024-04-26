@@ -45,7 +45,7 @@ import { getAnkyverseDay, encodeToAnkyverseLanguage } from "../lib/ankyverse";
 // State Variables
 
 const secondsOfLife = 481;
-const totalSessionDuration = 480;
+const totalSessionDuration = 10;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 const startingTimestamp = 1711861200; // UNIX timestamp in seconds
 const oneDayInSeconds = 86400; // 24 hours in seconds
@@ -99,65 +99,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [newenBarLength, setNewenBarLength] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [lastKeystroke, setLastKeystroke] = useState();
-
-  // Audio session states
+  const [isListening, setIsListening] = useState(false);
   const [audioModeOn, setAudioModeOn] = useState(false);
-  const recorderControls = useAudioRecorder(
-    {
-      noiseSuppression: true,
-      echoCancellation: true,
-    },
-    (err) => console.table(err)
-  );
-
-  const handleRecordingComplete = async (blob) => {
-    if (time < 2) {
-      return;
-    }
-    if (time < totalSessionDuration - 5) {
-      const sessionTime = time;
-      setTime(0);
-      clearInterval(intervalRef?.current);
-      setAudioModeOn(false);
-      return toast.error(
-        `an anky is ${totalSessionDuration} seconds. not ${sessionTime}.`,
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        }
-      );
-    }
-    const url = URL.createObjectURL(blob);
-    const audio = document.createElement("audio");
-    audio.src = url;
-    audio.controls = true;
-
-    // Assuming you want to send the blob to the server immediately after recording
-    try {
-      const formData = new FormData();
-      formData.append("file", blob, "audio.webm"); // Ensure your server handles 'webm' file format
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_ROUTE}/audio/transcribe`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("response", response.data);
-      setText(response.data.text);
-      console.log("the text was added", response.data.text);
-      saveThisSession();
-    } catch (error) {
-      console.error("Error uploading audio:", error);
-    }
-  };
 
   // Layout State Management
   const [clockTime, setClockTime] = useState("00:00:00");
@@ -177,6 +120,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const startingIntervalRef = useRef(null);
   const intervalRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
@@ -206,6 +150,32 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     return () => clearInterval(intervalId);
   }, []);
   // Initial App Setup
+
+  useEffect(() => {
+    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang =
+        userSettings.language == "en" ? "en-US" : "es-ES";
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0].transcript)
+          .join("");
+        setText(transcript);
+      };
+
+      recognitionRef.current.onend = () => {
+        if (isListening) recognitionRef.current.start();
+      };
+    } else {
+      toast.error("Your browser does not support Speech Recognition.");
+    }
+  }, [isListening]);
+
   useEffect(() => {
     const locallySavedSession = localStorage.getItem(
       `writingSession-${ankyverseDay.wink}`
@@ -258,11 +228,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             setUserLost(false);
             clearInterval(intervalRef?.current);
             if (audioModeOn) {
-              recorderControls.stopRecording();
-            } else {
-              setTextareaHidden(false);
-              saveThisSession();
+              recognitionRef.current.stop();
+              setIsListening(false);
             }
+            setTextareaHidden(false);
+            saveThisSession();
           }
           setNewenBarLength(Math.max(0, Math.max(0, newenBarLength)));
           return newTime;
@@ -273,6 +243,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   }, [sessionStarted, time]);
 
   // For starting the session
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      console.log("the recognition ref is:", recognitionRef);
+      recognitionRef.current.start();
+      console.log("this is listening");
+      setIsListening(true);
+    }
+  };
 
   async function saveThisSession() {
     try {
@@ -309,11 +288,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           "your wallet is not recognized. please log out and log in again (yes, sorry about that)"
         );
     }
-    setAlreadyStartedOnce(true);
     let now = new Date();
     const newRandomUUID = uuidv4();
     setSessionRandomUUID(newRandomUUID);
     setIsTextareaClicked(true);
+    startWritingSession(sessionRandomUUID, "writing");
   };
 
   const startWritingSession = async (thisNewRandomUUID, mode) => {
@@ -484,6 +463,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   };
 
   const startAllOverAgain = async () => {
+    setAudioModeOn(false);
     clearInterval(startingIntervalRef.current);
     clearInterval(intervalRef.current);
     setTextareaHidden(false);
@@ -492,6 +472,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setSessionStarted(false);
     setNewenBarLength(0);
     setLifeBarLength(0);
+    setText("");
     setTime(0);
     setFinishedSession(false);
   };
@@ -645,7 +626,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 className={`${ibmPlexSans.className} ${
                   isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
                 } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 ${
-                  textareaHidden ? "text-xl" : "text-sm"
+                  textareaHidden ? "text-xl" : "text-4xl"
                 } md:text-2xl shadow-lg relative`}
               >
                 {ankyverseQuestionToday}
@@ -669,12 +650,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}
               >
                 <h2 className="text-xl write-text mt-4">
-                  Write for 8 minutes.
+                  {userSettings.deviceType == "mobile" ? "speak" : "write"} for
+                  8 minutes
                 </h2>
-                <p className={`${montserratAlternates.className} cta `}>
-                  This app is in BETA, and there may be errors. Hang on, we are
-                  working to fix everything.
-                </p>
                 <Link passHref href="/ankyverse">
                   <h2
                     className={`${ankyverseDay.color} hover:opacity-60 text-xl`}
@@ -683,69 +661,34 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     {ankyverseDay.kingdom.toLowerCase()} · {clockTime}
                   </h2>
                 </Link>
+                <p className="mt-2">{ankyverseQuestionToday}</p>
               </div>
             )}
 
-            {textareaHidden && (
-              <div className="flex flex-col space-y-2">
-                {!authenticated && (
-                  <p className="my-3 text-2xl text-red-500 text-center">
-                    heads up: you are not logged in
-                  </p>
+            {sessionStarted && audioModeOn && (
+              <div className="p-2 text-xl h-96 overflow-y-scroll">
+                {text.includes("\n") ? (
+                  text.split("\n").map((x, i) => (
+                    <p className="my-2" key={i}>
+                      {x}
+                    </p>
+                  ))
+                ) : (
+                  <p className="my-2">{text}</p>
                 )}
-                <div className="w-fit mx-auto flex mt-4">
-                  {!audioModeOn && (
-                    <div
-                      onClick={() => {
-                        startWritingSession(sessionRandomUUID, "writing");
-                      }}
-                      className="p-4 bg-purple-200 cursor-pointer mx-4 hover:bg-purple-400 rounded-full border border-black"
-                    >
-                      <div className="rounded-full shadow-xl bg-gray-200 p-2.5">
-                        <FaPencil size={20} />
-                      </div>
-                    </div>
-                  )}
-
-                  <div
-                    onClick={() => {
-                      setAudioModeOn(true);
-                      startWritingSession(sessionRandomUUID, "audio");
-                    }}
-                    className="p-4 bg-purple-200 cursor-pointer hover:bg-purple-400 mx-4 rounded-full border border-black"
-                  >
-                    <AudioRecorder
-                      onRecordingComplete={(blob) => {
-                        handleRecordingComplete(blob);
-                      }}
-                      audioTrackConstraints={{
-                        noiseSuppression: true,
-                        echoCancellation: true,
-                      }}
-                      downloadFileExtension="webm"
-                      showVisualizer={true}
-                      recorderControls={recorderControls}
-                    />
-                  </div>
-                </div>
               </div>
             )}
 
-            {!textareaHidden && (
-              <div
-                className={`${
-                  isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
-                } mx-auto mt-4`}
-              >
+            <div
+              className={`${
+                isTextareaClicked
+                  ? "w-7/8 lg:w-8/12 "
+                  : "w-full flex justify-center grow md:mt-4 mt-24 lg:w-3/5"
+              } mx-auto mt-4`}
+            >
+              {userSettings.deviceType != "mobile" ? (
                 <textarea
-                  onClick={() => {
-                    if (!sessionStarted) {
-                      handleClick();
-                      if (!alreadyStartedOnce) {
-                        setTextareaHidden(true);
-                      }
-                    }
-                  }}
+                  onClick={handleClick}
                   onBlur={() => {
                     handleUserDistraction();
                   }}
@@ -756,15 +699,31 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   }  w-full md:h-96 h-48 bg-white shadow-md ${
                     !isTextareaClicked &&
                     "hover:shadow-xl hover:shadow-pink-200"
-                  } mx-auto placeholder:italic italic opacity-80 text-gray-400 italic border border-white p-3 cursor-pointer`}
+                  } mx-auto placeholder:italic italic opacity-80 text-purple-400 italic border border-white p-3 cursor-pointer`}
                   placeholder={`${!ready ? "loading..." : "start writing..."}`}
                 />
-              </div>
-            )}
+              ) : (
+                <div>
+                  {!audioModeOn && (
+                    <button
+                      className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
+                      onClick={() => {
+                        setIsTextareaClicked(true);
+                        setAudioModeOn(true);
+                        startWritingSession(sessionRandomUUID, "audio");
+                        startListening();
+                      }}
+                    >
+                      <FaMicrophone size={90} />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
 
             {!isTextareaClicked && (
               <div
-                className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-center flex mt-8 `}
+                className={`${montserratAlternates.className} w-fit space-x-8 mx-auto text-center flex mt-48 md:mt-8  `}
               >
                 <Link
                   className="text-gray-400 hover:text-gray-500"
