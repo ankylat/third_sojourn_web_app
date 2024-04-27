@@ -5,7 +5,7 @@ export const SettingsProvider = ({ children }) => {
   const [userSettings, setUserSettings] = useState({
     secondsBetweenKeystrokes: 8,
     language: "es",
-    deviceType: "",
+    deviceType: "mobile",
   });
 
   useEffect(() => {
