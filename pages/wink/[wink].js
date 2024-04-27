@@ -20,7 +20,7 @@ const Wink = () => {
     <div className="flex flex-col w-full ">
       {writingsForWink?.map((x, i) => {
         return (
-          <div className="w-full md:w-96 mx-auto">
+          <div key={i} className="w-full md:w-96 mx-auto">
             <p className="">{x.text}</p>
             <hr className="my-8 border border-gray-200 h-12" />
           </div>
