@@ -169,11 +169,14 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         const interimTranscript = Array.from(event.results)
           .map((result) => result[0].transcript)
           .join("");
+
+        console.log("IN HERRE!", interimTranscript);
         setTempText(interimTranscript);
       };
 
       recognitionRef.current.onerror = (event) => {
         console.error("Speech recognition error", event.error);
+        console.log("the event on the error is: ", event);
         toast.error(`Recognition error: ${event.error}`);
         // Append the interim text to the final text and clear interim
         setText((prev) => prev + tempText);
@@ -262,9 +265,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   const startListening = () => {
     if (recognitionRef.current) {
-      console.log("the recognition ref is:", recognitionRef);
       recognitionRef.current.start();
-      console.log("this is listening");
+      console.log("start listening!");
       setIsListening(true);
     }
   };
@@ -710,7 +712,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     </p>
                   ))
                 ) : (
-                  <p className="my-2">{text}</p>
+                  <p className="my-2">{text + tempText}</p>
                 )}
               </div>
             )}
@@ -735,13 +737,15 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   }  w-full md:h-96 h-48 bg-white shadow-md ${
                     !isTextareaClicked &&
                     "hover:shadow-xl hover:shadow-pink-200"
-                  } mx-auto placeholder:italic italic opacity-80 text-purple-400 italic border border-white p-3 cursor-pointer`}
+                  } mx-auto placeholder:italic italic opacity-80 ${
+                    ankyverseDay.color
+                  } italic border border-white p-3 cursor-pointer`}
                   placeholder={`${!ready ? "loading..." : "start writing..."}`}
                 />
               ) : (
                 <>
                   {!audioModeOn && (
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col space-y-2 px-4">
                       <button
                         className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
                         onClick={checkAndStartSession}
