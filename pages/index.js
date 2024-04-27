@@ -179,13 +179,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         console.log("the event on the error is: ", event);
         toast.error(`Recognition error: ${event.error}`);
         // Append the interim text to the final text and clear interim
-        setText((prev) => prev + tempText);
+        setText((prev) => prev + " " + tempText);
         setTempText("");
       };
 
       recognitionRef.current.onend = () => {
         console.log("Speech recognition service disconnected");
-        setText((prev) => prev + tempText);
+        setText((prev) => prev + " " + tempText);
         setTempText("");
         if (isListening) {
           console.log("Attempting to restart the speech recognition");
