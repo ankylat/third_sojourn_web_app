@@ -589,7 +589,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     <button
                       className={`${montserratAlternates.className} border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
                     >
-                      {savingSession ? "sending..." : "send to the ankyverse"}
+                      {savingSession ? "saving..." : "save"}
                     </button>
                   </div>
                 </div>
