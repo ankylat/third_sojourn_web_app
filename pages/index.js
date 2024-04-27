@@ -93,7 +93,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
   const [currentSessionStartingTime, setCurrentSessionStartingTime] =
     useState(null);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(""); // Holds final text
+  const [tempText, setTempText] = useState(""); // Buffer to hold interim results
   const [time, setTime] = useState(0);
   const [lifeBarLength, setLifeBarLength] = useState(100);
   const [newenBarLength, setNewenBarLength] = useState(0);
@@ -152,7 +153,10 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   // Initial App Setup
 
   useEffect(() => {
-    if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+    if (
+      typeof window !== "undefined" &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition)
+    ) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
@@ -162,43 +166,31 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         userSettings.language === "en" ? "en-US" : "es-ES";
 
       recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
+        const interimTranscript = Array.from(event.results)
           .map((result) => result[0].transcript)
           .join("");
-        setText(transcript);
+        setTempText(interimTranscript);
       };
 
       recognitionRef.current.onerror = (event) => {
         console.error("Speech recognition error", event.error);
         toast.error(`Recognition error: ${event.error}`);
+        // Append the interim text to the final text and clear interim
+        setText((prev) => prev + tempText);
+        setTempText("");
       };
 
       recognitionRef.current.onend = () => {
         console.log("Speech recognition service disconnected");
+        setText((prev) => prev + tempText);
+        setTempText("");
         if (isListening) {
           console.log("Attempting to restart the speech recognition");
           recognitionRef.current.start();
         }
       };
-    } else {
-      toast.error("Your browser does not support Speech Recognition.");
     }
   }, [isListening, userSettings.language]);
-
-  useEffect(() => {
-    const checkListeningStatus = setInterval(() => {
-      if (
-        isListening &&
-        recognitionRef.current &&
-        !recognitionRef.current.speaking
-      ) {
-        console.log("Restarting recognition due to inactivity...");
-        recognitionRef.current.start();
-      }
-    }, 30000); // check every 30 seconds
-
-    return () => clearInterval(checkListeningStatus);
-  }, [isListening]);
 
   useEffect(() => {
     const locallySavedSession = localStorage.getItem(
@@ -747,16 +739,23 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                   placeholder={`${!ready ? "loading..." : "start writing..."}`}
                 />
               ) : (
-                <div>
+                <>
                   {!audioModeOn && (
-                    <button
-                      className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
-                      onClick={checkAndStartSession}
-                    >
-                      <FaMicrophone size={90} />
-                    </button>
+                    <div className="flex flex-col space-y-2">
+                      <button
+                        className="rounded-full shadow-xl bg-purple-200 p-12 mx-auto"
+                        onClick={checkAndStartSession}
+                      >
+                        <FaMicrophone size={90} />
+                      </button>
+                      <p>
+                        ps: this feature is new and it may not be working
+                        properly. to make sure your session is stored today, do
+                        it on your computer writing.
+                      </p>
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
 
