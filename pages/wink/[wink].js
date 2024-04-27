@@ -4,18 +4,23 @@ import { useRouter } from "next/router";
 
 const Wink = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [writingsForWink, setWritingsForWink] = useState([]);
   useEffect(() => {
     const fetchWritings = async () => {
       try {
         const writings = await getCommunityWritingsForWink(router.query.wink);
         setWritingsForWink(writings);
+        setLoading(false);
       } catch (error) {
         console.log("there was an error", error);
       }
     };
-    fetchWritings();
-  }, []);
+    if (router?.query) {
+      fetchWritings();
+    }
+  }, [router.query]);
+  if (loading) return <p>loading...</p>;
   return (
     <div className="flex flex-col w-full ">
       {writingsForWink?.map((x, i) => {
