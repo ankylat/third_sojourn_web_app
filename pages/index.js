@@ -159,21 +159,45 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang =
-        userSettings.language == "en" ? "en-US" : "es-ES";
+        userSettings.language === "en" ? "en-US" : "es-ES";
 
       recognitionRef.current.onresult = (event) => {
         const transcript = Array.from(event.results)
           .map((result) => result[0].transcript)
           .join("");
-        setText(transcript);
+        setText((x) => x + transcript);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        toast.error(`Recognition error: ${event.error}`);
       };
 
       recognitionRef.current.onend = () => {
-        if (isListening) recognitionRef.current.start();
+        console.log("Speech recognition service disconnected");
+        if (isListening) {
+          console.log("Attempting to restart the speech recognition");
+          recognitionRef.current.start();
+        }
       };
     } else {
       toast.error("Your browser does not support Speech Recognition.");
     }
+  }, [isListening, userSettings.language]);
+
+  useEffect(() => {
+    const checkListeningStatus = setInterval(() => {
+      if (
+        isListening &&
+        recognitionRef.current &&
+        !recognitionRef.current.speaking
+      ) {
+        console.log("Restarting recognition due to inactivity...");
+        recognitionRef.current.start();
+      }
+    }, 30000); // check every 30 seconds
+
+    return () => clearInterval(checkListeningStatus);
   }, [isListening]);
 
   useEffect(() => {
