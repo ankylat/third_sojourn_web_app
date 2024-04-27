@@ -165,7 +165,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         const transcript = Array.from(event.results)
           .map((result) => result[0].transcript)
           .join("");
-        setText((x) => x + transcript);
+        setText(transcript);
       };
 
       recognitionRef.current.onerror = (event) => {
@@ -670,7 +670,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 className={`${ibmPlexSans.className} ${
                   isTextareaClicked ? " w-7/8 xl:w-8/12 " : "w-3/4 xl:w-1/2 "
                 } mx-auto h-fit py-3 md:py-4 mt-2 flex justify-center items-center px-8 bg-white text-gray-500 ${
-                  textareaHidden ? "text-xl" : "text-4xl"
+                  textareaHidden ? "text-xl" : "text-2xl"
                 } md:text-2xl shadow-lg relative`}
               >
                 {ankyverseQuestionToday}
