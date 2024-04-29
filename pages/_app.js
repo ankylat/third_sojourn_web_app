@@ -34,14 +34,16 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     // Mock loading time with setTimeout, adjust to your needs or remove if not needed
     setTimeout(() => {
-      const text = getSessionsText();
+      const text =
+        "la tierra bajo mis pies. la tierra que me sostiene. la tierra que me da vida. la tierra que me permite ser. la tierra que me contiene. la tierra que me hace sentirme anclado en esta sensación de ser yo. de encontrarme conmigo mismo. de abrazarme a través de lo que tengo adentro. de reconocerme con lo que tengo adentro. de estar con lo que tengo adentro, y de tenerlo como parte de lo que hay. como parte de lo que soy. como parte de eso que me hace avanzar. sostenerme. la tierra que me sostiene, y que da vida. la tierra que abraza, y me da calor. el cúmulo de experiencias que me hacen sentir vivo, y que están acá. el abrazo de la vida que me da consuelo. y que me tiene pudiendo vivir. estoy vivo gracias a esta tierra que me sostiene. nací en santiago. nací en la ciudad donde viví la mayor parte del tiempo. nací en ese lugar. nací en esa ciudad. nací donde viví mi vida. nací en esa ciudad. y qué es lo que me trae la ciudad de santiago? cómo es que me siento aterrizado y anclado en mi y en mi quehacer siendo parte de esa ciudad? de dónde viene la nocion de seguridad? qué es lo que me entrega? qué es lo que me hace sentir? qué es lo que abraza? qué es lo que manifiesta? la tierra me sostiene, y acá estamos, abrazándola." ||
+        getSessionsText();
       if (text.length > 30) {
         const svgElement = generateArtFromText(text);
         const serializedSVG = new XMLSerializer().serializeToString(svgElement);
         const svgBase64 = btoa(unescape(encodeURIComponent(serializedSVG)));
         setBackgroundImage(`url('data:image/svg+xml;base64,${svgBase64}')`);
       }
-      setIsArtGenerated(true);
+      // setIsArtGenerated(true);
       // Hide the black background after the art is generated or if there's no art
       setBlackBackgroundVisible(false);
     }, 8); // Mock loading time, set to 0 or remove if not needed
@@ -215,7 +217,7 @@ function MyApp({ Component, pageProps }) {
           <ErrorBoundary>
             <UserProvider>
               <SettingsProvider>
-                {true ? (
+                {isArtGenerated ? (
                   // Render the rest of the app
                   <>
                     <Navbar
@@ -243,6 +245,9 @@ function MyApp({ Component, pageProps }) {
                           <Button
                             buttonAction={() => {
                               setWantsToMint(true);
+                              alert(
+                                "this piece of art was created with all the text that youve ever written through anky. which is unique, and only yours. your uniqueness is a gift, and we are here to help you remember that. welcome."
+                              );
                             }}
                             buttonText="mint"
                             buttonColor="bg-purple-600 text-white"
