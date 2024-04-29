@@ -215,7 +215,7 @@ function MyApp({ Component, pageProps }) {
           <ErrorBoundary>
             <UserProvider>
               <SettingsProvider>
-                {isArtGenerated ? (
+                {true ? (
                   // Render the rest of the app
                   <>
                     <Navbar
