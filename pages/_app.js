@@ -246,7 +246,7 @@ function MyApp({ Component, pageProps }) {
                             buttonAction={() => {
                               setWantsToMint(true);
                               alert(
-                                "this piece of art was created with all the text that youve ever written through anky. which is unique, and only yours. your uniqueness is a gift, and we are here to help you remember that. welcome."
+                                "this piece of art could potentially be created generatively with all the text that youve ever written through anky. which is unique, and only yours. your uniqueness is a gift, and we are here to help you remember that. welcome to yourself. we are all here for you. waiting. with a smile."
                               );
                             }}
                             buttonText="mint"
