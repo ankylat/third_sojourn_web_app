@@ -668,7 +668,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 } md:text-2xl shadow-lg relative`}
               >
                 {ankyverseQuestionToday}
-                {!sessionStarted && (
+                {time < 10 && (
                   <span
                     className="absolute text-red-600 hover:text-red-500 right-1 cursor-pointer top-1"
                     onClick={() => {

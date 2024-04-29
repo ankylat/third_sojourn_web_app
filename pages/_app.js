@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Montserrat_Alternates } from "next/font/google";
 import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
+import Button from "../components/Button";
 import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 import { base } from "@wagmi/chains";
 import { configureChains, createConfig } from "wagmi";
@@ -22,13 +23,82 @@ const montserratAlternates = Montserrat_Alternates({
 const configureChainsConfig = configureChains([base], [publicProvider()]);
 
 function MyApp({ Component, pageProps }) {
+  const [isArtGenerated, setIsArtGenerated] = useState(false);
+  const [wantsToMint, setWantsToMint] = useState(false);
+  const [backgroundImage, setBackgroundImage] = useState("");
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
+  const [blackBackgroundVisible, setBlackBackgroundVisible] = useState(true);
   const [show, setShow] = useState(false);
   const [globalText, setGlobalText] = useState("");
+
+  useEffect(() => {
+    // Mock loading time with setTimeout, adjust to your needs or remove if not needed
+    setTimeout(() => {
+      const text = getSessionsText();
+      if (text.length > 30) {
+        const svgElement = generateArtFromText(text);
+        const serializedSVG = new XMLSerializer().serializeToString(svgElement);
+        const svgBase64 = btoa(unescape(encodeURIComponent(serializedSVG)));
+        setBackgroundImage(`url('data:image/svg+xml;base64,${svgBase64}')`);
+      }
+      setIsArtGenerated(true);
+      // Hide the black background after the art is generated or if there's no art
+      setBlackBackgroundVisible(false);
+    }, 8); // Mock loading time, set to 0 or remove if not needed
+  }, []);
+
+  function serializeSVG(svgElement) {
+    return new XMLSerializer().serializeToString(svgElement);
+  }
+
+  function generateArtFromText(text) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    let svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    svg.style.width = "100%";
+    svg.style.height = "100%";
+
+    // Generate shapes based on the text
+    for (let i = 0; i < text.length; i++) {
+      let rect = document.createElementNS(svgNS, "rect");
+      let x = (i * 10) % 100; // Example positioning
+      let y = Math.floor((i * 10) / 100) * 10;
+      let height = 5;
+      let width = (text.charCodeAt(i) % 50) / 10;
+      let color = `hsl(${text.charCodeAt(i) % 360}, 50%, 50%)`;
+
+      rect.setAttribute("x", x.toString());
+      rect.setAttribute("y", y.toString());
+      rect.setAttribute("width", width.toString());
+      rect.setAttribute("height", height.toString());
+      rect.setAttribute("fill", color);
+      svg.appendChild(rect);
+    }
+
+    return svg;
+  }
 
   const handleClose = () => setShow(false);
 
   const handleLogin = async (user) => {};
+
+  function getSessionsText() {
+    try {
+      let text = "";
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("writingSession-")) {
+          const session = JSON.parse(localStorage.getItem(key));
+          text += session.text || "";
+        }
+      }
+      return text;
+    } catch (error) {
+      console.log("there was an error");
+    }
+  }
 
   return (
     <main
@@ -145,18 +215,52 @@ function MyApp({ Component, pageProps }) {
           <ErrorBoundary>
             <UserProvider>
               <SettingsProvider>
-                <Navbar
-                  isTextareaClicked={isTextareaClicked}
-                  setIsTextareaClicked={setIsTextareaClicked}
-                  setShow={setShow}
-                />
-                <Component
-                  {...pageProps}
-                  isTextareaClicked={isTextareaClicked}
-                  setIsTextareaClicked={setIsTextareaClicked}
-                  show={show}
-                  handleClose={handleClose}
-                />
+                {isArtGenerated ? (
+                  // Render the rest of the app
+                  <>
+                    <Navbar
+                      isTextareaClicked={isTextareaClicked}
+                      setIsTextareaClicked={setIsTextareaClicked}
+                      setShow={setShow}
+                    />
+                    <Component
+                      {...pageProps}
+                      isTextareaClicked={isTextareaClicked}
+                      setIsTextareaClicked={setIsTextareaClicked}
+                      show={show}
+                      handleClose={handleClose}
+                    />
+                  </>
+                ) : (
+                  <div
+                    className="w-screen h-screen relative"
+                    id="artContainer"
+                    style={{ backgroundImage }}
+                  >
+                    <div className="absolute bottom-8 w-96 right-0 flex flex-row space-x-2">
+                      {!wantsToMint && (
+                        <div>
+                          <Button
+                            buttonAction={() => {
+                              setWantsToMint(true);
+                            }}
+                            buttonText="mint"
+                            buttonColor="bg-purple-600 text-white"
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <Button
+                          buttonAction={() => {
+                            setIsArtGenerated(true);
+                          }}
+                          buttonText="decode"
+                          buttonColor="bg-green-600 text-white"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </SettingsProvider>
             </UserProvider>
           </ErrorBoundary>
