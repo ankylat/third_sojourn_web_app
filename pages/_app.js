@@ -115,7 +115,7 @@ function MyApp({ Component, pageProps }) {
         <title>anky</title>
         <meta
           name="description"
-          content="Transform writing into a meditation practice like no other."
+          content="The antidsote to writers block: just write."
         />
         <link rel="icon" href="/favicon.ico" />
         <link rel="manifest" href="/site.webmanifest" />

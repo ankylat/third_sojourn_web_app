@@ -578,6 +578,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setNewenBarLength(0);
     setLifeBarLength(0);
     setTime(0);
+    setText("");
     setFinishedSession(false);
   };
 
@@ -724,7 +725,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             <div
               className={`${
                 isTextareaClicked ? "w-7/8 lg:w-8/12 " : "w-3/4 lg:w-3/5 "
-              } mx-auto mt-4`}
+              } mx-auto relative mt-4`}
             >
               <textarea
                 ref={textAreaRef}
@@ -753,21 +754,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           )}
 
-          {finishedSession &&
-            !todaysSessionData?.savedOnIrys &&
-            todaysSessionData.started &&
-            todaysSessionData.won && (
-              <div className="w-fit mt-4 mx-auto" onClick={handleSaveSession}>
-                <button
-                  className={`${montserratAlternates.className} border-solid bg-green-400 py-2 border-black px-8 hover:bg-green-600 shadow-xl border rounded-xl`}
-                >
-                  {savingSession ? "saving..." : "save session"}
-                </button>
-              </div>
-            )}
-
           {finishedSession && userLost && (
-            <div className="mt-4">
+            <div className="mt-4 absolute top-48">
               <div className="text-left bg-white finish-button w-3/4 md:w-3/5 mx-auto flex items-center">
                 <span className="mr-8">
                   <PiWarningCircle size={33} />{" "}
@@ -795,6 +783,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     setLifeBarLength(100);
                     setSessionStarted(false);
                     setTime(0);
+                    setText("");
                   }}
                   className="w-36 mx-auto mt-4 flex justify-center items-center border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
                 >
@@ -803,6 +792,19 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               </div>
             </div>
           )}
+
+          {finishedSession &&
+            !todaysSessionData?.savedOnIrys &&
+            todaysSessionData.started &&
+            todaysSessionData.won && (
+              <div className="w-fit mt-4 mx-auto" onClick={handleSaveSession}>
+                <button
+                  className={`${montserratAlternates.className} border-solid bg-green-400 py-2 border-black px-8 hover:bg-green-600 shadow-xl border rounded-xl`}
+                >
+                  {savingSession ? "saving..." : "save session"}
+                </button>
+              </div>
+            )}
 
           {!isTextareaClicked && (
             <div
