@@ -44,7 +44,7 @@ import { useRouter } from "next/router";
 // State Variables
 
 const secondsOfLife = 8;
-const totalSessionDuration = 12;
+const totalSessionDuration = 480;
 const waitingTime = 30;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 const startingTimestamp = 1711861200; // UNIX timestamp in seconds
