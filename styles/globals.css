@@ -19,6 +19,10 @@ body {
   background-attachment: fixed;
 }
 
+.the-ocean p {
+  margin-top: 12px;
+}
+
 #artContainer {
   width: 100%;
   height: 100%;

@@ -11,7 +11,7 @@ const InformationCards = () => {
           <div className="w-48 h-48 relative">
             <FiPenTool size={192} />
           </div>
-          <p className="w-64 mt-4 h-fit">Escribe 8 minutos, todos los días.</p>
+          <p className="w-64 mt-4 h-fit">Write 8 minutes, every day.</p>
         </div>
         <div className="p-2 border  max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
           {" "}
@@ -19,9 +19,8 @@ const InformationCards = () => {
             <FaBookOpen size={192} />
           </div>
           <p className="w-64 mt-4 h-fit">
-            Todas las piezas de escritura se usan para entrenar un modelo de IA
-            que va a escribir un libro. Todos los días un nuevo capítulo es
-            escrito.
+            Every piece of writing is used to train a custom AI model that is
+            writing a book. Every day a new chapter is written.
           </p>
         </div>
         <div className="p-2 border max-w-64 border-black rounded-xl bg-purple-200 flex flex-col items-center justify-between flex-1 mx-2 my-4 md:my-0">
@@ -30,8 +29,7 @@ const InformationCards = () => {
             <Image src="/images/newen.svg" fill />
           </div>
           <p className="w-64 mt-4 h-fit">
-            Nuestr@s escritor@s obtienen como recompensa $newen, una
-            criptomoneda muy especial.
+            Our writers are rewarded with $newen.
           </p>
         </div>
       </div>

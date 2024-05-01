@@ -11,14 +11,14 @@ const Welcome = () => {
         <Image src="/images/logo.svg" fill />
       </div>
       <div className="w-full md:w-1/3">
-        <h2 className="text-3xl">Bienvenid@</h2>
+        <h2 className="text-3xl">Welcome</h2>
         <p className="mt-4">
-          Anky es un marco de referencia para transformar en un juego lo que es
-          fundamentalmente difícil de hacer: conocerte a ti mism@.
+          Anky is a frame of reference to gamify what is fundamentally hard to
+          do: get to know yourself.
         </p>
         <p className="mt-4">
-          Ocupamos distintas herramientas para desarrollar una práctica
-          concreta: escribir, todos los días, 8 minutos.
+          We use different tools in order to help you develop a core practice:
+          writing, every day, for 8 minutes.
         </p>
       </div>
     </section>

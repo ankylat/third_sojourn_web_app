@@ -37,14 +37,6 @@ const WritingSessionByCid = ({ writingSession, ankyverseDay }) => {
         <ToastContainer />
         <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
           <div className="flex flex-col items-center p-2 w-96">
-            <h2
-              className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
-            >
-              day {ankyverseDay.wink} · {ankyverseDay.kingdom.toLowerCase()}
-            </h2>
-            <p className={`${ankyverseDay.color} mb-4 p-2`}>
-              {ankyverseDay.prompt["en"]}
-            </p>
             <div
               className={` rounded-xl w-full h-fit max-h-64 overflow-y-scroll mb-2`}
             >
@@ -73,6 +65,5 @@ export default WritingSessionByCid;
 export const getServerSideProps = async (context) => {
   const { cid } = context.query;
   const writingSession = await fetchContentFromIrys(cid);
-  const ankyverseDay = getAnkyverseDay(writingSession.savedTimestamp);
-  return { props: { writingSession, ankyverseDay } };
+  return { props: { writingSession } };
 };
