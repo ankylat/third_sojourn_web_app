@@ -531,6 +531,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               },
             }
           );
+          setFinishedSession(false);
+          setIsTextareaClicked(false);
           router.push("/dashboard");
         }
       } else {
