@@ -96,9 +96,8 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   const [currentSessionStartingTime, setCurrentSessionStartingTime] =
     useState(null);
   const [text, setText] = useState("");
-  const longThreadString = getLongThread(ankyverseDay.wink);
   const [clockTime, setClockTime] = useState("00:00:00");
-  const [longThread, setLongThread] = useState(longThreadString);
+  const [longThread, setLongThread] = useState("");
   const [time, setTime] = useState(0);
   const [lifeBarLength, setLifeBarLength] = useState(0);
   const [newenBarLength, setNewenBarLength] = useState(0);
@@ -142,7 +141,9 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   useEffect(() => {
     setAnkyverseQuestionToday(ankyverseDay.prompt[userSettings.language]);
-  }, [userSettings]);
+    const longThreadString = getLongThread(ankyverseDay.wink);
+    setLongThread(longThreadString);
+  }, [userSettings, authenticated]);
 
   useEffect(() => {
     const updateClock = () => {
@@ -533,7 +534,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           );
           setFinishedSession(false);
           setIsTextareaClicked(false);
-          router.push("/dashboard");
         }
       } else {
         setFinishedSession(false);
@@ -686,7 +686,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
               <h2 className="text-xl write-text mt-4">Write for 8 minutes.</h2>
-              <p className={`${montserratAlternates.className} cta `}>
+              <p className={`${montserratAlternates.className} cta mb-2`}>
                 This app is in BETA, and there may be errors. Hang on, we are
                 working to fix everything.
               </p>
