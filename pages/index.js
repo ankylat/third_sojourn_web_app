@@ -579,13 +579,6 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
     setFinishedSession(false);
   };
 
-  if (appLoading)
-    return (
-      <div className="h-full w-full flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
-
   if (authenticated && todaysSessionData.cid) {
     return (
       <div className="flex h-full  w-full flex-col items-center justify-center md:flex-row">
