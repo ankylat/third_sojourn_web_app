@@ -10,11 +10,13 @@ import Image from "next/image";
 import Button from "../../components/Button";
 import { getThisUserWritings } from "../../lib/irys";
 import { FaCopy } from "react-icons/fa";
+import Spinner from "../../components/Spinner";
 
 const DashboardIndex = () => {
   const { authenticated, login, ready } = usePrivy();
   const { allUserWritings, setAllUserWritings } = useUser();
   const [writings, setWritings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [textCopied, setTextCopied] = useState(false);
   const [chosenAnkyverseDay, setChosenAnkyverseDay] = useState(null);
@@ -41,11 +43,9 @@ const DashboardIndex = () => {
     // Function to load writings from local storage
     const loadWritings = () => {
       let allWritings = [];
-      console.log("the local storage is: ", localStorage);
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith("session - ")) {
-          // Ensure to only get writing sessions
           const writingData = localStorage.getItem(key);
           allWritings.push(JSON.parse(writingData));
         }
@@ -100,6 +100,7 @@ const DashboardIndex = () => {
     });
     setTotalNewenEarned(activeDaysSet.size * 7025);
     setUserActivity(activity);
+    setLoading(false);
   };
 
   const copyText = async () => {
@@ -147,23 +148,16 @@ const DashboardIndex = () => {
         <p>login please</p>
       </div>
     );
+  if (loading)
+    return (
+      <div className="px-2 flex flex-col justify-center w-full items-center">
+        <Spinner />
+      </div>
+    );
   return (
     <div className="h-full w-full flex flex-col items-center px-8 ">
       <ToastContainer />
-      <div className="w-96 mx-auto">
-        <p className="mb-2">
-          if the information you see here is different than what you expect...
-          just let go of that expectation
-        </p>
-        <p className="mb-2">
-          there may be many errors, and that is part of the learning process of
-          how to build this thing
-        </p>
-        <p className="mb-2">but don&apos;t forget to write</p>
-        <p className="mb-2">that is the whole point. thank you.</p>
-      </div>
-
-      <div className="flex w-full justify-center mx-auto flex-wrap w-fit">
+      <div className="flex w-full md:w-96 justify-center mx-auto flex-wrap w-fit">
         {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
           (day) => {
             return (

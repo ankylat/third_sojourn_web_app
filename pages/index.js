@@ -584,11 +584,11 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
 
   if (authenticated && todaysSessionData.cid) {
     return (
-      <div className="flex h-full  w-full flex-col items-center justify-center md:flex-row">
+      <div className="flex w-full flex-col items-center justify-center md:flex-row">
         <ToastContainer />
-        <div className="h-96 md:h-full w-full md:w-fit px-8">
+        <div className="w-full md:w-fit px-8">
           <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-            <div className="flex flex-col items-center p-2 w-96">
+            <div className="flex flex-col items-center p-2 w-full md:w-1/2">
               <h2
                 className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
               >
@@ -598,7 +598,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               <div
                 className={`${
                   copiedText && "bg-green-200"
-                } rounded-xl w-full h-72 overflow-y-scroll mb-2`}
+                } rounded-xl w-full h-fit mb-2`}
               >
                 {todaysSessionData.text}
               </div>
@@ -747,9 +747,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 }  w-full md:h-96 h-48 bg-white shadow-md ${
                   !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
                 } mx-auto placeholder:italic italic opacity-80 text-black italic border border-white p-3 cursor-pointer`}
-                placeholder={
-                  isTextareaClicked ? "start writing..." : longThread
-                }
+                placeholder="start writing..."
               />
             </div>
           )}
@@ -778,12 +776,12 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 </div>
                 <div
                   onClick={() => {
+                    setTime(0);
+                    setText("");
                     setFinishedSession(false);
                     setNewenBarLength(0);
                     setLifeBarLength(100);
                     setSessionStarted(false);
-                    setTime(0);
-                    setText("");
                   }}
                   className="w-36 mx-auto mt-4 flex justify-center items-center border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"
                 >

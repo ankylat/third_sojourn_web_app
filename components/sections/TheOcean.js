@@ -2,7 +2,7 @@ import React from "react";
 
 const TheOcean = () => {
   return (
-    <div className="the-ocean h-fit px-4 py-12 md:px-48 mx-auto ">
+    <div className="the-ocean md:w-1/2 h-fit px-4 py-12  mx-auto ">
       <h2 className="text-2xl ">Become the Ocean </h2>
       <p>
         Have you ever seen a tide pool? They&#39;re formed when the ocean
