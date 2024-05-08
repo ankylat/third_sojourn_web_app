@@ -14,6 +14,7 @@ import { UserProvider } from "../context/UserContext";
 
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
+import WritingGame from "../components/WritingGame";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ function MyApp({ Component, pageProps }) {
   const [wantsToMint, setWantsToMint] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [isTextareaClicked, setIsTextareaClicked] = useState(false);
+  const [displayWritingGame, setDisplayWritingGame] = useState(false);
   const [blackBackgroundVisible, setBlackBackgroundVisible] = useState(true);
   const [show, setShow] = useState(false);
   const [globalText, setGlobalText] = useState("");
@@ -217,7 +219,7 @@ function MyApp({ Component, pageProps }) {
           <ErrorBoundary>
             <UserProvider>
               <SettingsProvider>
-                {true ? (
+                {!displayWritingGame ? (
                   // Render the rest of the app
                   <>
                     <Navbar
@@ -231,40 +233,12 @@ function MyApp({ Component, pageProps }) {
                       setIsTextareaClicked={setIsTextareaClicked}
                       show={show}
                       handleClose={handleClose}
+                      displayWritingGame={displayWritingGame}
+                      setDisplayWritingGame={setDisplayWritingGame}
                     />
                   </>
                 ) : (
-                  <div
-                    className="w-screen h-screen relative"
-                    id="artContainer"
-                    style={{ backgroundImage }}
-                  >
-                    <div className="absolute bottom-8 w-96 right-0 flex flex-row space-x-2">
-                      {!wantsToMint && (
-                        <div>
-                          <Button
-                            buttonAction={() => {
-                              setWantsToMint(true);
-                              alert(
-                                "this piece of art could potentially be created generatively with all the text that youve ever written through anky. which is unique, and only yours. your uniqueness is a gift, and we are here to help you remember that. welcome to yourself. we are all here for you. waiting. with a smile."
-                              );
-                            }}
-                            buttonText="mint"
-                            buttonColor="bg-purple-600 text-white"
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <Button
-                          buttonAction={() => {
-                            setIsArtGenerated(true);
-                          }}
-                          buttonText="decode"
-                          buttonColor="bg-green-600 text-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <WritingGame setDisplayWritingGame={setDisplayWritingGame} />
                 )}
               </SettingsProvider>
             </UserProvider>

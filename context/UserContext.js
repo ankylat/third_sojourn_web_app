@@ -42,7 +42,6 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function getAllUserWritings() {
-      console.log("inside the get all user writings");
       if (!wallet) return;
       if (!authenticated) return;
       const writings = await getThisUserWritings(wallet.address);

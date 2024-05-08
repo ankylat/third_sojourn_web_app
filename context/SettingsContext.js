@@ -7,6 +7,10 @@ export const SettingsProvider = ({ children }) => {
     language: "en",
     deviceType: "mobile",
   });
+  const [gameSettings, setGameSettings] = useState({
+    prompt: "",
+    ankyverseDay: null,
+  });
 
   useEffect(() => {
     const detectDeviceType = () => {
@@ -36,6 +40,8 @@ export const SettingsProvider = ({ children }) => {
       value={{
         userSettings,
         setUserSettings,
+        gameSettings,
+        setGameSettings,
       }}
     >
       {children}

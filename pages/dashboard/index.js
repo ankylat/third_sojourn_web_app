@@ -12,9 +12,9 @@ import { getThisUserWritings } from "../../lib/irys";
 import { FaCopy } from "react-icons/fa";
 import Spinner from "../../components/Spinner";
 
-const DashboardIndex = () => {
+const DashboardIndex = ({ setDisplayWritingGame }) => {
   const { authenticated, login, ready } = usePrivy();
-  const { allUserWritings, setAllUserWritings } = useUser();
+  const [allUserWritings, setAllUserWritings] = useState([]);
   const [writings, setWritings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [writingForDisplay, setWritingForDisplay] = useState(null);
@@ -26,21 +26,46 @@ const DashboardIndex = () => {
     name: "Darkoh",
   });
   const [userActivity, setUserActivity] = useState({});
-  const { userSettings } = useSettings();
+  const { userSettings, setGameSettings } = useSettings();
   const { wallets } = useWallets();
   const thisUserWallet = wallets.at(0);
 
   const startTimestamp = 1711861200;
 
-  // Run the check when component mounts or writings change
+  function sortWritings(a, b) {
+    const timestampA = a.timestamp;
+    const timestampB = b.timestamp;
+    return timestampB - timestampA;
+  }
+
   useEffect(() => {
     if (authenticated && ready) {
-      checkUserActivity();
+      async function getAllUserWritings() {
+        if (!thisUserWallet) return;
+        if (!authenticated) return;
+        const writings = await getThisUserWritings(thisUserWallet.address);
+        console.log("the wriiiitings are: ", writings);
+        const sortedWritings = writings.sort(
+          (a, b) => a.timestamp - b.timestamp
+        );
+        setAllUserWritings(sortedWritings);
+        const activity = {};
+        sortedWritings.forEach((writing) => {
+          console.log("in heeere", writing);
+          if (writing.storedDay == writing.calculatedDay) {
+            activity[writing.storedDay] = "green";
+          } else if (writing.storedDay < writing.calculatedDay) {
+            activity[writing.storedDay] = "purple"; // Store the color (green or purple)
+          }
+        });
+        setUserActivity(activity);
+        setLoading(false);
+      }
+      getAllUserWritings();
     }
   }, [authenticated, ready]);
 
   useEffect(() => {
-    // Function to load writings from local storage
     const loadWritings = () => {
       let allWritings = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -70,37 +95,9 @@ const DashboardIndex = () => {
   const getWritingByDay = (day) => {
     setChosenAnkyverseDay(day);
     const writing = allUserWritings.find((writing) => {
-      const writingDay =
-        Math.floor((writing.timestamp / 1000 - startTimestamp) / (24 * 3600)) +
-        1;
-      return writingDay === day;
+      return writing.storedDay === day;
     });
     setWritingForDisplay(writing);
-  };
-
-  const checkUserActivity = async () => {
-    if (!thisUserWallet.address) return;
-    const allUserWritingsResponse = await getThisUserWritings(
-      thisUserWallet.address
-    );
-    setAllUserWritings(allUserWritingsResponse);
-    const activity = {};
-    const activeDaysSet = new Set();
-    // Loop through each Ankyverse day up to the current day
-    for (let day = 1; day <= currentAnkyverseDay; day++) {
-      // By default, set the user's activity to false for that day
-      activity[day] = false;
-    }
-    allUserWritings.forEach((writing) => {
-      const day =
-        Math.floor((writing.timestamp / 1000 - startTimestamp) / (24 * 3600)) +
-        1;
-      activity[day] = true;
-      activeDaysSet.add(day);
-    });
-    setTotalNewenEarned(activeDaysSet.size * 7025);
-    setUserActivity(activity);
-    setLoading(false);
   };
 
   const copyText = async () => {
@@ -164,8 +161,14 @@ const DashboardIndex = () => {
               <div
                 key={day}
                 onClick={() => getWritingByDay(day)}
-                className={`w-8 h-8 flex m-2 hover:bg-purple-400 hover:cursor-pointer justify-center flex-wrap items-center rounded-full ${
-                  userActivity[day] ? "bg-green-500" : "bg-red-500"
+                className={`${
+                  chosenAnkyverseDay == day && "border-black border-2"
+                } w-8 h-8 flex m-2 hover:bg-purple-400 hover:cursor-pointer justify-center flex-wrap items-center rounded-full ${
+                  userActivity[day] === "green"
+                    ? "bg-green-500"
+                    : userActivity[day] === "purple"
+                    ? "bg-purple-500"
+                    : "bg-red-500"
                 }`}
               >
                 {day}
@@ -174,46 +177,68 @@ const DashboardIndex = () => {
           }
         )}
       </div>
-      <p className="mt-3 text-center w-full">
-        total $newen earned: {totalNewenEarned}
-      </p>
+
       {chosenAnkyverseDay && (
         <div className="h-fit w-full md:w-96 mb-4 flex flex-col justify-start bg-purple-300 border border-black mt-2 rounded-xl  pt-4 items-center  px-2 pb-6">
           <p className="mb-2 underline text-xl">
             ankyverse day: {chosenAnkyverseDay}
           </p>
-          <p className="mb-2 ">
-            {chosenAnkyverseDay &&
-              getAnkyverseQuestionForToday(chosenAnkyverseDay)[
-                userSettings.language
-              ]}
-          </p>
-          {writingForDisplay && (
-            <div className="flex flex-col w-full bg-purple-200 px-4 rounded-xl items-center ">
-              <div className="flex w-full mx-4 mt-2 flex-col px-2 py-2 h-96 overflow-y-scroll">
-                {writingForDisplay.text ? (
-                  writingForDisplay.text.includes("\n") ? (
-                    writingForDisplay.text.split("\n").map((x, i) => (
-                      <p className="my-2" key={i}>
-                        {x}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="my-2">{writingForDisplay.text}</p>
-                  )
-                ) : null}
-              </div>
-              <div>
-                <div className="flex w-full justify-between">
-                  <div className="w-fit  mx-auto" onClick={handleShareSession}>
-                    <button
-                      className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                    >
-                      <FaShareSquare />
-                    </button>
+          {!writingForDisplay ? (
+            <div>
+              <Button
+                buttonText="answer this one"
+                buttonAction={() => {
+                  setGameSettings({
+                    prompt:
+                      getAnkyverseQuestionForToday(chosenAnkyverseDay)[
+                        userSettings.language
+                      ],
+                    ankyverseDay: chosenAnkyverseDay,
+                  });
+                  setDisplayWritingGame(true);
+                }}
+                buttonColor="bg-green-200"
+              />
+            </div>
+          ) : (
+            <div>
+              <p className="mb-2 ">
+                {chosenAnkyverseDay &&
+                  getAnkyverseQuestionForToday(chosenAnkyverseDay)[
+                    userSettings.language
+                  ]}
+              </p>
+              {writingForDisplay && (
+                <div className="flex flex-col w-full bg-purple-200 px-4 rounded-xl items-center ">
+                  <div className="flex w-full mx-4 mt-2 flex-col px-2 py-2 h-96 overflow-y-scroll">
+                    {writingForDisplay.text ? (
+                      writingForDisplay.text.includes("\n") ? (
+                        writingForDisplay.text.split("\n").map((x, i) => (
+                          <p className="my-2" key={i}>
+                            {x}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="my-2">{writingForDisplay.text}</p>
+                      )
+                    ) : null}
+                  </div>
+                  <div>
+                    <div className="flex w-full justify-between">
+                      <div
+                        className="w-fit  mx-auto"
+                        onClick={handleShareSession}
+                      >
+                        <button
+                          className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                        >
+                          <FaShareSquare />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
