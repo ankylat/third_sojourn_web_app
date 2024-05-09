@@ -1,6 +1,7 @@
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import React, { useState, useEffect } from "react";
+import moment from "moment";
 import { useUser } from "../../context/UserContext";
 import { useSettings } from "../../context/SettingsContext";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
@@ -152,97 +153,105 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
       </div>
     );
   return (
-    <div className="h-full w-full flex flex-col items-center px-8 ">
+    <div className=" w-full">
       <ToastContainer />
-      <div className="flex w-full md:w-96 justify-center mx-auto flex-wrap w-fit">
-        {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
-          (day) => {
-            return (
-              <div
-                key={day}
-                onClick={() => getWritingByDay(day)}
-                className={`${
-                  chosenAnkyverseDay == day && "border-black border-2"
-                } w-8 h-8 flex m-2 hover:bg-purple-400 hover:cursor-pointer justify-center flex-wrap items-center rounded-full ${
-                  userActivity[day] === "green"
-                    ? "bg-green-500"
-                    : userActivity[day] === "purple"
-                    ? "bg-purple-500"
-                    : "bg-red-500"
-                }`}
-              >
-                {day}
-              </div>
-            );
-          }
-        )}
-      </div>
-
-      {chosenAnkyverseDay && (
-        <div className="h-fit w-full md:w-96 mb-4 flex flex-col justify-start bg-purple-300 border border-black mt-2 rounded-xl  pt-4 items-center  px-2 pb-6">
-          <p className="mb-2 underline text-xl">
-            ankyverse day: {chosenAnkyverseDay}
-          </p>
-          {!writingForDisplay ? (
-            <div>
-              <Button
-                buttonText="answer this one"
-                buttonAction={() => {
-                  setGameSettings({
-                    prompt:
+      <div className="w-full flex flex-col md:flex-row">
+        <div className="flex-none flex w-full md:w-96 md:mx-12 h-fit  justify-center  flex-wrap ">
+          {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
+            (day) => {
+              return (
+                <div
+                  key={day}
+                  onClick={() => getWritingByDay(day)}
+                  className={`${
+                    chosenAnkyverseDay == day && "border-black border-2"
+                  } w-8 h-8 flex m-2 hover:bg-purple-400 hover:cursor-pointer justify-center flex-wrap items-center rounded-full ${
+                    userActivity[day] === "green"
+                      ? "bg-green-500"
+                      : userActivity[day] === "purple"
+                      ? "bg-purple-500"
+                      : "bg-red-500"
+                  }`}
+                >
+                  {day}
+                </div>
+              );
+            }
+          )}
+        </div>
+        <div className="px-4 grow">
+          {chosenAnkyverseDay && (
+            <div className="h-fit w-full mb-4 mx-auto flex flex-col justify-center mt-2 rounded-xl pt-4 items-center  px-2 pb-6">
+              <p className="mb-2 underline text-xl">
+                ankyverse day: {chosenAnkyverseDay}
+              </p>
+              {!writingForDisplay ? (
+                <div>
+                  <Button
+                    buttonText="answer this one"
+                    buttonAction={() => {
+                      setGameSettings({
+                        prompt:
+                          getAnkyverseQuestionForToday(chosenAnkyverseDay)[
+                            userSettings.language
+                          ],
+                        ankyverseDay: chosenAnkyverseDay,
+                      });
+                      setDisplayWritingGame(true);
+                    }}
+                    buttonColor="bg-green-200"
+                  />
+                </div>
+              ) : (
+                <div className="w-full">
+                  <p className="mb-2 italic w-full md:w-1/2 text-blue-600">
+                    {chosenAnkyverseDay &&
                       getAnkyverseQuestionForToday(chosenAnkyverseDay)[
                         userSettings.language
-                      ],
-                    ankyverseDay: chosenAnkyverseDay,
-                  });
-                  setDisplayWritingGame(true);
-                }}
-                buttonColor="bg-green-200"
-              />
-            </div>
-          ) : (
-            <div>
-              <p className="mb-2 ">
-                {chosenAnkyverseDay &&
-                  getAnkyverseQuestionForToday(chosenAnkyverseDay)[
-                    userSettings.language
-                  ]}
-              </p>
-              {writingForDisplay && (
-                <div className="flex flex-col w-full bg-purple-200 px-4 rounded-xl items-center ">
-                  <div className="flex w-full mx-4 mt-2 flex-col px-2 py-2 h-96 overflow-y-scroll">
-                    {writingForDisplay.text ? (
-                      writingForDisplay.text.includes("\n") ? (
-                        writingForDisplay.text.split("\n").map((x, i) => (
-                          <p className="my-2" key={i}>
-                            {x}
-                          </p>
-                        ))
-                      ) : (
-                        <p className="my-2">{writingForDisplay.text}</p>
-                      )
-                    ) : null}
-                  </div>
-                  <div>
-                    <div className="flex w-full justify-between">
-                      <div
-                        className="w-fit  mx-auto"
-                        onClick={handleShareSession}
-                      >
-                        <button
-                          className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
-                        >
-                          <FaShareSquare />
-                        </button>
+                      ]}
+                  </p>
+                  {writingForDisplay && (
+                    <div className="flex flex-col w-full rounded-xl items-center ">
+                      <p className="text-left w-full text-xl">
+                        {moment(writingForDisplay.timestamp).format(
+                          "MMMM Do YYYY, h:mm:ss a"
+                        )}
+                      </p>
+                      <div className="flex w-full mx-4 flex-col  py-2 h-fit overflow-y-scroll">
+                        {writingForDisplay.text ? (
+                          writingForDisplay.text.includes("\n") ? (
+                            writingForDisplay.text.split("\n").map((x, i) => (
+                              <p className="my-2" key={i}>
+                                {x}
+                              </p>
+                            ))
+                          ) : (
+                            <p className="my-2">{writingForDisplay.text}</p>
+                          )
+                        ) : null}
+                      </div>
+                      <div>
+                        <div className="flex w-full justify-between">
+                          <div
+                            className="w-fit  mx-auto"
+                            onClick={handleShareSession}
+                          >
+                            <button
+                              className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                            >
+                              <FaShareSquare />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
