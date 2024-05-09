@@ -18,6 +18,7 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
   const [allUserWritings, setAllUserWritings] = useState([]);
   const [writings, setWritings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [writingForDisplay, setWritingForDisplay] = useState(null);
   const [textCopied, setTextCopied] = useState(false);
   const [chosenAnkyverseDay, setChosenAnkyverseDay] = useState(null);
@@ -122,7 +123,7 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
 
   async function handleShareSession() {
     try {
-      console.log("the writing for display is: ", writingForDisplay);
+      setLinkCopied(true);
       await navigator.clipboard.writeText(
         `https://www.anky.lat/r/${writingForDisplay.cid}`
       );
@@ -135,6 +136,9 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
         draggable: true,
         progress: undefined,
       });
+      setTimeout(() => {
+        setLinkCopied(false);
+      }, 1000);
     } catch (error) {
       console.log("there was an error copying the text", error);
     }
@@ -237,7 +241,9 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
                             onClick={handleShareSession}
                           >
                             <button
-                              className={`border-solid  py-2 border-red-400 px-8 hover:bg-gray-100 shadow-xl border rounded-full`}
+                              className={`${
+                                linkCopied && "bg-purple-200"
+                              } border-solid py-2 border-red-400 px-8 hover:bg-gray-100 active:bg-purple-200 active:translate-y-1 shadow-xl border rounded-full`}
                             >
                               <FaShareSquare />
                             </button>
