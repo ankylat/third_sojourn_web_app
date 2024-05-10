@@ -63,6 +63,7 @@ const WritingGame = ({ setDisplayWritingGame }) => {
   });
   const [isTimeOver, setIsTimeOver] = useState(false);
   const [whatUserWrote, setWhatUserWrote] = useState("");
+  const [isLifeOver, setIsLifeOver] = useState(false);
 
   // Writing session states
   const [sessionRandomUUID, setSessionRandomUUID] = useState("");
@@ -231,6 +232,7 @@ const WritingGame = ({ setDisplayWritingGame }) => {
         const now = new Date().getTime();
         const elapsedTimeBetweenKeystrokes = Date.now() - lastKeystroke;
         if (elapsedTimeBetweenKeystrokes > secondsOfLife * 1000) {
+          setIsLifeOver(true);
           if (!isTimeOver) {
             pingServerToEndWritingSession("lost");
             clearInterval(keystrokeIntervalRef.current);
@@ -499,6 +501,7 @@ const WritingGame = ({ setDisplayWritingGame }) => {
 
       if (authenticated) {
         const receipt = await saveSessionToIrys(thisSessionData);
+
         if (receipt) {
           setThisSessionData((prev) => {
             const newData = { ...prev, savedOnIrys: true, cid: receipt };
@@ -508,26 +511,29 @@ const WritingGame = ({ setDisplayWritingGame }) => {
             );
             return newData;
           });
-
-          let response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
-            {
-              cid: receipt,
-              sessionId: thisSessionData.sessionDatabaseId || "",
-              user: user?.id?.replace("did:privy:", ""),
-              userWallet: user?.wallet?.address,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
+          try {
+            let response = await axios.post(
+              `${process.env.NEXT_PUBLIC_API_ROUTE}/save-cid`,
+              {
+                cid: receipt,
+                sessionId: thisSessionData.sessionDatabaseId || "",
+                user: user?.id?.replace("did:privy:", ""),
+                userWallet: user?.wallet?.address,
               },
-            }
-          );
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${userSessionInformation.privyAuthToken}`,
+                },
+              }
+            );
+          } catch (error) {
+            console.log("there was an error sending the cid to the server");
+          }
           setFinishedSession(false);
           setIsTextareaClicked(false);
-          // add the session to the user
           setDisplayWritingGame(false);
+          router.push(`/dashboard?day=${ankyverseDay.wink}`);
         }
       } else {
         setFinishedSession(false);
@@ -536,10 +542,11 @@ const WritingGame = ({ setDisplayWritingGame }) => {
       setSavingSession(false);
       setSessionSaved(true);
       // TODOOOOOO
-      alert("add this writing session to the user!");
+      alert("add this writing session to the user locally!");
       setDisplayWritingGame(false);
     } catch (error) {
       console.log("there is an error here", error);
+
       setDisplayWritingGame(false);
     }
   };
@@ -657,11 +664,13 @@ const WritingGame = ({ setDisplayWritingGame }) => {
                 fontStyle: "italic",
               }} // Set minimum height and allow growth
               onPaste={(e) => e.preventDefault()}
-              disabled={finishedSession}
+              disabled={isLifeOver}
               onChange={handleTextChange}
               className={`${
                 montserratAlternates.className
-              }  w-full md:h-96 h-48 bg-white shadow-md ${
+              } w-full md:h-96 h-48 ${
+                isTimeOver ? "bg-gray-200" : "bg-white"
+              } shadow-md ${
                 !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
               } mx-auto placeholder:italic italic opacity-80 text-black italic border border-white p-3 cursor-pointer`}
               placeholder="start writing..."
@@ -698,6 +707,7 @@ const WritingGame = ({ setDisplayWritingGame }) => {
                   setFinishedSession(false);
                   setNewenBarLength(0);
                   setLifeBarLength(100);
+                  setIsLifeOver(false);
                   setSessionStarted(false);
                 }}
                 className="w-36 mx-auto mt-4 flex justify-center items-center border-solid text-center py-2 border-red-400 px-4 cursor-pointer hover:bg-gray-100 shadow-xl border rounded-full"

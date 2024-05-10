@@ -1,6 +1,7 @@
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import moment from "moment";
 import { useUser } from "../../context/UserContext";
 import { useSettings } from "../../context/SettingsContext";
@@ -14,6 +15,7 @@ import { FaCopy } from "react-icons/fa";
 import Spinner from "../../components/Spinner";
 
 const DashboardIndex = ({ setDisplayWritingGame }) => {
+  const router = useRouter();
   const { authenticated, login, ready } = usePrivy();
   const [allUserWritings, setAllUserWritings] = useState([]);
   const [writings, setWritings] = useState([]);
@@ -46,14 +48,12 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
         if (!thisUserWallet) return;
         if (!authenticated) return;
         const writings = await getThisUserWritings(thisUserWallet.address);
-        console.log("the wriiiitings are: ", writings);
         const sortedWritings = writings.sort(
           (a, b) => a.timestamp - b.timestamp
         );
         setAllUserWritings(sortedWritings);
         const activity = {};
         sortedWritings.forEach((writing) => {
-          console.log("in heeere", writing);
           if (writing.storedDay == writing.calculatedDay) {
             activity[writing.storedDay] = "green";
           } else if (writing.storedDay < writing.calculatedDay) {
@@ -66,6 +66,13 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
       getAllUserWritings();
     }
   }, [authenticated, ready]);
+
+  useEffect(() => {
+    if (router.query.day && allUserWritings.length) {
+      const dayAsNumber = parseInt(router.query.day, 10);
+      getWritingByDay(dayAsNumber);
+    }
+  }, [router.query.day, allUserWritings]);
 
   useEffect(() => {
     const loadWritings = () => {
@@ -100,6 +107,14 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
       return writing.storedDay === day;
     });
     setWritingForDisplay(writing);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, day: day },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const copyText = async () => {

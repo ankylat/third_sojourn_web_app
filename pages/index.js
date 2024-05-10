@@ -44,8 +44,8 @@ import { useRouter } from "next/router";
 // State Variables
 
 const secondsOfLife = 8;
-const totalSessionDuration = 480;
-const waitingTime = 30;
+const totalSessionDuration = 3;
+const waitingTime = 2;
 const ankyverseDay = getAnkyverseDay(new Date().getTime());
 const startingTimestamp = 1711861200; // UNIX timestamp in seconds
 const oneDayInSeconds = 86400; // 24 hours in seconds
@@ -107,6 +107,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   // Layout State Management
   const [textareaHidden, setTextareaHidden] = useState(false);
   const [finishedSession, setFinishedSession] = useState(false);
+  const [isLifeOver, setIsLifeOver] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
   const [sessionSaved, setSessionSaved] = useState(false);
@@ -233,6 +234,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         const now = new Date().getTime();
         const elapsedTimeBetweenKeystrokes = Date.now() - lastKeystroke;
         if (elapsedTimeBetweenKeystrokes > secondsOfLife * 1000) {
+          setIsLifeOver(true);
           if (!isTimeOver) {
             pingServerToEndWritingSession("lost");
             clearInterval(keystrokeIntervalRef.current);
@@ -556,6 +558,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
           );
           setFinishedSession(false);
           setIsTextareaClicked(false);
+          router.push(`/dashboard?day=${ankyverseDay.wink}`);
         }
       } else {
         setFinishedSession(false);
@@ -606,12 +609,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
   };
 
   if (authenticated && todaysSessionData.cid) {
+    router.push(`/dashboard?day=${ankyverseDay.wink}`);
     return (
       <div className="flex w-full flex-col items-center justify-center md:flex-row">
         <ToastContainer />
-        <div className="w-full md:w-fit px-8">
+        <div className="w-full px-8">
           <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-            <div className="flex flex-col items-center p-2 w-full md:w-1/2">
+            <div className="flex flex-col items-center p-2 w-full md:w-2/3 bg-red-200">
               <h2
                 className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
               >
@@ -764,11 +768,13 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                 style={{
                   fontStyle: "italic",
                 }} // Set minimum height and allow growth
-                disabled={finishedSession}
+                disabled={isLifeOver}
                 onChange={handleTextChange}
                 className={`${
                   montserratAlternates.className
-                }  w-full md:h-96 h-48 bg-white shadow-md ${
+                }  w-full md:h-96 h-48 shadow-md ${
+                  isTimeOver ? "bg-gray-200" : "bg-white"
+                } ${
                   !isTextareaClicked && "hover:shadow-xl hover:shadow-pink-200"
                 } mx-auto placeholder:italic italic opacity-80 text-black italic border border-white p-3 cursor-pointer`}
                 placeholder="start writing..."
@@ -804,6 +810,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
                     setText("");
                     setFinishedSession(false);
                     setNewenBarLength(0);
+                    setIsLifeOver(false);
                     setLifeBarLength(100);
                     setSessionStarted(false);
                   }}
