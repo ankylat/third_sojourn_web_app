@@ -1,7 +1,6 @@
 import "../styles/globals.css";
 import { useEffect, useState } from "react";
 import { Montserrat_Alternates } from "next/font/google";
-import { appWithTranslation } from "next-i18next";
 import axios from "axios";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import Button from "../components/Button";
@@ -250,4 +249,4 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default appWithTranslation(MyApp);
+export default MyApp;

@@ -1,5 +1,4 @@
 const Buffer = require("buffer").Buffer;
-const { i18n } = require("./next-i18next.config");
 
 module.exports = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
@@ -18,7 +17,6 @@ module.exports = {
 
     return config;
   },
-  i18n,
   images: {
     remotePatterns: [
       {
