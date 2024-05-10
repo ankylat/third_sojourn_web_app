@@ -615,7 +615,7 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
         <ToastContainer />
         <div className="w-full px-8">
           <div className="flex w-full mx-auto py-4 px-2 rounded-xl space-y-2 flex-col items-center justify-between mt-8">
-            <div className="flex flex-col items-center p-2 w-full md:w-2/3 bg-red-200">
+            <div className="flex flex-col items-center p-2 w-full md:w-2/3 ">
               <h2
                 className={`${ankyverseDay.color} mb-2 hover:opacity-60 text-xl`}
               >
