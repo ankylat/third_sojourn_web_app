@@ -11,7 +11,7 @@ import { getAnkyverseQuestionForToday } from "../../lib/ankyverse";
 import Image from "next/image";
 import Button from "../../components/Button";
 import { getThisUserWritings } from "../../lib/irys";
-import { FaCopy } from "react-icons/fa";
+import { FaCopy, FaDownload } from "react-icons/fa";
 import Spinner from "../../components/Spinner";
 
 const DashboardIndex = ({ setDisplayWritingGame }) => {
