@@ -712,10 +712,22 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
             </div>
           ) : (
             <div className={`${ibmPlexSans.className} w-3/4 lg:w-3/5 mx-auto`}>
-              <h2 className="text-xl write-text mt-4">Write for 8 minutes.</h2>
+              <h2 className="text-5xl text-red-600  mt-4">important.</h2>
               <p className={`${montserratAlternates.className} cta mb-2`}>
-                This app is in BETA, and there may be errors. Hang on, we are
-                working to fix everything.
+                (this app will stop working when this wink ends. after that, you
+                will only be able to download all of your writings from your
+                profile,{" "}
+                {authenticated ? (
+                  <Link href="/dashboard"> here</Link>
+                ) : (
+                  <span
+                    onClick={login}
+                    className="hover:text-purple-600 cursor-pointer text-yellow-700"
+                  >
+                    if you login
+                  </span>
+                )}
+                )
               </p>
               <Link passHref href="/ankyverse">
                 <h2
@@ -847,20 +859,20 @@ const LandingPage = ({ isTextareaClicked, setIsTextareaClicked }) => {
               </Link>
               <a
                 className="text-gray-400 hover:text-gray-500"
-                href="https://t.me/ankytheape"
+                href="https://warpcast.com/~/channel/anky"
                 target="_blank"
               >
-                telegram
+                farcaster channel
               </a>
             </div>
           )}
         </div>
       </section>
-      <TheOcean />
+      {/* <TheOcean />
       <Welcome />
       <InformationCards />
       <Instructions ankyverseDay={ankyverseDay} />
-      <Footer />
+      <Footer /> */}
     </div>
   );
 };

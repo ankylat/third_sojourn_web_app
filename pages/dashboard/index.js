@@ -159,6 +159,41 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
     }
   }
 
+  const downloadAllWritings = () => {
+    let content = "";
+    try {
+      for (let day = 1; day <= 96; day++) {
+        const writing = allUserWritings.find((w) => w.storedDay === day);
+        const prompt = getAnkyverseQuestionForToday(day)[userSettings.language];
+
+        content += `SOJOURN 3 - WINK ${day}\n\n`;
+        content += `Prompt: ${prompt}\n\n`;
+
+        if (writing) {
+          content += writing.text;
+        } else {
+          content += "writing didn't happen, or it was not found";
+        }
+
+        content += "\n\n--------------------\n\n";
+      }
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = "all_writings.txt";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+    } catch (error) {
+      alert(
+        "there was an error generating the file with your writings. contact jp asap"
+      );
+    }
+  };
+
   if (!authenticated)
     return (
       <div className="px-2 flex flex-col justify-center w-full items-center">
@@ -174,6 +209,14 @@ const DashboardIndex = ({ setDisplayWritingGame }) => {
   return (
     <div className=" w-full">
       <ToastContainer />
+      <div className="w-full flex flex-col items-center mb-8">
+        <button
+          onClick={downloadAllWritings}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg flex items-center"
+        >
+          <FaDownload className="mr-2" /> DOWNLOAD ALL WRITINGS
+        </button>
+      </div>
       <div className="w-full flex flex-col md:flex-row">
         <div className="flex-none flex w-full md:w-96 md:mx-12 h-fit  justify-center  flex-wrap ">
           {Array.from({ length: currentAnkyverseDay }, (_, i) => i + 1).map(
